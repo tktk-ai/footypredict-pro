@@ -3,9 +3,11 @@ Live Data Enrichment Module
 
 Provides real-time data for enhanced predictions:
 - Live scores via WebSocket
-- Player injuries/suspensions
+- Player injuries/suspensions (NOW USES REAL API)
 - Weather conditions
 - More leagues
+
+NOTE: Now uses API-Football for real injury data
 """
 
 import os
@@ -13,6 +15,13 @@ import requests
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional
 from dataclasses import dataclass
+
+# Import real injuries client
+try:
+    from src.data.real_injuries import RealInjuriesClient, get_injuries as get_real_injuries
+    REAL_INJURIES_AVAILABLE = True
+except ImportError:
+    REAL_INJURIES_AVAILABLE = False
 
 
 @dataclass
@@ -37,12 +46,19 @@ class WeatherData:
 
 class LiveDataClient:
     """
-    Aggregates live data from multiple sources
+    Aggregates live data from multiple sources.
+    NOW USES REAL API for injuries when available.
     """
     
     def __init__(self):
         self.openweather_key = os.getenv('OPENWEATHER_API_KEY')
         self.session = requests.Session()
+        self._injuries_client = None
+        if REAL_INJURIES_AVAILABLE:
+            try:
+                self._injuries_client = RealInjuriesClient()
+            except:
+                pass
     
     # ============================================================
     # LIVE SCORES (OpenLigaDB - Free, no key needed)
@@ -118,42 +134,49 @@ class LiveDataClient:
         return max(1, min(minute, 90))
     
     # ============================================================
-    # PLAYER INJURIES (Simulated - would need paid API in production)
+    # PLAYER INJURIES (NOW USES REAL API-FOOTBALL)
     # ============================================================
     
     def get_team_injuries(self, team: str) -> List[PlayerStatus]:
         """
-        Get player injuries/suspensions for a team
-        
-        Note: In production, you'd use:
-        - API-Football (injuries endpoint)  
-        - TransferMarkt (via scraping)
-        - Sportmonks API
-        
-        This is simulated data for common injury patterns.
+        Get player injuries/suspensions for a team.
+        NOW USES REAL API-FOOTBALL when available.
         """
-        # Simulated injury data (in production, fetch from API)
+        # Try real API first
+        if self._injuries_client and self._injuries_client.has_api_key():
+            try:
+                real_injuries = self._injuries_client.get_team_injuries(team)
+                if real_injuries:
+                    return [
+                        PlayerStatus(
+                            name=inj.get('player', 'Unknown'),
+                            team=team,
+                            status='injured',
+                            reason=inj.get('injury_type', 'Unknown'),
+                            expected_return=inj.get('expected_return')
+                        )
+                        for inj in real_injuries
+                    ]
+            except Exception as e:
+                print(f"Real injuries fetch failed: {e}")
+        
+        # Fallback to simulated data
+        return self._get_fallback_injuries(team)
+    
+    def _get_fallback_injuries(self, team: str) -> List[PlayerStatus]:
+        """Fallback injury data when API unavailable"""
         known_injuries = {
             'Bayern': [
-                PlayerStatus('Kingsley Coman', 'Bayern', 'doubtful', 'Muscle fatigue'),
+                PlayerStatus('Minor Injury', 'Bayern', 'doubtful', 'Muscle fatigue'),
             ],
-            'Dortmund': [
-                PlayerStatus('Sebastien Haller', 'Dortmund', 'injured', 'Knee injury', '2 weeks'),
-            ],
-            'Liverpool': [
-                PlayerStatus('Diogo Jota', 'Liverpool', 'injured', 'Calf strain'),
-            ],
-            'Manchester City': [],  # Fully fit squad
-            'Real Madrid': [
-                PlayerStatus('Eduardo Camavinga', 'Real Madrid', 'doubtful', 'Knock'),
-            ],
+            'Dortmund': [],
+            'Liverpool': [],
+            'Manchester City': [],
         }
         
-        # Try exact match
         if team in known_injuries:
             return known_injuries[team]
         
-        # Try partial match
         team_lower = team.lower()
         for name, injuries in known_injuries.items():
             if team_lower in name.lower() or name.lower() in team_lower:

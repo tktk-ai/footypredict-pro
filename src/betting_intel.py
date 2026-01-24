@@ -2,10 +2,12 @@
 Betting Intelligence Module
 
 Advanced betting features:
-- Multi-bookmaker odds comparison
+- Multi-bookmaker odds comparison (NOW USES REAL API)
 - Arbitrage opportunity detection
 - Value bet identification
 - Odds movement tracking
+
+NOTE: Now uses The-Odds-API for real bookmaker odds
 """
 
 import os
@@ -13,6 +15,13 @@ import requests
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
+
+# Import real odds client
+try:
+    from src.data.real_odds import RealOddsClient, get_live_odds
+    REAL_ODDS_AVAILABLE = True
+except ImportError:
+    REAL_ODDS_AVAILABLE = False
 
 
 @dataclass
@@ -53,43 +62,82 @@ class ValueBet:
 
 class OddsComparer:
     """
-    Compare odds across bookmakers and find best prices
+    Compare odds across bookmakers and find best prices.
     
-    Note: In production, you'd use:
-    - The Odds API (https://the-odds-api.com) - Free tier available
-    - Betfair Exchange API
-    - Oddschecker scraping
-    
-    This implementation uses simulated odds data.
+    NOW USES REAL API DATA from The-Odds-API when available.
+    Falls back to simulated data when API key not configured.
     """
     
-    # Simulated bookmaker odds (in production, fetch from API)
-    SAMPLE_ODDS = {
+    # Fallback simulated odds (used only when API unavailable)
+    _FALLBACK_ODDS = {
         'Bayern vs Dortmund': {
-            'bet365': {'home': 1.45, 'draw': 4.50, 'away': 6.50},
-            'betfair': {'home': 1.48, 'draw': 4.40, 'away': 6.80},
-            'unibet': {'home': 1.44, 'draw': 4.60, 'away': 6.40},
-            'williamhill': {'home': 1.47, 'draw': 4.33, 'away': 7.00},
-            'pinnacle': {'home': 1.49, 'draw': 4.55, 'away': 6.60},
+            'Fallback': {'home': 1.45, 'draw': 4.50, 'away': 6.50},
         },
         'Liverpool vs Arsenal': {
-            'bet365': {'home': 2.10, 'draw': 3.40, 'away': 3.50},
-            'betfair': {'home': 2.14, 'draw': 3.45, 'away': 3.45},
-            'unibet': {'home': 2.05, 'draw': 3.50, 'away': 3.55},
-            'williamhill': {'home': 2.15, 'draw': 3.30, 'away': 3.60},
-            'pinnacle': {'home': 2.12, 'draw': 3.42, 'away': 3.52},
-        },
-        'Real Madrid vs Barcelona': {
-            'bet365': {'home': 2.40, 'draw': 3.30, 'away': 2.90},
-            'betfair': {'home': 2.42, 'draw': 3.35, 'away': 2.88},
-            'unibet': {'home': 2.38, 'draw': 3.25, 'away': 2.95},
-            'williamhill': {'home': 2.45, 'draw': 3.20, 'away': 2.85},
-            'pinnacle': {'home': 2.44, 'draw': 3.32, 'away': 2.92},
+            'Fallback': {'home': 2.10, 'draw': 3.40, 'away': 3.50},
         },
     }
     
     def __init__(self):
-        self.odds_api_key = os.getenv('ODDS_API_KEY')
+        self.odds_api_key = os.getenv('THE_ODDS_API_KEY')
+        self._real_client = None
+        if REAL_ODDS_AVAILABLE:
+            try:
+                self._real_client = RealOddsClient()
+            except:
+                pass
+    
+    def calculate_margin(self, home: float, draw: float, away: float) -> float:
+        """Calculate bookmaker margin from odds"""
+        if home <= 0 or draw <= 0 or away <= 0:
+            return 0
+        margin = (1/home + 1/draw + 1/away - 1) * 100
+        return round(margin, 2)
+    
+    def get_odds_for_match(self, home_team: str, away_team: str) -> List[BookmakerOdds]:
+        """Get odds from all bookmakers for a match - NOW USES REAL API"""
+        # Try real API first
+        if self._real_client and self._real_client.has_api_key():
+            try:
+                real_odds = self._real_client.get_match_odds(home_team, away_team)
+                if real_odds.get('found') and real_odds.get('data_source') == 'LIVE_API':
+                    results = []
+                    for bookie in real_odds.get('bookmakers', []):
+                        margin = self.calculate_margin(
+                            bookie.get('home', 2.0),
+                            bookie.get('draw', 3.0),
+                            bookie.get('away', 3.0)
+                        )
+                        results.append(BookmakerOdds(
+                            bookmaker=bookie.get('bookmaker', 'Unknown'),
+                            home_odds=bookie.get('home', 2.0),
+                            draw_odds=bookie.get('draw', 3.0),
+                            away_odds=bookie.get('away', 3.0),
+                            margin=margin,
+                            last_updated=datetime.now().isoformat()
+                        ))
+                    if results:
+                        return results
+            except Exception as e:
+                print(f"Real odds fetch failed: {e}")
+        
+        # Fallback to simulated odds
+        match_key = f"{home_team} vs {away_team}"
+        odds_data = self._FALLBACK_ODDS.get(match_key) or self._generate_simulated_odds(home_team, away_team)
+        
+        results = []
+        for bookmaker, odds in odds_data.items():
+            margin = self.calculate_margin(odds['home'], odds['draw'], odds['away'])
+            results.append(BookmakerOdds(
+                bookmaker=bookmaker,
+                home_odds=odds['home'],
+                draw_odds=odds['draw'],
+                away_odds=odds['away'],
+                margin=margin,
+                last_updated=datetime.now().isoformat()
+            ))
+        
+        return results
     
     def calculate_margin(self, home: float, draw: float, away: float) -> float:
         """Calculate bookmaker margin from odds"""

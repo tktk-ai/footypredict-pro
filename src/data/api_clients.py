@@ -333,6 +333,112 @@ class FootballDataOrgClient:
         
         return []
     
+    def get_head_to_head(self, match_id: int) -> Dict:
+        """
+        Get head-to-head data for a specific match
+        Returns: Dict with H2H statistics
+        """
+        if not self.api_key:
+            return {}
+        
+        cache_key = f"fdo_h2h_{match_id}"
+        cached = self.cache.get(cache_key, max_age_minutes=1440)  # 24hr cache
+        if cached:
+            return cached
+        
+        url = f"{self.BASE_URL}/matches/{match_id}/head2head"
+        params = {'limit': 10}
+        
+        try:
+            response = self.session.get(url, params=params)
+            if response.status_code == 200:
+                data = response.json()
+                self.cache.set(cache_key, data)
+                return data
+        except Exception as e:
+            print(f"H2H fetch error: {e}")
+        
+        return {}
+    
+    def get_team_by_name(self, team_name: str) -> Optional[Dict]:
+        """
+        Search for team by name to get team ID
+        """
+        if not self.api_key:
+            return None
+        
+        cache_key = f"fdo_team_search_{team_name.lower()}"
+        cached = self.cache.get(cache_key, max_age_minutes=1440)
+        if cached:
+            return cached
+        
+        # Try to find team in any league we support
+        for league_code in self.LEAGUES.values():
+            url = f"{self.BASE_URL}/competitions/{league_code}/teams"
+            try:
+                response = self.session.get(url)
+                if response.status_code == 200:
+                    data = response.json()
+                    for team in data.get('teams', []):
+                        if (team_name.lower() in team['name'].lower() or 
+                            team_name.lower() in team.get('shortName', '').lower() or
+                            team_name.lower() == team.get('tla', '').lower()):
+                            self.cache.set(cache_key, team)
+                            return team
+            except:
+                continue
+        
+        return None
+    
+    def get_finished_matches(self, league: str = 'premier_league', limit: int = 50) -> List[Dict]:
+        """Get finished matches for training data"""
+        if not self.api_key:
+            return []
+        
+        league_code = self.LEAGUES.get(league, league)
+        
+        cache_key = f"fdo_finished_{league_code}_{limit}"
+        cached = self.cache.get(cache_key, max_age_minutes=60)
+        if cached:
+            return cached
+        
+        url = f"{self.BASE_URL}/competitions/{league_code}/matches"
+        params = {'status': 'FINISHED', 'limit': limit}
+        
+        try:
+            response = self.session.get(url, params=params)
+            if response.status_code == 200:
+                data = response.json()
+                matches = data.get('matches', [])
+                self.cache.set(cache_key, matches)
+                return matches
+        except Exception as e:
+            print(f"Error fetching finished matches: {e}")
+        
+        return []
+    
+    def get_live_standings_parsed(self, league: str = 'premier_league') -> Dict[str, int]:
+        """
+        Get live standings as team name -> position dict
+        For use in predictions
+        """
+        standings_raw = self.get_standings(league)
+        
+        positions = {}
+        if standings_raw:
+            for table in standings_raw:
+                if table.get('type') == 'TOTAL':
+                    for entry in table.get('table', []):
+                        team_name = entry.get('team', {}).get('name', '')
+                        short_name = entry.get('team', {}).get('shortName', '')
+                        position = entry.get('position', 10)
+                        
+                        positions[team_name] = position
+                        if short_name:
+                            positions[short_name] = position
+        
+        return positions
+    
     def _parse_matches(self, data: Dict, league: str) -> List[Match]:
         """Parse Football-Data.org response"""
         matches = []
