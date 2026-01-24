@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 Analytics Dashboard | Football Predictions</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📊 Analytics Dashboard</h1>
+            <p class="subtitle">Track prediction accuracy and betting performance</p>
+            <a href="/" class="back-link">← Back to Predictions</a>
+        </header>
+
+        <div class="dashboard-grid">
+            <!-- Accuracy Stats Card -->
+            <div class="dashboard-card">
+                <h3>📈 Prediction Accuracy</h3>
+                <div id="accuracy-stats">
+                    <div class="stat-row">
+                        <span>Total Predictions</span>
+                        <span id="total-preds">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Correct</span>
+                        <span id="correct-preds" class="success">0</span>
+                    </div>
+                    <div class="stat-row">
+                        <span>Accuracy</span>
+                        <span id="accuracy-pct" class="highlight">0%</span>
+                    </div>
+                </div>
+                <canvas id="accuracyChart"></canvas>
+            </div>
+
+            <!-- Kelly Calculator Card -->
+            <div class="dashboard-card">
+                <h3>🎯 Kelly Criterion Calculator</h3>
+                <div class="kelly-form">
+                    <div class="input-group">
+                        <label>Win Probability (%)</label>
+                        <input type="number" id="kelly-prob" value="65" min="1" max="99">
+                    </div>
+                    <div class="input-group">
+                        <label>Decimal Odds</label>
+                        <input type="number" id="kelly-odds" value="1.8" step="0.1" min="1.01">
+                    </div>
+                    <div class="input-group">
+                        <label>Bankroll (€)</label>
+                        <input type="number" id="kelly-bankroll" value="100" min="1">
+                    </div>
+                    <button onclick="calculateKelly()">Calculate</button>
+                </div>
+                <div id="kelly-result"></div>
+            </div>
+
+            <!-- Patterns Card -->
+            <div class="dashboard-card">
+                <h3>🔍 High-Confidence Patterns</h3>
+                <div id="patterns-list">
+                    <p class="muted">Track more predictions to discover patterns...</p>
+                </div>
+            </div>
+
+            <!-- Backtest Results -->
+            <div class="dashboard-card full-width">
+                <h3>📊 Strategy Backtest</h3>
+                <div id="backtest-results">
+                    <p class="muted">Need 5+ tracked predictions to run backtest</p>
+                </div>
+                <canvas id="roiChart"></canvas>
+            </div>
+
+            <!-- Recent Predictions -->
+            <div class="dashboard-card full-width">
+                <h3>📝 Track New Prediction</h3>
+                <div class="track-form">
+                    <input type="text" id="track-home" placeholder="Home Team">
+                    <input type="text" id="track-away" placeholder="Away Team">
+                    <select id="track-outcome">
+                        <option value="H">Home Win</option>
+                        <option value="D">Draw</option>
+                        <option value="A">Away Win</option>
+                    </select>
+                    <input type="number" id="track-prob" placeholder="Probability %" value="60" min="1" max="99">
+                    <button onclick="trackPrediction()">Track</button>
+                </div>
+                <div id="track-result"></div>
+            </div>
+        </div>
+
+        <footer>
+            <p>⚠️ For entertainment purposes only. Gamble responsibly.</p>
+        </footer>
+    </div>
+
+    <script>
+        let accuracyChart, roiChart;
+
+        async function loadDashboard() {
+            // Load accuracy stats
+            try {
+                const accRes = await fetch('/api/accuracy');
+                const accData = await accRes.json();
+                
+                if (accData.success) {
+                    document.getElementById('total-preds').textContent = accData.stats.total || 0;
+                    document.getElementById('correct-preds').textContent = accData.stats.correct || 0;
+                    document.getElementById('accuracy-pct').textContent = 
+                        ((accData.stats.accuracy || 0) * 100).toFixed(1) + '%';
+                    
+                    updateAccuracyChart(accData.stats);
+                }
+            } catch (e) {
+                console.log('No accuracy data yet');
+            }
+
+            // Load patterns
+            try {
+                const patRes = await fetch('/api/patterns');
+                const patData = await patRes.json();
+                
+                if (patData.success && patData.patterns.recommendations) {
+                    const list = document.getElementById('patterns-list');
+                    if (patData.patterns.recommendations.length > 0) {
+                        list.innerHTML = patData.patterns.recommendations
+                            .map(r => `<p class="pattern">${r}</p>`).join('');
+                    }
+                }
+            } catch (e) {
+                console.log('No pattern data yet');
+            }
+
+            // Load backtest
+            try {
+                const btRes = await fetch('/api/backtest');
+                const btData = await btRes.json();
+                
+                if (btData.success) {
+                    displayBacktest(btData.backtest);
+                }
+            } catch (e) {
+                console.log('No backtest data yet');
+            }
+        }
+
+        function updateAccuracyChart(stats) {
+            const ctx = document.getElementById('accuracyChart').getContext('2d');
+            
+            if (accuracyChart) accuracyChart.destroy();
+            
+            const leagues = Object.keys(stats.by_league || {});
+            const accuracies = leagues.map(l => (stats.by_league[l].accuracy * 100).toFixed(1));
+            
+            if (leagues.length === 0) return;
+            
+            accuracyChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: leagues,
+                    datasets: [{
+                        label: 'Accuracy %',
+                        data: accuracies,
+                        backgroundColor: 'rgba(0, 212, 255, 0.6)',
+                        borderColor: '#00d4ff',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: { beginAtZero: true, max: 100 }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                }
+            });
+        }
+
+        function displayBacktest(data) {
+            if (!data.strategies) return;
+            
+            const container = document.getElementById('backtest-results');
+            let html = '<table class="backtest-table"><tr><th>Strategy</th><th>Bets</th><th>Accuracy</th><th>ROI</th></tr>';
+            
+            for (const [name, result] of Object.entries(data.strategies)) {
+                const roiClass = result.roi > 0 ? 'success' : 'danger';
+                html += `<tr>
+                    <td>${name}</td>
+                    <td>${result.total_predictions}</td>
+                    <td>${(result.accuracy * 100).toFixed(1)}%</td>
+                    <td class="${roiClass}">${(result.roi * 100).toFixed(1)}%</td>
+                </tr>`;
+            }
+            html += '</table>';
+            
+            if (data.best_strategy) {
+                html += `<p class="best-strategy">🏆 Best: ${data.best_strategy} (${(data.best_roi * 100).toFixed(1)}% ROI)</p>`;
+            }
+            
+            container.innerHTML = html;
+        }
+
+        async function calculateKelly() {
+            const prob = parseFloat(document.getElementById('kelly-prob').value) / 100;
+            const odds = parseFloat(document.getElementById('kelly-odds').value);
+            const bankroll = parseFloat(document.getElementById('kelly-bankroll').value);
+            
+            const response = await fetch(`/api/kelly?prob=${prob}&odds=${odds}&bankroll=${bankroll}`);
+            const data = await response.json();
+            
+            if (data.success) {
+                const k = data.kelly;
+                const resultDiv = document.getElementById('kelly-result');
+                
+                if (k.recommendation === 'NO BET') {
+                    resultDiv.innerHTML = `
+                        <div class="kelly-output danger">
+                            <h4>❌ NO BET</h4>
+                            <p>Negative expected value</p>
+                        </div>`;
+                } else {
+                    resultDiv.innerHTML = `
+                        <div class="kelly-output success">
+                            <h4>✅ ${k.recommendation}</h4>
+                            <div class="kelly-amounts">
+                                <div><span>Full Kelly:</span> €${k.full_kelly}</div>
+                                <div><span>Half Kelly:</span> €${k.half_kelly}</div>
+                                <div><span>Quarter Kelly:</span> €${k.quarter_kelly}</div>
+                            </div>
+                            <p>Edge: ${k.edge_percent}% | EV: ${(k.expected_value * 100).toFixed(1)}%</p>
+                        </div>`;
+                }
+            }
+        }
+
+        async function trackPrediction() {
+            const home = document.getElementById('track-home').value;
+            const away = document.getElementById('track-away').value;
+            const outcome = document.getElementById('track-outcome').value;
+            const prob = parseFloat(document.getElementById('track-prob').value) / 100;
+            
+            const response = await fetch('/api/track', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    home_team: home,
+                    away_team: away,
+                    predicted: outcome,
+                    probability: prob,
+                    confidence: prob
+                })
+            });
+            
+            const data = await response.json();
+            const resultDiv = document.getElementById('track-result');
+            
+            if (data.success) {
+                resultDiv.innerHTML = `<p class="success">✅ Tracked: ${home} vs ${away}</p>`;
+                // Clear form
+                document.getElementById('track-home').value = '';
+                document.getElementById('track-away').value = '';
+            }
+        }
+
+        // Load on page load
+        document.addEventListener('DOMContentLoaded', loadDashboard);
+    </script>
+</body>
+</html>

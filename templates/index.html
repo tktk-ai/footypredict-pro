@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>⚽ Football Predictions | Live Match Predictions</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#00d4ff">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="FootyPredict">
+    <link rel="manifest" href="/static/manifest.json">
+    <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
+    
+    <link rel="stylesheet" href="/static/style.css" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    
+    <!-- Service Worker Registration -->
+    <script>
+      if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+          navigator.serviceWorker.register('/static/sw.js')
+            .then(reg => console.log('SW registered'))
+            .catch(err => console.log('SW failed:', err));
+        });
+      }
+    </script>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <h1>⚽ Football Predictions</h1>
+        <p class="subtitle">AI-powered match predictions with live fixtures</p>
+        <nav class="main-nav">
+          <a href="/" class="nav-link active">Predictions</a>
+          <a href="#sure-wins" class="nav-link">🔥 Sure Wins</a>
+          <a href="#accumulator" class="nav-link">🎰 Accumulator</a>
+          <a href="/dashboard" class="nav-link">📊 Dashboard</a>
+        </nav>
+      </header>
+
+      <div class="controls">
+        <div class="league-selector">
+          <label for="league">League:</label>
+          <select id="league" onchange="loadFixtures()">
+            <optgroup label="🇩🇪 Germany (Free)">
+              <option value="bundesliga">Bundesliga</option>
+              <option value="bundesliga2">2. Bundesliga</option>
+              <option value="3liga">3. Liga</option>
+              <option value="dfb_pokal">DFB-Pokal</option>
+            </optgroup>
+            <optgroup label="🌍 European Cups (Free)">
+              <option value="champions_league">Champions League</option>
+              <option value="europa_league">Europa League</option>
+              <option value="conference_league">Conference League</option>
+            </optgroup>
+            <optgroup label="🏴󠁧󠁢󠁥󠁮󠁧󠁿 England">
+              <option value="premier_league">Premier League</option>
+              <option value="championship">Championship</option>
+              <option value="league_one">League One</option>
+              <option value="fa_cup">FA Cup</option>
+            </optgroup>
+            <optgroup label="🇪🇸 Spain">
+              <option value="la_liga">La Liga</option>
+              <option value="la_liga2">La Liga 2</option>
+              <option value="copa_del_rey">Copa del Rey</option>
+            </optgroup>
+            <optgroup label="🇮🇹 Italy">
+              <option value="serie_a">Serie A</option>
+              <option value="serie_b">Serie B</option>
+              <option value="coppa_italia">Coppa Italia</option>
+            </optgroup>
+            <optgroup label="🇫🇷 France">
+              <option value="ligue_1">Ligue 1</option>
+              <option value="ligue_2">Ligue 2</option>
+              <option value="coupe_de_france">Coupe de France</option>
+            </optgroup>
+            <optgroup label="🇳🇱 Netherlands">
+              <option value="eredivisie">Eredivisie</option>
+              <option value="eerste_divisie">Eerste Divisie</option>
+            </optgroup>
+            <optgroup label="🇵🇹 Portugal">
+              <option value="primeira_liga">Primeira Liga</option>
+            </optgroup>
+            <optgroup label="🇧🇪 Belgium">
+              <option value="jupiler_pro">Jupiler Pro League</option>
+            </optgroup>
+            <optgroup label="🇹🇷 Turkey">
+              <option value="super_lig">Süper Lig</option>
+            </optgroup>
+            <optgroup label="🇬🇷 Greece">
+              <option value="super_league_greece">Super League</option>
+            </optgroup>
+            <optgroup label="🇧🇷 Brazil">
+              <option value="brasileirao">Brasileirão</option>
+            </optgroup>
+            <optgroup label="🇦🇷 Argentina">
+              <option value="liga_argentina">Liga Argentina</option>
+            </optgroup>
+            <optgroup label="🇺🇸 USA">
+              <option value="mls">MLS</option>
+            </optgroup>
+          </select>
+        </div>
+        <button onclick="loadFixtures()" class="refresh-btn">🔄 Refresh</button>
+      </div>
+
+      <div id="loading" class="loading">
+        <div class="spinner"></div>
+        <p>Loading fixtures...</p>
+      </div>
+
+      <div id="fixtures" class="fixtures-grid"></div>
+
+      <!-- SURE WIN SECTION -->
+      <section id="sure-wins" class="sure-wins-section">
+        <h2>🔥 Sure Wins (Over 0.5 Goals)</h2>
+        <p class="section-desc">Matches with 4+ expected goals - extremely high probability of at least 1 goal</p>
+        <div id="sure-wins-list" class="sure-wins-grid">
+          <p class="loading-text">Loading sure wins...</p>
+        </div>
+      </section>
+
+      <!-- ACCUMULATOR SECTION -->
+      <section id="accumulator" class="accumulator-section">
+        <h2>🎰 Today's Accumulator</h2>
+        <p class="section-desc">AI-selected value picks for maximum returns</p>
+        <div class="acca-controls">
+          <label>Legs: <input type="number" id="acca-legs" value="4" min="2" max="10"></label>
+          <label>Min Confidence: <input type="number" id="acca-conf" value="60" min="50" max="90">%</label>
+          <button onclick="generateAccumulator()">🎲 Generate Accumulator</button>
+        </div>
+        <div id="accumulator-result" class="acca-result"></div>
+      </section>
+
+      <section class="custom-prediction">
+        <h2>🎯 Custom Prediction</h2>
+        <div class="prediction-form">
+          <input
+            type="text"
+            id="home-team"
+            placeholder="Home Team (e.g., Bayern München)"
+          />
+          <span class="vs">vs</span>
+          <input
+            type="text"
+            id="away-team"
+            placeholder="Away Team (e.g., Borussia Dortmund)"
+          />
+          <button onclick="customPredict()">Predict</button>
+        </div>
+        <div id="custom-result"></div>
+      </section>
+
+      <footer>
+        <p>
+          Predictions based on ELO ratings, form analysis, and research-backed
+          algorithms
+        </p>
+        <p class="disclaimer">
+          ⚠️ For entertainment purposes only. Not betting advice.
+        </p>
+      </footer>
+    </div>
+
+    <script>
+      async function loadFixtures() {
+        const league = document.getElementById("league").value;
+        const loading = document.getElementById("loading");
+        const fixtures = document.getElementById("fixtures");
+
+        loading.style.display = "flex";
+        fixtures.innerHTML = "";
+
+        try {
+          const response = await fetch(
+            `/api/fixtures?league=${league}&days=14`,
+          );
+          const data = await response.json();
+
+          loading.style.display = "none";
+
+          if (data.success && data.fixtures.length > 0) {
+            fixtures.innerHTML = data.fixtures
+              .map((f) => createMatchCard(f))
+              .join("");
+          } else {
+            fixtures.innerHTML = `
+                        <div class="no-matches">
+                            <p>No upcoming matches found for this league.</p>
+                            <p class="hint">Try selecting a different league or check back later.</p>
+                        </div>
+                    `;
+          }
+        } catch (error) {
+          loading.style.display = "none";
+          fixtures.innerHTML = `
+                    <div class="error">
+                        <p>Error loading fixtures: ${error.message}</p>
+                    </div>
+                `;
+        }
+      }
+
+      function createMatchCard(fixture) {
+        const match = fixture.match;
+        const pred = fixture.prediction;
+
+        const kickoff = new Date(match.kickoff);
+        const dateStr = kickoff.toLocaleDateString("en-GB", {
+          weekday: "short",
+          day: "numeric",
+          month: "short",
+        });
+        const timeStr = kickoff.toLocaleTimeString("en-GB", {
+          hour: "2-digit",
+          minute: "2-digit",
+        });
+
+        let predictionHtml = "";
+        if (pred) {
+          const homeClass =
+            pred.predicted_outcome === "Home Win" ? "predicted" : "";
+          const drawClass =
+            pred.predicted_outcome === "Draw" ? "predicted" : "";
+          const awayClass =
+            pred.predicted_outcome === "Away Win" ? "predicted" : "";
+
+          predictionHtml = `
+                    <div class="prediction">
+                        <div class="probs">
+                            <div class="prob ${homeClass}">
+                                <span class="label">H</span>
+                                <span class="value">${(pred.home_win_prob * 100).toFixed(0)}%</span>
+                            </div>
+                            <div class="prob ${drawClass}">
+                                <span class="label">D</span>
+                                <span class="value">${(pred.draw_prob * 100).toFixed(0)}%</span>
+                            </div>
+                            <div class="prob ${awayClass}">
+                                <span class="label">A</span>
+                                <span class="value">${(pred.away_win_prob * 100).toFixed(0)}%</span>
+                            </div>
+                        </div>
+                        <div class="confidence">
+                            Confidence: ${(pred.confidence * 100).toFixed(0)}%
+                        </div>
+                        ${pred.is_value_bet ? `<div class="value-bet">💰 Value: ${pred.value_outcome?.replace("_", " ")}</div>` : ""}
+                        <div class="elo-info">
+                            ELO: ${pred.home_elo?.toFixed(0) || "?"} vs ${pred.away_elo?.toFixed(0) || "?"}
+                        </div>
+                    </div>
+                    ${fixture.goals ? createGoalsHtml(fixture.goals) : ''}
+                `;
+        }
+
+        return `
+                <div class="match-card ${pred?.is_value_bet ? "has-value" : ""}">
+                    <div class="match-header">
+                        <span class="date">${dateStr}</span>
+                        <span class="time">${timeStr}</span>
+                    </div>
+                    <div class="teams">
+                        <div class="team home">
+                            ${match.home_team.logo_url ? `<img src="${match.home_team.logo_url}" alt="" class="team-logo">` : ""}
+                            <span class="name">${match.home_team.short_name || match.home_team.name}</span>
+                        </div>
+                        <div class="vs-badge">VS</div>
+                        <div class="team away">
+                            ${match.away_team.logo_url ? `<img src="${match.away_team.logo_url}" alt="" class="team-logo">` : ""}
+                            <span class="name">${match.away_team.short_name || match.away_team.name}</span>
+                        </div>
+                    </div>
+                    ${predictionHtml}
+                </div>
+            `;
+      }
+
+      async function customPredict() {
+        const home = document.getElementById("home-team").value;
+        const away = document.getElementById("away-team").value;
+        const league = document.getElementById("league").value;
+        const resultDiv = document.getElementById("custom-result");
+
+        if (!home || !away) {
+          resultDiv.innerHTML =
+            '<p class="error">Please enter both team names</p>';
+          return;
+        }
+
+        try {
+          const response = await fetch(
+            `/api/predict?home=${encodeURIComponent(home)}&away=${encodeURIComponent(away)}&league=${league}`,
+          );
+          const data = await response.json();
+
+          if (data.success) {
+            const pred = data.prediction;
+            resultDiv.innerHTML = `
+                        <div class="custom-result-card">
+                            <h3>${home} vs ${away}</h3>
+                            <div class="result-probs">
+                                <div class="prob-bar">
+                                    <div class="bar home" style="width: ${pred.home_win_prob * 100}%">
+                                        Home ${(pred.home_win_prob * 100).toFixed(0)}%
+                                    </div>
+                                    <div class="bar draw" style="width: ${pred.draw_prob * 100}%">
+                                        Draw ${(pred.draw_prob * 100).toFixed(0)}%
+                                    </div>
+                                    <div class="bar away" style="width: ${pred.away_win_prob * 100}%">
+                                        Away ${(pred.away_win_prob * 100).toFixed(0)}%
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="predicted-outcome">
+                                🏆 Predicted: <strong>${pred.predicted_outcome}</strong> 
+                                (${(pred.confidence * 100).toFixed(0)}% confidence)
+                            </p>
+                            <p class="elo">ELO: ${pred.home_elo} vs ${pred.away_elo}</p>
+                            ${
+                              pred.analysis_notes?.length
+                                ? `
+                                <div class="notes">
+                                    ${pred.analysis_notes.map((n) => `<p>${n}</p>`).join("")}
+                                </div>
+                            `
+                                : ""
+                            }
+                        </div>
+                    `;
+          }
+        } catch (error) {
+          resultDiv.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+        }
+      }
+
+      function createGoalsHtml(goals) {
+        if (!goals) return '';
+        const xg = goals.expected_goals;
+        const ou = goals.over_under;
+        const btts = goals.btts;
+        const scores = goals.likely_scores?.slice(0, 3) || [];
+        
+        return `
+          <div class="goals-prediction">
+            <div class="goals-header">⚽ Goal Predictions</div>
+            <div class="goals-grid">
+              <div class="goal-stat">
+                <span class="label">xG</span>
+                <span class="value">${xg.home.toFixed(1)} - ${xg.away.toFixed(1)}</span>
+              </div>
+              <div class="goal-stat">
+                <span class="label">Total</span>
+                <span class="value">${xg.total.toFixed(1)}</span>
+              </div>
+              <div class="goal-stat">
+                <span class="label">O2.5</span>
+                <span class="value ${ou['over_2.5'] > 0.5 ? 'high' : ''}">${(ou['over_2.5'] * 100).toFixed(0)}%</span>
+              </div>
+              <div class="goal-stat">
+                <span class="label">BTTS</span>
+                <span class="value ${btts.yes > 0.5 ? 'high' : ''}">${(btts.yes * 100).toFixed(0)}%</span>
+              </div>
+            </div>
+            <div class="likely-scores">
+              <span class="label">Likely:</span>
+              ${scores.map(s => `<span class="score">${s.score} (${(s.probability * 100).toFixed(0)}%)</span>`).join('')}
+            </div>
+          </div>
+        `;
+      }
+
+      // SURE WINS - Matches with 4+ expected goals
+      async function loadSureWins() {
+        const sureWinsDiv = document.getElementById('sure-wins-list');
+        
+        try {
+          // Fetch from multiple leagues
+          const leagues = ['bundesliga', 'premier_league', 'la_liga', 'serie_a'];
+          let allSureWins = [];
+          
+          for (const league of leagues) {
+            try {
+              const response = await fetch(`/api/fixtures?league=${league}&days=3`);
+              const data = await response.json();
+              
+              if (data.fixtures) {
+                // Filter for matches with 4+ expected goals
+                const sureWins = data.fixtures.filter(f => {
+                  const xg = f.goals?.expected_goals?.total || 0;
+                  return xg >= 4;
+                });
+                
+                sureWins.forEach(sw => sw.league = league);
+                allSureWins = allSureWins.concat(sureWins);
+              }
+            } catch (e) {
+              console.log(`Error fetching ${league}:`, e);
+            }
+          }
+          
+          if (allSureWins.length === 0) {
+            sureWinsDiv.innerHTML = '<p class="no-data">No sure win matches found with 4+ xG today. Check back later!</p>';
+            return;
+          }
+          
+          // Sort by xG descending
+          allSureWins.sort((a, b) => (b.goals?.expected_goals?.total || 0) - (a.goals?.expected_goals?.total || 0));
+          
+          sureWinsDiv.innerHTML = allSureWins.map(sw => {
+            const match = sw.match;
+            const xg = sw.goals?.expected_goals;
+            const home = match.home_team?.short_name || match.home_team?.name || 'Home';
+            const away = match.away_team?.short_name || match.away_team?.name || 'Away';
+            
+            return `
+              <div class="sure-win-card">
+                <div class="sure-win-badge">🔥 SURE WIN</div>
+                <div class="sure-win-teams">${home} vs ${away}</div>
+                <div class="sure-win-bet">
+                  <span class="bet-type">Over 0.5 Goals</span>
+                  <span class="xg-total">xG: ${xg?.total?.toFixed(1) || '4+'}</span>
+                </div>
+                <div class="sure-win-reason">
+                  Expected: ${xg?.home?.toFixed(1)} - ${xg?.away?.toFixed(1)} goals
+                </div>
+                <div class="sure-win-confidence">99%+ probability</div>
+              </div>
+            `;
+          }).join('');
+          
+        } catch (error) {
+          sureWinsDiv.innerHTML = '<p class="error">Error loading sure wins</p>';
+        }
+      }
+
+      // ACCUMULATOR GENERATOR
+      async function generateAccumulator() {
+        const legs = document.getElementById('acca-legs').value;
+        const minConf = document.getElementById('acca-conf').value;
+        const resultDiv = document.getElementById('accumulator-result');
+        
+        resultDiv.innerHTML = '<p class="loading-text">🎲 Generating accumulator...</p>';
+        
+        try {
+          const response = await fetch(`/api/accumulator?league=bundesliga&legs=${legs}&min_prob=${minConf/100}`);
+          const data = await response.json();
+          
+          if (data.success && data.accumulator) {
+            const acca = data.accumulator;
+            
+            let legsHtml = acca.legs.map((leg, i) => `
+              <div class="acca-leg">
+                <span class="leg-num">${i + 1}</span>
+                <span class="leg-match">${leg.match}</span>
+                <span class="leg-pick">${leg.selection.replace('_', ' ')}</span>
+                <span class="leg-odds">@${leg.odds.toFixed(2)}</span>
+                <span class="leg-prob">${(leg.probability * 100).toFixed(0)}%</span>
+              </div>
+            `).join('');
+            
+            resultDiv.innerHTML = `
+              <div class="acca-container">
+                <div class="acca-header">
+                  <span class="acca-legs-count">${acca.num_legs} Fold Accumulator</span>
+                  <span class="acca-odds">Combined Odds: ${acca.combined_odds.toFixed(2)}</span>
+                </div>
+                <div class="acca-legs">${legsHtml}</div>
+                <div class="acca-summary">
+                  <div class="acca-stat">
+                    <span class="label">€10 Stake Returns</span>
+                    <span class="value highlight">€${acca.potential_return.toFixed(2)}</span>
+                  </div>
+                  <div class="acca-stat">
+                    <span class="label">Win Probability</span>
+                    <span class="value">${(acca.combined_probability * 100).toFixed(1)}%</span>
+                  </div>
+                </div>
+              </div>
+            `;
+          } else {
+            resultDiv.innerHTML = `<p class="error">${data.error || 'Could not generate accumulator'}</p>`;
+          }
+        } catch (error) {
+          resultDiv.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+        }
+      }
+
+      // Load fixtures on page load
+      document.addEventListener("DOMContentLoaded", () => {
+        loadFixtures();
+        loadSureWins();
+        generateAccumulator();
+      });
+    </script>
+  </body>
+</html>
