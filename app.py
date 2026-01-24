@@ -86,6 +86,12 @@ def pricing_page():
     return render_template('pricing.html')
 
 
+@app.route('/accumulators')
+def accumulators_page():
+    """Accumulators page with all 6 strategies"""
+    return render_template('accumulators.html')
+
+
 # ============================================================
 # User Authentication API
 # ============================================================
@@ -136,30 +142,33 @@ def get_all_accumulators():
     
     # Get predictions for accumulator generation
     try:
-        matches = data_aggregator.get_matches(league, days=3)
+        matches = data_aggregator.get_upcoming_matches([league], days=3)
         predictions = []
         
         for match in matches[:10]:  # Limit for performance
-            pred = predictor.predict(match.home_team, match.away_team)
-            goals = goals_predictor.predict(match.home_team, match.away_team)
+            home_name = match.home_team.name if hasattr(match.home_team, 'name') else str(match.home_team)
+            away_name = match.away_team.name if hasattr(match.away_team, 'name') else str(match.away_team)
+            
+            pred = predictor.predict_match(home_name, away_name)
+            goals = goals_predictor.predict_goals(home_name, away_name)
             
             predictions.append({
                 'id': match.id,
-                'home_team': match.home_team,
-                'away_team': match.away_team,
-                'home_win_prob': pred['home_prob'],
-                'draw_prob': pred['draw_prob'],
-                'away_win_prob': pred['away_prob'],
-                'confidence': pred.get('confidence', 0.7),
+                'home_team': home_name,
+                'away_team': away_name,
+                'home_win_prob': pred.home_win_prob,
+                'draw_prob': pred.draw_prob,
+                'away_win_prob': pred.away_win_prob,
+                'confidence': pred.confidence,
                 'goals': {
                     'home_xg': goals.home_xg,
                     'away_xg': goals.away_xg,
-                    'total_xg': goals.home_xg + goals.away_xg,
+                    'total_xg': goals.total_xg,
                     'over_under': {
-                        'over_0.5': goals.over_under.get('over_0.5', 0.95),
-                        'over_2.5': goals.over_under.get('over_2.5', 0.5),
+                        'over_0.5': goals.over_0_5,
+                        'over_2.5': goals.over_2_5,
                     },
-                    'btts': {'yes': goals.btts.get('yes', 0.5)}
+                    'btts': {'yes': goals.btts_yes}
                 }
             })
         
@@ -183,29 +192,32 @@ def get_accumulator_by_strategy(strategy):
     league = request.args.get('league', 'bundesliga')
     
     try:
-        matches = data_aggregator.get_matches(league, days=3)
+        matches = data_aggregator.get_upcoming_matches([league], days=3)
         predictions = []
         
         for match in matches[:10]:
-            pred = predictor.predict(match.home_team, match.away_team)
-            goals = goals_predictor.predict(match.home_team, match.away_team)
+            home_name = match.home_team.name if hasattr(match.home_team, 'name') else str(match.home_team)
+            away_name = match.away_team.name if hasattr(match.away_team, 'name') else str(match.away_team)
+            
+            pred = predictor.predict_match(home_name, away_name)
+            goals = goals_predictor.predict_goals(home_name, away_name)
             
             predictions.append({
                 'id': match.id,
-                'home_team': match.home_team,
-                'away_team': match.away_team,
-                'home_win_prob': pred['home_prob'],
-                'draw_prob': pred['draw_prob'],
-                'away_win_prob': pred['away_prob'],
-                'confidence': pred.get('confidence', 0.7),
+                'home_team': home_name,
+                'away_team': away_name,
+                'home_win_prob': pred.home_win_prob,
+                'draw_prob': pred.draw_prob,
+                'away_win_prob': pred.away_win_prob,
+                'confidence': pred.confidence,
                 'goals': {
                     'home_xg': goals.home_xg,
                     'away_xg': goals.away_xg,
                     'over_under': {
-                        'over_0.5': goals.over_under.get('over_0.5', 0.95),
-                        'over_2.5': goals.over_under.get('over_2.5', 0.5),
+                        'over_0.5': goals.over_0_5,
+                        'over_2.5': goals.over_2_5,
                     },
-                    'btts': {'yes': goals.btts.get('yes', 0.5)}
+                    'btts': {'yes': goals.btts_yes}
                 }
             })
         

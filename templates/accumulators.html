@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎰 Accumulators | Football Predictions</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+    <link rel="stylesheet" href="/static/css/premium-ui.css">
+    
+    <style>
+        .acca-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .page-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .page-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        
+        .page-header p {
+            color: #a0a0b0;
+        }
+        
+        .strategy-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 30px;
+        }
+        
+        .strategy-tab {
+            padding: 12px 24px;
+            background: rgba(26, 26, 46, 0.7);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px;
+            color: #a0a0a0;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 0.9rem;
+        }
+        
+        .strategy-tab:hover {
+            background: rgba(99, 102, 241, 0.2);
+            border-color: rgba(99, 102, 241, 0.5);
+        }
+        
+        .strategy-tab.active {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-color: transparent;
+            color: white;
+        }
+        
+        .strategy-tab .emoji {
+            margin-right: 6px;
+        }
+        
+        .acca-display {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 20px;
+        }
+        
+        .acca-card {
+            background: rgba(26, 26, 46, 0.8);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 24px;
+            transition: all 0.3s ease;
+        }
+        
+        .acca-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.2);
+        }
+        
+        .acca-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .acca-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+        }
+        
+        .acca-title .emoji {
+            margin-right: 8px;
+        }
+        
+        .risk-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .risk-badge.very-low { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+        .risk-badge.low { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
+        .risk-badge.medium { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
+        .risk-badge.medium-high { background: rgba(249, 115, 22, 0.2); color: #f97316; }
+        .risk-badge.high { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
+        
+        .pick-list {
+            margin-bottom: 20px;
+        }
+        
+        .pick-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 8px;
+            margin-bottom: 8px;
+        }
+        
+        .pick-match {
+            font-size: 0.9rem;
+        }
+        
+        .pick-selection {
+            color: #10b981;
+            font-weight: 500;
+            font-size: 0.85rem;
+        }
+        
+        .pick-odds {
+            background: rgba(99, 102, 241, 0.2);
+            color: #6366f1;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+        
+        .acca-summary {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        
+        .summary-item {
+            text-align: center;
+        }
+        
+        .summary-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            color: #fff;
+        }
+        
+        .summary-value.odds { color: #6366f1; }
+        .summary-value.probability { color: #f59e0b; }
+        .summary-value.return { color: #10b981; }
+        
+        .summary-label {
+            font-size: 0.75rem;
+            color: #a0a0a0;
+            margin-top: 4px;
+        }
+        
+        .acca-actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-place-bet {
+            flex: 1;
+            padding: 12px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-place-bet:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(99, 102, 241, 0.4);
+        }
+        
+        .btn-share {
+            padding: 12px 20px;
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 10px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-share:hover {
+            background: rgba(255,255,255,0.2);
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #a0a0a0;
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(99, 102, 241, 0.2);
+            border-top-color: #6366f1;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .no-acca {
+            text-align: center;
+            padding: 40px;
+            color: #a0a0a0;
+            background: rgba(26, 26, 46, 0.5);
+            border-radius: 16px;
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-bottom: 20px;
+            color: #a0a0a0;
+            text-decoration: none;
+        }
+        
+        .back-link:hover {
+            color: #fff;
+        }
+    </style>
+</head>
+<body>
+    <div class="acca-container">
+        <a href="/" class="back-link">← Back to Predictions</a>
+        
+        <div class="page-header">
+            <h1>🎰 Accumulators</h1>
+            <p>AI-generated betting accumulators with different risk profiles</p>
+        </div>
+        
+        <div class="strategy-tabs">
+            <button class="strategy-tab active" data-strategy="all">
+                <span class="emoji">📊</span>All Strategies
+            </button>
+            <button class="strategy-tab" data-strategy="safe">
+                <span class="emoji">🛡️</span>Safe
+            </button>
+            <button class="strategy-tab" data-strategy="banker">
+                <span class="emoji">🏦</span>Banker
+            </button>
+            <button class="strategy-tab" data-strategy="value">
+                <span class="emoji">💎</span>Value
+            </button>
+            <button class="strategy-tab" data-strategy="btts">
+                <span class="emoji">⚽</span>BTTS
+            </button>
+            <button class="strategy-tab" data-strategy="goals">
+                <span class="emoji">🎯</span>Goals
+            </button>
+            <button class="strategy-tab" data-strategy="risky">
+                <span class="emoji">🎲</span>Risky
+            </button>
+        </div>
+        
+        <div id="acca-content" class="acca-display">
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <p>Loading accumulators...</p>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const STRATEGY_INFO = {
+            safe: { emoji: '🛡️', name: 'Safe Acca', risk: 'Very Low' },
+            banker: { emoji: '🏦', name: 'Banker Acca', risk: 'Low' },
+            value: { emoji: '💎', name: 'Value Acca', risk: 'Medium' },
+            btts: { emoji: '⚽', name: 'BTTS Acca', risk: 'Medium' },
+            goals: { emoji: '🎯', name: 'Goals Acca', risk: 'Medium-High' },
+            risky: { emoji: '🎲', name: 'Risky Acca', risk: 'High' }
+        };
+        
+        let currentStrategy = 'all';
+        let accumulators = {};
+        
+        // Tab switching
+        document.querySelectorAll('.strategy-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.strategy-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                currentStrategy = tab.dataset.strategy;
+                renderAccumulators();
+            });
+        });
+        
+        // Fetch accumulators
+        async function loadAccumulators() {
+            try {
+                const response = await fetch('/api/accumulators');
+                const data = await response.json();
+                
+                if (data.success) {
+                    accumulators = data.accumulators;
+                    renderAccumulators();
+                } else {
+                    showError('Failed to load accumulators');
+                }
+            } catch (err) {
+                showError('Network error: ' + err.message);
+            }
+        }
+        
+        function renderAccumulators() {
+            const container = document.getElementById('acca-content');
+            let html = '';
+            
+            const strategies = currentStrategy === 'all' 
+                ? Object.keys(STRATEGY_INFO)
+                : [currentStrategy];
+            
+            strategies.forEach(strategy => {
+                const acca = accumulators[strategy];
+                if (acca) {
+                    html += renderAccaCard(strategy, acca);
+                }
+            });
+            
+            if (!html) {
+                html = '<div class="no-acca">No accumulators available for today\'s fixtures. Check back later!</div>';
+            }
+            
+            container.innerHTML = html;
+        }
+        
+        function renderAccaCard(strategy, acca) {
+            const info = STRATEGY_INFO[strategy];
+            const riskClass = info.risk.toLowerCase().replace(' ', '-');
+            
+            let picksHtml = '';
+            acca.picks.forEach(pick => {
+                picksHtml += `
+                    <div class="pick-item">
+                        <div>
+                            <div class="pick-match">${pick.home_team} vs ${pick.away_team}</div>
+                            <div class="pick-selection">${pick.selection}</div>
+                        </div>
+                        <span class="pick-odds">${pick.odds.toFixed(2)}</span>
+                    </div>
+                `;
+            });
+            
+            return `
+                <div class="acca-card">
+                    <div class="acca-header">
+                        <div class="acca-title">
+                            <span class="emoji">${info.emoji}</span>${info.name}
+                        </div>
+                        <span class="risk-badge ${riskClass}">${info.risk} Risk</span>
+                    </div>
+                    
+                    <div class="pick-list">
+                        ${picksHtml}
+                    </div>
+                    
+                    <div class="acca-summary">
+                        <div class="summary-item">
+                            <div class="summary-value odds">${acca.combined_odds.toFixed(2)}</div>
+                            <div class="summary-label">Combined Odds</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-value probability">${(acca.combined_probability * 100).toFixed(1)}%</div>
+                            <div class="summary-label">Probability</div>
+                        </div>
+                        <div class="summary-item">
+                            <div class="summary-value return">$${acca.potential_return.toFixed(0)}</div>
+                            <div class="summary-label">Return ($${acca.stake_suggestion})</div>
+                        </div>
+                    </div>
+                    
+                    <div class="acca-actions">
+                        <button class="btn-place-bet" onclick="placeBet('${strategy}')">
+                            Place Bet
+                        </button>
+                        <button class="btn-share" onclick="shareAcca('${strategy}')">
+                            📤
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function showError(message) {
+            document.getElementById('acca-content').innerHTML = `
+                <div class="no-acca">${message}</div>
+            `;
+        }
+        
+        function placeBet(strategy) {
+            alert('Redirecting to bookmaker... (Affiliate link would go here)');
+        }
+        
+        function shareAcca(strategy) {
+            const text = `Check out this ${STRATEGY_INFO[strategy].name} on Football Predictions!`;
+            if (navigator.share) {
+                navigator.share({ title: 'Football Accumulator', text });
+            } else {
+                navigator.clipboard.writeText(text);
+                alert('Copied to clipboard!');
+            }
+        }
+        
+        // Load on page load
+        document.addEventListener('DOMContentLoaded', loadAccumulators);
+    </script>
+</body>
+</html>
