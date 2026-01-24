@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricing | Football Predictions</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/design-system.css">
+    
+    <style>
+        .pricing-container {
+            min-height: 100vh;
+            padding: var(--spacing-2xl);
+            background: linear-gradient(135deg, var(--bg-primary) 0%, #1a1a3e 100%);
+        }
+        
+        .pricing-header {
+            text-align: center;
+            margin-bottom: var(--spacing-2xl);
+        }
+        
+        .pricing-header h1 {
+            font-size: var(--font-size-4xl);
+            font-weight: 700;
+            margin-bottom: var(--spacing-md);
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .pricing-header p {
+            color: var(--text-secondary);
+            font-size: var(--font-size-lg);
+        }
+        
+        .billing-toggle {
+            display: flex;
+            justify-content: center;
+            gap: var(--spacing-md);
+            margin-bottom: var(--spacing-2xl);
+        }
+        
+        .billing-toggle button {
+            padding: var(--spacing-md) var(--spacing-xl);
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-full);
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--transition-fast);
+        }
+        
+        .billing-toggle button.active {
+            background: var(--accent-primary);
+            border-color: var(--accent-primary);
+            color: white;
+        }
+        
+        .savings-badge {
+            background: var(--success-bg);
+            color: var(--success);
+            padding: 2px 8px;
+            border-radius: var(--radius-full);
+            font-size: var(--font-size-xs);
+            font-weight: 600;
+            margin-left: var(--spacing-sm);
+        }
+        
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--spacing-xl);
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .pricing-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-xl);
+            padding: var(--spacing-xl);
+            position: relative;
+            transition: all var(--transition-base);
+        }
+        
+        .pricing-card:hover {
+            transform: translateY(-8px);
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .pricing-card.featured {
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 40px rgba(99, 102, 241, 0.3);
+        }
+        
+        .pricing-card.featured::before {
+            content: 'MOST POPULAR';
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--accent-gradient);
+            color: white;
+            padding: 4px 16px;
+            border-radius: var(--radius-full);
+            font-size: var(--font-size-xs);
+            font-weight: 600;
+        }
+        
+        .tier-icon {
+            font-size: 2.5rem;
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .tier-name {
+            font-size: var(--font-size-xl);
+            font-weight: 700;
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .tier-description {
+            color: var(--text-secondary);
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .tier-price {
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .price-amount {
+            font-size: var(--font-size-4xl);
+            font-weight: 700;
+        }
+        
+        .price-period {
+            color: var(--text-secondary);
+        }
+        
+        .tier-features {
+            list-style: none;
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        .tier-features li {
+            display: flex;
+            align-items: center;
+            gap: var(--spacing-sm);
+            padding: var(--spacing-sm) 0;
+            color: var(--text-secondary);
+        }
+        
+        .tier-features li::before {
+            content: '✓';
+            color: var(--success);
+            font-weight: 600;
+        }
+        
+        .tier-features li.disabled {
+            opacity: 0.5;
+        }
+        
+        .tier-features li.disabled::before {
+            content: '✗';
+            color: var(--danger);
+        }
+        
+        .tier-cta {
+            width: 100%;
+        }
+        
+        .tier-cta.btn-outline {
+            background: transparent;
+            border: 2px solid var(--accent-primary);
+            color: var(--accent-primary);
+        }
+        
+        .tier-cta.btn-outline:hover {
+            background: var(--accent-primary);
+            color: white;
+        }
+        
+        /* Affiliates Section */
+        .affiliates-section {
+            max-width: 1000px;
+            margin: var(--spacing-2xl) auto 0;
+            text-align: center;
+        }
+        
+        .affiliates-section h2 {
+            font-size: var(--font-size-2xl);
+            margin-bottom: var(--spacing-lg);
+        }
+        
+        .affiliates-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: var(--spacing-lg);
+        }
+        
+        .affiliate-card {
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-lg);
+            padding: var(--spacing-lg);
+            text-decoration: none;
+            color: var(--text-primary);
+            transition: all var(--transition-fast);
+        }
+        
+        .affiliate-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-md);
+            border-color: var(--accent-primary);
+        }
+        
+        .affiliate-name {
+            font-weight: 600;
+            margin-bottom: var(--spacing-sm);
+        }
+        
+        .affiliate-bonus {
+            font-size: var(--font-size-sm);
+            color: var(--success);
+        }
+        
+        .back-link {
+            display: inline-block;
+            margin-bottom: var(--spacing-xl);
+            color: var(--text-secondary);
+            text-decoration: none;
+        }
+        
+        .back-link:hover {
+            color: var(--text-primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="pricing-container">
+        <a href="/" class="back-link">← Back to Predictions</a>
+        
+        <div class="pricing-header">
+            <h1>Choose Your Plan</h1>
+            <p>Unlock premium predictions and boost your winning rate</p>
+        </div>
+        
+        <div class="billing-toggle">
+            <button class="active" onclick="toggleBilling('monthly')">Monthly</button>
+            <button onclick="toggleBilling('yearly')">
+                Yearly <span class="savings-badge">Save 17%</span>
+            </button>
+        </div>
+        
+        <div class="pricing-grid stagger-list">
+            <!-- Free Tier -->
+            <div class="pricing-card">
+                <div class="tier-icon">🆓</div>
+                <div class="tier-name">Free</div>
+                <p class="tier-description">Get started with basic predictions</p>
+                
+                <div class="tier-price">
+                    <span class="price-amount">$0</span>
+                    <span class="price-period">/month</span>
+                </div>
+                
+                <ul class="tier-features">
+                    <li>10 predictions per day</li>
+                    <li>Bundesliga only</li>
+                    <li>Basic accumulator</li>
+                    <li>Email support</li>
+                    <li class="disabled">Value bet alerts</li>
+                    <li class="disabled">All leagues</li>
+                    <li class="disabled">API access</li>
+                </ul>
+                
+                <a href="/login" class="btn btn-secondary tier-cta">Get Started</a>
+            </div>
+            
+            <!-- Pro Tier -->
+            <div class="pricing-card featured">
+                <div class="tier-icon">⭐</div>
+                <div class="tier-name">Pro</div>
+                <p class="tier-description">For serious bettors</p>
+                
+                <div class="tier-price">
+                    <span class="price-amount" data-monthly="$9.99" data-yearly="$99.99">$9.99</span>
+                    <span class="price-period">/month</span>
+                </div>
+                
+                <ul class="tier-features">
+                    <li>50 predictions per day</li>
+                    <li>All leagues</li>
+                    <li>All accumulator types</li>
+                    <li>Value bet alerts</li>
+                    <li>Live odds comparison</li>
+                    <li>Priority support</li>
+                    <li class="disabled">API access</li>
+                </ul>
+                
+                <a href="/login?plan=pro" class="btn btn-primary tier-cta">Start Pro Trial</a>
+            </div>
+            
+            <!-- Premium Tier -->
+            <div class="pricing-card">
+                <div class="tier-icon">👑</div>
+                <div class="tier-name">Premium</div>
+                <p class="tier-description">Maximum winning potential</p>
+                
+                <div class="tier-price">
+                    <span class="price-amount" data-monthly="$24.99" data-yearly="$249.99">$24.99</span>
+                    <span class="price-period">/month</span>
+                </div>
+                
+                <ul class="tier-features">
+                    <li>Unlimited predictions</li>
+                    <li>All leagues + international</li>
+                    <li>Telegram & WhatsApp alerts</li>
+                    <li>API access</li>
+                    <li>Private Discord community</li>
+                    <li>Early feature access</li>
+                    <li>1-on-1 support</li>
+                </ul>
+                
+                <a href="/login?plan=premium" class="btn btn-outline tier-cta">Go Premium</a>
+            </div>
+        </div>
+        
+        <!-- Affiliates Section -->
+        <div class="affiliates-section">
+            <h2>🎰 Recommended Bookmakers</h2>
+            <p style="color: var(--text-secondary); margin-bottom: var(--spacing-lg);">
+                Sign up through our links for exclusive bonuses
+            </p>
+            
+            <div class="affiliates-grid stagger-list">
+                <a href="#" class="affiliate-card">
+                    <div class="affiliate-name">bet365</div>
+                    <div class="affiliate-bonus">Up to $100 in Bet Credits</div>
+                </a>
+                
+                <a href="#" class="affiliate-card">
+                    <div class="affiliate-name">Betway</div>
+                    <div class="affiliate-bonus">$30 Free Bet</div>
+                </a>
+                
+                <a href="#" class="affiliate-card">
+                    <div class="affiliate-name">Unibet</div>
+                    <div class="affiliate-bonus">$40 Money Back</div>
+                </a>
+                
+                <a href="#" class="affiliate-card">
+                    <div class="affiliate-name">1xBet</div>
+                    <div class="affiliate-bonus">100% up to $130</div>
+                </a>
+                
+                <a href="#" class="affiliate-card">
+                    <div class="affiliate-name">Betfair</div>
+                    <div class="affiliate-bonus">Up to $20 Free</div>
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function toggleBilling(period) {
+            const buttons = document.querySelectorAll('.billing-toggle button');
+            buttons.forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            const priceElements = document.querySelectorAll('.price-amount[data-monthly]');
+            priceElements.forEach(el => {
+                el.textContent = el.dataset[period];
+            });
+            
+            const periodLabels = document.querySelectorAll('.price-period');
+            periodLabels.forEach(el => {
+                el.textContent = period === 'monthly' ? '/month' : '/year';
+            });
+        }
+    </script>
+</body>
+</html>

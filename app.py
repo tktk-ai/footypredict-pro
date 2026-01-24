@@ -2,6 +2,7 @@
 Football Prediction Web Application
 
 Flask-based web interface for the prediction system.
+Now with advanced accumulators, monetization, and user management.
 """
 
 from flask import Flask, render_template, jsonify, request
@@ -29,6 +30,11 @@ from src.user_manager import UserManager
 from src.whatsapp_bot import WhatsAppBot
 from src.advanced_predictions import AdvancedPredictor, HeadToHeadAnalyzer
 
+# New Phase 7-10 imports
+from src.accumulators import AccumulatorEngine, generate_all_accumulators
+from src.monetization import MonetizationManager, get_pricing
+from src.bet_tracker import BetTracker
+
 app = Flask(__name__)
 
 # Initialize components
@@ -50,6 +56,11 @@ whatsapp_bot = WhatsAppBot()
 advanced_predictor = AdvancedPredictor()
 h2h_analyzer = HeadToHeadAnalyzer()
 
+# New Phase 7-10 components
+acca_engine = AccumulatorEngine()
+monetization = MonetizationManager()
+bet_tracker = BetTracker()
+
 
 @app.route('/')
 def index():
@@ -61,6 +72,241 @@ def index():
 def dashboard():
     """Analytics dashboard"""
     return render_template('dashboard.html')
+
+
+@app.route('/login')
+def login_page():
+    """Login/Register page"""
+    return render_template('login.html')
+
+
+@app.route('/pricing')
+def pricing_page():
+    """Pricing page with subscription tiers"""
+    return render_template('pricing.html')
+
+
+# ============================================================
+# User Authentication API
+# ============================================================
+
+@app.route('/api/user/register', methods=['POST'])
+def register_user():
+    """Register new user"""
+    data = request.get_json()
+    result = user_manager.register(
+        email=data.get('email', ''),
+        username=data.get('username', ''),
+        password=data.get('password', ''),
+        tier=data.get('tier', 'free')
+    )
+    return jsonify(result)
+
+
+@app.route('/api/user/login', methods=['POST'])
+def login_user():
+    """Login user"""
+    data = request.get_json()
+    result = user_manager.login(
+        email=data.get('email', ''),
+        password=data.get('password', '')
+    )
+    return jsonify(result)
+
+
+@app.route('/api/user/profile')
+def get_user_profile():
+    """Get current user profile"""
+    token = request.headers.get('Authorization', '').replace('Bearer ', '')
+    user = user_manager.validate_session(token)
+    
+    if user:
+        return jsonify({'success': True, 'user': user.to_public_dict()})
+    return jsonify({'success': False, 'error': 'Invalid session'}), 401
+
+
+# ============================================================
+# Advanced Accumulators API
+# ============================================================
+
+@app.route('/api/accumulators')
+def get_all_accumulators():
+    """Get all accumulator types for today's fixtures"""
+    league = request.args.get('league', 'bundesliga')
+    
+    # Get predictions for accumulator generation
+    try:
+        matches = data_aggregator.get_matches(league, days=3)
+        predictions = []
+        
+        for match in matches[:10]:  # Limit for performance
+            pred = predictor.predict(match.home_team, match.away_team)
+            goals = goals_predictor.predict(match.home_team, match.away_team)
+            
+            predictions.append({
+                'id': match.id,
+                'home_team': match.home_team,
+                'away_team': match.away_team,
+                'home_win_prob': pred['home_prob'],
+                'draw_prob': pred['draw_prob'],
+                'away_win_prob': pred['away_prob'],
+                'confidence': pred.get('confidence', 0.7),
+                'goals': {
+                    'home_xg': goals.home_xg,
+                    'away_xg': goals.away_xg,
+                    'total_xg': goals.home_xg + goals.away_xg,
+                    'over_under': {
+                        'over_0.5': goals.over_under.get('over_0.5', 0.95),
+                        'over_2.5': goals.over_under.get('over_2.5', 0.5),
+                    },
+                    'btts': {'yes': goals.btts.get('yes', 0.5)}
+                }
+            })
+        
+        accas = generate_all_accumulators(predictions)
+        
+        return jsonify({
+            'success': True,
+            'strategies': acca_engine.get_all_strategies(),
+            'accumulators': accas
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/accumulators/<strategy>')
+def get_accumulator_by_strategy(strategy):
+    """Get specific accumulator type"""
+    from src.accumulators import generate_accumulator
+    
+    league = request.args.get('league', 'bundesliga')
+    
+    try:
+        matches = data_aggregator.get_matches(league, days=3)
+        predictions = []
+        
+        for match in matches[:10]:
+            pred = predictor.predict(match.home_team, match.away_team)
+            goals = goals_predictor.predict(match.home_team, match.away_team)
+            
+            predictions.append({
+                'id': match.id,
+                'home_team': match.home_team,
+                'away_team': match.away_team,
+                'home_win_prob': pred['home_prob'],
+                'draw_prob': pred['draw_prob'],
+                'away_win_prob': pred['away_prob'],
+                'confidence': pred.get('confidence', 0.7),
+                'goals': {
+                    'home_xg': goals.home_xg,
+                    'away_xg': goals.away_xg,
+                    'over_under': {
+                        'over_0.5': goals.over_under.get('over_0.5', 0.95),
+                        'over_2.5': goals.over_under.get('over_2.5', 0.5),
+                    },
+                    'btts': {'yes': goals.btts.get('yes', 0.5)}
+                }
+            })
+        
+        acca = generate_accumulator(predictions, strategy)
+        
+        if acca:
+            return jsonify({'success': True, 'accumulator': acca})
+        return jsonify({'success': False, 'error': 'Could not generate accumulator'}), 404
+        
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+# ============================================================
+# Monetization API
+# ============================================================
+
+@app.route('/api/pricing')
+def get_pricing_info():
+    """Get subscription pricing information"""
+    return jsonify(get_pricing())
+
+
+@app.route('/api/checkout', methods=['POST'])
+def create_checkout():
+    """Create checkout session for subscription"""
+    data = request.get_json()
+    token = request.headers.get('Authorization', '').replace('Bearer ', '')
+    user = user_manager.validate_session(token)
+    
+    if not user:
+        return jsonify({'success': False, 'error': 'Login required'}), 401
+    
+    session = monetization.generate_checkout_session(
+        user_id=user.id,
+        tier_id=data.get('tier', 'pro'),
+        period=data.get('period', 'monthly')
+    )
+    
+    return jsonify({'success': True, **session})
+
+
+# ============================================================
+# Bet Tracking API
+# ============================================================
+
+@app.route('/api/bets', methods=['GET', 'POST'])
+def handle_bets():
+    """Get or add user bets"""
+    token = request.headers.get('Authorization', '').replace('Bearer ', '')
+    user = user_manager.validate_session(token)
+    
+    if not user:
+        return jsonify({'success': False, 'error': 'Login required'}), 401
+    
+    if request.method == 'POST':
+        data = request.get_json()
+        bet = bet_tracker.add_bet(
+            user_id=user.id,
+            match_id=data.get('match_id', ''),
+            home_team=data.get('home_team', ''),
+            away_team=data.get('away_team', ''),
+            selection=data.get('selection', ''),
+            odds=float(data.get('odds', 1.0)),
+            stake=float(data.get('stake', 0)),
+            notes=data.get('notes')
+        )
+        return jsonify({'success': True, 'bet': bet.to_dict()})
+    
+    else:
+        status = request.args.get('status')
+        bets = bet_tracker.get_user_bets(user.id, status=status)
+        stats = bet_tracker.get_user_stats(user.id)
+        return jsonify({'success': True, 'bets': bets, 'stats': stats})
+
+
+@app.route('/api/bets/<bet_id>/settle', methods=['POST'])
+def settle_bet(bet_id):
+    """Settle a bet as won or lost"""
+    token = request.headers.get('Authorization', '').replace('Bearer ', '')
+    user = user_manager.validate_session(token)
+    
+    if not user:
+        return jsonify({'success': False, 'error': 'Login required'}), 401
+    
+    data = request.get_json()
+    won = data.get('won', False)
+    
+    bet = bet_tracker.settle_bet(bet_id, user.id, won)
+    
+    if bet:
+        return jsonify({'success': True, 'bet': bet.to_dict()})
+    return jsonify({'success': False, 'error': 'Bet not found'}), 404
+
+
+@app.route('/api/leaderboard')
+def get_leaderboard():
+    """Get betting leaderboard"""
+    limit = int(request.args.get('limit', 10))
+    leaderboard = bet_tracker.get_leaderboard(limit)
+    return jsonify({'success': True, 'leaderboard': leaderboard})
 
 
 @app.route('/api/fixtures')
