@@ -27,7 +27,7 @@ from src.ml_predictor import EnsemblePredictor
 from src.betting_intel import OddsComparer, ArbitrageFinder, ValueBetFinder
 from src.user_manager import UserManager
 from src.whatsapp_bot import WhatsAppBot
-from src.advanced_predictions import AdvancedPredictor
+from src.advanced_predictions import AdvancedPredictor, HeadToHeadAnalyzer
 
 app = Flask(__name__)
 
@@ -48,6 +48,7 @@ value_finder = ValueBetFinder()
 user_manager = UserManager()
 whatsapp_bot = WhatsAppBot()
 advanced_predictor = AdvancedPredictor()
+h2h_analyzer = HeadToHeadAnalyzer()
 
 
 @app.route('/')
@@ -563,6 +564,23 @@ def record_result():
     return jsonify({
         'success': True,
         'message': f'Result recorded for {match_id}'
+    })
+
+
+@app.route('/api/h2h')
+def get_h2h():
+    """Get head-to-head data between two teams"""
+    home = request.args.get('home')
+    away = request.args.get('away')
+    
+    if not home or not away:
+        return jsonify({'error': 'Missing home or away team'}), 400
+    
+    h2h_data = h2h_analyzer.get_full_h2h(home, away)
+    
+    return jsonify({
+        'success': True,
+        **h2h_data
     })
 
 
