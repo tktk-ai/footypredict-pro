@@ -92,6 +92,24 @@ def accumulators_page():
     return render_template('accumulators.html')
 
 
+@app.route('/profile')
+def profile_page():
+    """User profile dashboard"""
+    return render_template('profile.html')
+
+
+@app.route('/tracker')
+def tracker_page():
+    """Bet tracker page"""
+    return render_template('tracker.html')
+
+
+@app.route('/leaderboard')
+def leaderboard_page():
+    """Betting leaderboard"""
+    return render_template('leaderboard.html')
+
+
 # ============================================================
 # User Authentication API
 # ============================================================
@@ -243,7 +261,7 @@ def get_pricing_info():
 
 @app.route('/api/checkout', methods=['POST'])
 def create_checkout():
-    """Create checkout session for subscription"""
+    """Create Stripe checkout session for subscription"""
     data = request.get_json()
     token = request.headers.get('Authorization', '').replace('Bearer ', '')
     user = user_manager.validate_session(token)
@@ -251,13 +269,25 @@ def create_checkout():
     if not user:
         return jsonify({'success': False, 'error': 'Login required'}), 401
     
-    session = monetization.generate_checkout_session(
-        user_id=user.id,
-        tier_id=data.get('tier', 'pro'),
-        period=data.get('period', 'monthly')
-    )
-    
-    return jsonify({'success': True, **session})
+    # Use new payments module
+    try:
+        from src.payments import create_payment_session
+        result = create_payment_session(
+            user_id=user.id,
+            user_email=user.email,
+            tier=data.get('tier', 'pro'),
+            period=data.get('period', 'monthly'),
+            provider=data.get('provider', 'stripe')
+        )
+        return jsonify(result)
+    except Exception as e:
+        # Fallback to simple session
+        session = monetization.generate_checkout_session(
+            user_id=user.id,
+            tier_id=data.get('tier', 'pro'),
+            period=data.get('period', 'monthly')
+        )
+        return jsonify({'success': True, **session})
 
 
 # ============================================================
