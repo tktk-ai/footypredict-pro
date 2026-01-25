@@ -3,403 +3,276 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | Football Predictions</title>
+    <title>Login | FootyPredict Pro</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/design-system.css">
+    <meta name="theme-color" content="#6366f1">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
-        .auth-container {
+        :root {
+            --bg-primary: #050510;
+            --accent: #6366f1;
+            --text: #ffffff;
+            --text-muted: rgba(255, 255, 255, 0.5);
+        }
+        
+        [data-theme="light"] {
+            --bg-primary: #f8fafc;
+            --text: #0f172a;
+            --text-muted: #64748b;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            background-image: radial-gradient(ellipse at top, rgba(99, 102, 241, 0.2) 0%, transparent 50%);
+            color: var(--text);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: var(--spacing-lg);
-            background: linear-gradient(135deg, var(--bg-primary) 0%, #1a1a3e 100%);
         }
         
-        .auth-card {
+        [data-theme="light"] body {
+            background-image: radial-gradient(ellipse at top, rgba(99, 102, 241, 0.1) 0%, transparent 50%);
+        }
+        
+        .login-container {
             width: 100%;
-            max-width: 420px;
-            background: var(--bg-card);
+            max-width: 440px;
+            padding: 20px;
+        }
+        
+        .login-card {
+            background: rgba(20, 20, 42, 0.8);
             backdrop-filter: blur(20px);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-xl);
-            padding: var(--spacing-2xl);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 24px;
+            padding: 40px;
         }
         
-        .auth-header {
+        [data-theme="light"] .login-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+        
+        .login-logo {
             text-align: center;
-            margin-bottom: var(--spacing-xl);
+            margin-bottom: 32px;
         }
         
-        .auth-logo {
-            font-size: 3rem;
-            margin-bottom: var(--spacing-md);
-        }
-        
-        .auth-title {
-            font-size: var(--font-size-2xl);
-            font-weight: 700;
-            margin-bottom: var(--spacing-sm);
-        }
-        
-        .auth-subtitle {
-            color: var(--text-secondary);
-        }
-        
-        .auth-tabs {
-            display: flex;
-            margin-bottom: var(--spacing-xl);
-            background: var(--bg-tertiary);
-            border-radius: var(--radius-md);
-            padding: 4px;
-        }
-        
-        .auth-tab {
-            flex: 1;
-            padding: var(--spacing-md);
-            text-align: center;
-            background: none;
-            border: none;
-            color: var(--text-secondary);
-            font-weight: 500;
-            cursor: pointer;
-            border-radius: var(--radius-sm);
-            transition: all var(--transition-fast);
-        }
-        
-        .auth-tab.active {
-            background: var(--accent-primary);
-            color: white;
-        }
-        
-        .auth-form {
-            display: none;
-        }
-        
-        .auth-form.active {
-            display: block;
-        }
-        
-        .form-divider {
-            display: flex;
-            align-items: center;
-            margin: var(--spacing-lg) 0;
-            color: var(--text-muted);
-        }
-        
-        .form-divider::before,
-        .form-divider::after {
-            content: '';
-            flex: 1;
-            height: 1px;
-            background: var(--border-color);
-        }
-        
-        .form-divider span {
-            padding: 0 var(--spacing-md);
-            font-size: var(--font-size-sm);
-        }
-        
-        .social-login {
-            display: flex;
-            gap: var(--spacing-md);
-        }
-        
-        .social-btn {
-            flex: 1;
+        .logo-icon {
+            width: 72px;
+            height: 72px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: var(--spacing-sm);
-            padding: var(--spacing-md);
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            color: var(--text-primary);
+            font-size: 2.5rem;
+            margin: 0 auto 16px;
+            box-shadow: 0 12px 40px rgba(99, 102, 241, 0.4);
+        }
+        
+        .logo-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+        }
+        
+        .logo-subtitle {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-top: 8px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+            font-weight: 500;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 16px 18px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            font-size: 1rem;
+            color: var(--text);
+            transition: all 0.2s;
+        }
+        
+        [data-theme="light"] .form-input {
+            background: rgba(0, 0, 0, 0.03);
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+        }
+        
+        .form-input::placeholder {
+            color: var(--text-muted);
+        }
+        
+        .forgot-link {
+            display: block;
+            text-align: right;
+            color: var(--accent);
+            font-size: 0.85rem;
+            text-decoration: none;
+            margin-top: 8px;
+        }
+        
+        .forgot-link:hover { text-decoration: underline; }
+        
+        .btn-login {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border: none;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 700;
+            color: white;
             cursor: pointer;
-            transition: all var(--transition-fast);
+            transition: all 0.2s;
+            box-shadow: 0 8px 32px rgba(99, 102, 241, 0.4);
+            margin-top: 24px;
         }
         
-        .social-btn:hover {
-            background: var(--bg-card-hover);
-            border-color: var(--border-color-light);
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(99, 102, 241, 0.5);
         }
         
-        .form-link {
-            color: var(--accent-primary);
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 28px 0;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .divider span { padding: 0 16px; }
+        
+        .social-btns {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .btn-social {
+            flex: 1;
+            padding: 14px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            font-size: 1.4rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        [data-theme="light"] .btn-social {
+            background: rgba(0, 0, 0, 0.03);
+            border-color: rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn-social:hover {
+            background: rgba(99, 102, 241, 0.15);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+        
+        .signup-link {
+            text-align: center;
+            margin-top: 28px;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        
+        .signup-link a {
+            color: var(--accent);
+            text-decoration: none;
+            font-weight: 600;
+        }
+        
+        .signup-link a:hover { text-decoration: underline; }
+        
+        .back-link {
+            display: block;
+            text-align: center;
+            margin-top: 20px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
             text-decoration: none;
         }
         
-        .form-link:hover {
-            text-decoration: underline;
-        }
-        
-        .form-remember {
-            display: flex;
-            align-items: center;
-            gap: var(--spacing-sm);
-            margin-bottom: var(--spacing-lg);
-        }
-        
-        .form-remember input {
-            width: 18px;
-            height: 18px;
-            accent-color: var(--accent-primary);
-        }
-        
-        .alert {
-            padding: var(--spacing-md);
-            border-radius: var(--radius-md);
-            margin-bottom: var(--spacing-lg);
-            display: none;
-        }
-        
-        .alert.error {
-            display: block;
-            background: var(--danger-bg);
-            border: 1px solid var(--danger);
-            color: var(--danger);
-        }
-        
-        .alert.success {
-            display: block;
-            background: var(--success-bg);
-            border: 1px solid var(--success);
-            color: var(--success);
-        }
-        
-        .tier-select {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: var(--spacing-sm);
-            margin-bottom: var(--spacing-lg);
-        }
-        
-        .tier-option {
-            padding: var(--spacing-md);
-            text-align: center;
-            border: 2px solid var(--border-color);
-            border-radius: var(--radius-md);
-            cursor: pointer;
-            transition: all var(--transition-fast);
-        }
-        
-        .tier-option:hover {
-            border-color: var(--accent-primary);
-        }
-        
-        .tier-option.selected {
-            border-color: var(--accent-primary);
-            background: rgba(99, 102, 241, 0.1);
-        }
-        
-        .tier-option input {
-            display: none;
-        }
-        
-        .tier-name {
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-        
-        .tier-price {
-            font-size: var(--font-size-sm);
-            color: var(--text-secondary);
-        }
+        .back-link:hover { color: var(--text); }
     </style>
 </head>
 <body>
-    <div class="auth-container">
-        <div class="auth-card animate-slide-up">
-            <div class="auth-header">
-                <div class="auth-logo">⚽</div>
-                <h1 class="auth-title">Football Predictions</h1>
-                <p class="auth-subtitle">AI-powered match predictions</p>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-logo">
+                <div class="logo-icon">⚽</div>
+                <h1 class="logo-title">FootyPredict Pro</h1>
+                <p class="logo-subtitle">Sign in to your account</p>
             </div>
             
-            <div class="auth-tabs">
-                <button class="auth-tab active" onclick="showTab('login')">Login</button>
-                <button class="auth-tab" onclick="showTab('register')">Register</button>
-            </div>
-            
-            <div id="alert" class="alert"></div>
-            
-            <!-- Login Form -->
-            <form id="login-form" class="auth-form active" onsubmit="handleLogin(event)">
+            <form action="/api/login" method="POST">
                 <div class="form-group">
-                    <label class="form-label">Email</label>
-                    <input type="email" name="email" class="form-input" placeholder="you@example.com" required>
+                    <label class="form-label">Email Address</label>
+                    <input type="email" class="form-input" placeholder="you@example.com" required>
                 </div>
                 
                 <div class="form-group">
                     <label class="form-label">Password</label>
-                    <input type="password" name="password" class="form-input" placeholder="••••••••" required>
+                    <input type="password" class="form-input" placeholder="••••••••" required>
+                    <a href="#" class="forgot-link">Forgot password?</a>
                 </div>
                 
-                <div class="form-remember">
-                    <input type="checkbox" id="remember" name="remember">
-                    <label for="remember">Remember me</label>
-                    <a href="#" class="form-link" style="margin-left: auto;">Forgot password?</a>
-                </div>
-                
-                <button type="submit" class="btn btn-primary" style="width: 100%;">
-                    Login
-                </button>
-                
-                <div class="form-divider">
-                    <span>or continue with</span>
-                </div>
-                
-                <div class="social-login">
-                    <button type="button" class="social-btn">
-                        <span>G</span> Google
-                    </button>
-                    <button type="button" class="social-btn">
-                        <span>📱</span> Telegram
-                    </button>
-                </div>
+                <button type="submit" class="btn-login">Sign In</button>
             </form>
             
-            <!-- Register Form -->
-            <form id="register-form" class="auth-form" onsubmit="handleRegister(event)">
-                <div class="form-group">
-                    <label class="form-label">Username</label>
-                    <input type="text" name="username" class="form-input" placeholder="johndoe" required>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Email</label>
-                    <input type="email" name="email" class="form-input" placeholder="you@example.com" required>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Password</label>
-                    <input type="password" name="password" class="form-input" placeholder="••••••••" required minlength="6">
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Select Plan</label>
-                    <div class="tier-select">
-                        <label class="tier-option selected">
-                            <input type="radio" name="tier" value="free" checked>
-                            <div class="tier-name">🆓 Free</div>
-                            <div class="tier-price">$0/mo</div>
-                        </label>
-                        <label class="tier-option">
-                            <input type="radio" name="tier" value="pro">
-                            <div class="tier-name">⭐ Pro</div>
-                            <div class="tier-price">$9.99/mo</div>
-                        </label>
-                        <label class="tier-option">
-                            <input type="radio" name="tier" value="premium">
-                            <div class="tier-name">👑 Premium</div>
-                            <div class="tier-price">$24.99/mo</div>
-                        </label>
-                    </div>
-                </div>
-                
-                <button type="submit" class="btn btn-primary" style="width: 100%;">
-                    Create Account
-                </button>
-                
-                <p style="text-align: center; margin-top: var(--spacing-lg); color: var(--text-secondary); font-size: var(--font-size-sm);">
-                    By registering, you agree to our <a href="#" class="form-link">Terms</a> and <a href="#" class="form-link">Privacy Policy</a>
-                </p>
-            </form>
+            <div class="divider"><span>or continue with</span></div>
+            
+            <div class="social-btns">
+                <button class="btn-social" title="Google">🔵</button>
+                <button class="btn-social" title="GitHub">⬛</button>
+                <button class="btn-social" title="Telegram">💬</button>
+            </div>
+            
+            <p class="signup-link">
+                Don't have an account? <a href="/pricing">Sign up</a>
+            </p>
         </div>
+        
+        <a href="/" class="back-link">← Back to Home</a>
     </div>
     
     <script>
-        function showTab(tab) {
-            document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'));
-            
-            event.target.classList.add('active');
-            document.getElementById(tab + '-form').classList.add('active');
-            
-            document.getElementById('alert').className = 'alert';
-        }
-        
-        // Tier selection
-        document.querySelectorAll('.tier-option').forEach(option => {
-            option.addEventListener('click', function() {
-                document.querySelectorAll('.tier-option').forEach(o => o.classList.remove('selected'));
-                this.classList.add('selected');
-            });
-        });
-        
-        async function handleLogin(e) {
-            e.preventDefault();
-            const form = e.target;
-            const data = {
-                email: form.email.value,
-                password: form.password.value
-            };
-            
-            try {
-                const response = await fetch('/api/user/login', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    localStorage.setItem('token', result.token);
-                    localStorage.setItem('user', JSON.stringify(result.user));
-                    window.location.href = '/';
-                } else {
-                    showAlert(result.error || 'Login failed', 'error');
-                }
-            } catch (err) {
-                showAlert('Network error. Please try again.', 'error');
-            }
-        }
-        
-        async function handleRegister(e) {
-            e.preventDefault();
-            const form = e.target;
-            const data = {
-                username: form.username.value,
-                email: form.email.value,
-                password: form.password.value,
-                tier: form.tier.value
-            };
-            
-            try {
-                const response = await fetch('/api/user/register', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(data)
-                });
-                
-                const result = await response.json();
-                
-                if (result.success) {
-                    localStorage.setItem('token', result.token);
-                    localStorage.setItem('user', JSON.stringify(result.user));
-                    
-                    if (data.tier !== 'free') {
-                        window.location.href = '/pricing?checkout=' + data.tier;
-                    } else {
-                        window.location.href = '/';
-                    }
-                } else {
-                    showAlert(result.error || 'Registration failed', 'error');
-                }
-            } catch (err) {
-                showAlert('Network error. Please try again.', 'error');
-            }
-        }
-        
-        function showAlert(message, type) {
-            const alert = document.getElementById('alert');
-            alert.textContent = message;
-            alert.className = 'alert ' + type;
-        }
+        (function() {
+            const saved = localStorage.getItem('theme');
+            if (saved) document.documentElement.setAttribute('data-theme', saved);
+        })();
     </script>
 </body>
 </html>

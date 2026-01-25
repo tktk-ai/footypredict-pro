@@ -3,481 +3,515 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bet Tracker | Football Predictions</title>
+    <title>Tracker | FootyPredict Pro</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/design-system.css">
-    <link rel="stylesheet" href="/static/css/premium-ui.css">
+    <meta name="theme-color" content="#6366f1">
+    <link rel="manifest" href="/static/manifest.json">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
-        .tracker-container {
-            max-width: 1000px;
-            margin: 0 auto;
-            padding: 20px;
+        :root {
+            --bg-primary: #050510;
+            --bg-secondary: #0d0d1a;
+            --bg-tertiary: #14142a;
+            --accent: #6366f1;
+            --accent-glow: rgba(99, 102, 241, 0.4);
+            --gold: #fbbf24;
+            --emerald: #10b981;
+            --rose: #f43f5e;
+            --text: #ffffff;
+            --text-muted: rgba(255, 255, 255, 0.5);
         }
         
-        .page-header {
-            text-align: center;
-            margin-bottom: 30px;
+        [data-theme="light"] {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f1f5f9;
+            --text: #0f172a;
+            --text-muted: #64748b;
         }
         
-        .page-header h1 { font-size: 2rem; }
-        .page-header p { color: #a0a0a0; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         
-        .add-bet-card {
-            background: rgba(26, 26, 46, 0.8);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 30px;
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            background-image: radial-gradient(ellipse at top, rgba(99, 102, 241, 0.15) 0%, transparent 50%);
+            color: var(--text);
+            min-height: 100vh;
         }
         
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-bottom: 15px;
+        [data-theme="light"] body {
+            background-image: radial-gradient(ellipse at top, rgba(99, 102, 241, 0.08) 0%, transparent 50%);
         }
         
-        @media (max-width: 600px) {
-            .form-row { grid-template-columns: 1fr; }
-        }
+        .app { max-width: 1400px; margin: 0 auto; padding: 20px; }
         
-        .form-group {
-            margin-bottom: 15px;
-        }
-        
-        .form-label {
-            display: block;
-            margin-bottom: 6px;
-            color: #a0a0a0;
-            font-size: 0.9rem;
-        }
-        
-        .form-input {
-            width: 100%;
-            padding: 12px;
-            background: rgba(0,0,0,0.3);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 8px;
-            color: white;
-            font-size: 1rem;
-        }
-        
-        .form-input:focus {
-            outline: none;
-            border-color: #6366f1;
-        }
-        
-        .btn-add {
-            width: 100%;
-            padding: 14px;
-            background: linear-gradient(135deg, #6366f1, #8b5cf6);
-            border: none;
-            border-radius: 10px;
-            color: white;
-            font-weight: 600;
-            font-size: 1rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .btn-add:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(99, 102, 241, 0.4);
-        }
-        
-        .pending-bets h2 {
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .pending-count {
-            background: #f59e0b;
-            color: #000;
-            padding: 2px 10px;
-            border-radius: 10px;
-            font-size: 0.8rem;
-        }
-        
-        .bet-card {
-            background: rgba(26, 26, 46, 0.8);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 12px;
-            padding: 20px;
-            margin-bottom: 15px;
+        /* Header */
+        .header {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 20px 30px;
+            background: rgba(13, 13, 26, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 20px;
+            margin-bottom: 30px;
         }
         
-        .bet-details {
-            flex: 1;
+        [data-theme="light"] .header {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(0, 0, 0, 0.08);
         }
         
-        .bet-match {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 6px;
+        .logo { display: flex; align-items: center; gap: 12px; }
+        
+        .logo-icon {
+            width: 48px; height: 48px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 8px 32px rgba(16, 185, 129, 0.3);
         }
         
-        .bet-selection {
-            color: #10b981;
+        .logo-text { font-size: 1.5rem; font-weight: 800; }
+        
+        .nav-links { display: flex; gap: 8px; }
+        
+        .nav-link {
+            padding: 10px 18px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
             font-size: 0.9rem;
+            border-radius: 10px;
+            transition: all 0.2s;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            background: rgba(99, 102, 241, 0.15);
+            color: #a5b4fc;
+        }
+        
+        .theme-toggle {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 10px 16px;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+        
+        /* Stats Row */
+        .stats-row {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
+            margin-bottom: 30px;
+        }
+        
+        @media (max-width: 1024px) {
+            .stats-row { grid-template-columns: repeat(3, 1fr); }
+        }
+        
+        @media (max-width: 768px) {
+            .stats-row { grid-template-columns: repeat(2, 1fr); }
+        }
+        
+        .stat-card {
+            background: rgba(20, 20, 42, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+        }
+        
+        [data-theme="light"] .stat-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(0, 0, 0, 0.08);
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
             margin-bottom: 4px;
         }
         
-        .bet-meta {
-            display: flex;
-            gap: 15px;
-            color: #a0a0a0;
-            font-size: 0.85rem;
+        .stat-label {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         
-        .bet-actions {
+        .stat-value.emerald { color: var(--emerald); }
+        .stat-value.rose { color: var(--rose); }
+        .stat-value.gold { color: var(--gold); }
+        .stat-value.accent { color: var(--accent); }
+        
+        /* Filter Bar */
+        .filter-bar {
             display: flex;
-            gap: 10px;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
         }
         
-        .btn-won, .btn-lost {
+        .filter-btn {
             padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            font-weight: 600;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: var(--text-muted);
+            font-weight: 500;
             cursor: pointer;
             transition: all 0.2s;
         }
         
-        .btn-won {
-            background: rgba(16, 185, 129, 0.2);
-            color: #10b981;
+        .filter-btn:hover, .filter-btn.active {
+            background: rgba(99, 102, 241, 0.15);
+            border-color: rgba(99, 102, 241, 0.4);
+            color: #a5b4fc;
         }
         
-        .btn-won:hover { background: #10b981; color: white; }
-        
-        .btn-lost {
-            background: rgba(239, 68, 68, 0.2);
-            color: #ef4444;
+        /* Predictions Table */
+        .section-card {
+            background: rgba(20, 20, 42, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 20px;
+            overflow: hidden;
         }
         
-        .btn-lost:hover { background: #ef4444; color: white; }
-        
-        .history-section {
-            margin-top: 40px;
+        [data-theme="light"] .section-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(0, 0, 0, 0.08);
         }
         
-        .history-section h2 {
-            margin-bottom: 20px;
-        }
-        
-        .history-item {
+        .section-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .table-container { overflow-x: auto; }
+        
+        .predictions-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .predictions-table th,
+        .predictions-table td {
             padding: 16px 20px;
-            background: rgba(26, 26, 46, 0.6);
-            border-radius: 10px;
-            margin-bottom: 10px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
         }
         
-        .history-result {
-            padding: 6px 14px;
-            border-radius: 6px;
+        .predictions-table th {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
             font-weight: 600;
-            font-size: 0.85rem;
+            background: rgba(255, 255, 255, 0.02);
         }
         
-        .history-result.won {
-            background: rgba(16, 185, 129, 0.2);
-            color: #10b981;
+        .predictions-table tr:hover td {
+            background: rgba(99, 102, 241, 0.05);
         }
         
-        .history-result.lost {
-            background: rgba(239, 68, 68, 0.2);
-            color: #ef4444;
+        /* Match Cell */
+        .match-cell {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
         }
         
-        .profit-display {
+        .match-teams { font-weight: 600; }
+        .match-league { font-size: 0.8rem; color: var(--text-muted); }
+        
+        /* Badges */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
             font-weight: 600;
         }
         
-        .profit-display.positive { color: #10b981; }
-        .profit-display.negative { color: #ef4444; }
+        .badge-success { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+        .badge-danger { background: rgba(244, 63, 94, 0.15); color: #f43f5e; }
+        .badge-warning { background: rgba(251, 191, 36, 0.15); color: #fbbf24; }
+        .badge-info { background: rgba(99, 102, 241, 0.15); color: #a5b4fc; }
+        .badge-pending { background: rgba(255, 255, 255, 0.1); color: var(--text-muted); }
         
+        /* Confidence Bar */
+        .confidence-bar {
+            width: 80px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .confidence-fill {
+            height: 100%;
+            border-radius: 3px;
+            background: linear-gradient(90deg, var(--accent), #8b5cf6);
+        }
+        
+        /* Empty State */
         .empty-state {
             text-align: center;
-            padding: 40px;
-            color: #a0a0a0;
-        }
-        
-        .quick-stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-        
-        .quick-stat {
-            background: rgba(26, 26, 46, 0.8);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 12px;
-            padding: 20px;
-            text-align: center;
-        }
-        
-        .quick-stat-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-        }
-        
-        .quick-stat-label {
-            color: #a0a0a0;
-            font-size: 0.8rem;
-            margin-top: 4px;
-        }
-        
-        .back-link {
-            display: inline-block;
-            margin-bottom: 20px;
-            color: #a0a0a0;
-            text-decoration: none;
-        }
-        
-        .back-link:hover { color: #fff; }
-        
-        .login-prompt {
-            text-align: center;
             padding: 60px 20px;
-            background: rgba(26, 26, 46, 0.6);
-            border-radius: 16px;
+            color: var(--text-muted);
         }
         
-        .login-prompt h2 { margin-bottom: 15px; }
-        .login-prompt p { color: #a0a0a0; margin-bottom: 20px; }
+        .empty-icon { font-size: 3rem; margin-bottom: 16px; }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-in { animation: fadeIn 0.3s ease forwards; }
+        
+        .predictions-table tbody tr {
+            animation: fadeIn 0.3s ease forwards;
+        }
+        
+        .predictions-table tbody tr:nth-child(1) { animation-delay: 0.05s; }
+        .predictions-table tbody tr:nth-child(2) { animation-delay: 0.1s; }
+        .predictions-table tbody tr:nth-child(3) { animation-delay: 0.15s; }
+        .predictions-table tbody tr:nth-child(4) { animation-delay: 0.2s; }
+        .predictions-table tbody tr:nth-child(5) { animation-delay: 0.25s; }
     </style>
 </head>
 <body>
-    <div class="tracker-container">
-        <a href="/" class="back-link">← Back to Predictions</a>
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">📊</div>
+                <span class="logo-text">Tracker</span>
+            </div>
+            
+            <nav class="nav-links">
+                <a href="/" class="nav-link">🏠 Home</a>
+                <a href="/accumulators" class="nav-link">🎰 Accumulators</a>
+                <a href="/tracker" class="nav-link active">📊 Tracker</a>
+                <a href="/analytics" class="nav-link">📈 Analytics</a>
+                <a href="/dashboard" class="nav-link">🎯 Dashboard</a>
+            </nav>
+            
+            <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
+        </header>
         
-        <div class="page-header">
-            <h1>📊 Bet Tracker</h1>
-            <p>Track your bets and analyze your performance</p>
+        <!-- Stats Row -->
+        <div class="stats-row">
+            <div class="stat-card">
+                <div class="stat-value" id="total-preds">-</div>
+                <div class="stat-label">Total Predictions</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value emerald" id="correct">-</div>
+                <div class="stat-label">Correct</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value rose" id="wrong">-</div>
+                <div class="stat-label">Wrong</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value accent" id="accuracy">-</div>
+                <div class="stat-label">Accuracy</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-value gold" id="roi">-</div>
+                <div class="stat-label">ROI</div>
+            </div>
         </div>
         
-        <div id="content">
-            <!-- Content loaded via JS -->
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="correct">✅ Correct</button>
+            <button class="filter-btn" data-filter="wrong">❌ Wrong</button>
+            <button class="filter-btn" data-filter="pending">⏳ Pending</button>
+            <button class="filter-btn" data-filter="today">Today</button>
+            <button class="filter-btn" data-filter="week">This Week</button>
+        </div>
+        
+        <!-- Predictions Table -->
+        <div class="section-card">
+            <div class="section-header">
+                <h2 class="section-title">📋 Prediction History</h2>
+                <span class="badge badge-info" id="count-badge">0 predictions</span>
+            </div>
+            
+            <div class="table-container">
+                <table class="predictions-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Match</th>
+                            <th>Prediction</th>
+                            <th>Confidence</th>
+                            <th>Odds</th>
+                            <th>Result</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="predictions-body">
+                        <!-- Will be populated by JS -->
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
     
     <script>
-        const token = localStorage.getItem('token');
-        const user = JSON.parse(localStorage.getItem('user') || 'null');
-        
-        if (!token || !user) {
-            document.getElementById('content').innerHTML = `
-                <div class="login-prompt">
-                    <h2>🔐 Login Required</h2>
-                    <p>Please login to track your bets</p>
-                    <a href="/login" class="btn btn-primary">Login</a>
-                </div>
-            `;
-        } else {
-            renderTracker();
+        // Theme toggle
+        function toggleTheme() {
+            const html = document.documentElement;
+            const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
         }
         
-        function renderTracker() {
-            document.getElementById('content').innerHTML = `
-                <div class="quick-stats">
-                    <div class="quick-stat">
-                        <div class="quick-stat-value" id="pending-stake">$0</div>
-                        <div class="quick-stat-label">Pending Stakes</div>
-                    </div>
-                    <div class="quick-stat">
-                        <div class="quick-stat-value" id="today-profit" style="color: #10b981;">$0</div>
-                        <div class="quick-stat-label">Today's Profit</div>
-                    </div>
-                    <div class="quick-stat">
-                        <div class="quick-stat-value" id="potential-return">$0</div>
-                        <div class="quick-stat-label">Potential Returns</div>
-                    </div>
-                </div>
-                
-                <div class="add-bet-card">
-                    <h3 style="margin-bottom: 20px;">➕ Add New Bet</h3>
-                    <form id="add-bet-form">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label">Home Team</label>
-                                <input type="text" class="form-input" name="home_team" placeholder="e.g. Bayern Munich" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Away Team</label>
-                                <input type="text" class="form-input" name="away_team" placeholder="e.g. Dortmund" required>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Selection</label>
-                            <input type="text" class="form-input" name="selection" placeholder="e.g. Bayern Win, Over 2.5, BTTS" required>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label class="form-label">Odds</label>
-                                <input type="number" step="0.01" class="form-input" name="odds" placeholder="1.85" required>
-                            </div>
-                            <div class="form-group">
-                                <label class="form-label">Stake ($)</label>
-                                <input type="number" step="0.01" class="form-input" name="stake" placeholder="10.00" required>
-                            </div>
-                        </div>
-                        <button type="submit" class="btn-add">Add Bet</button>
-                    </form>
-                </div>
-                
-                <div class="pending-bets">
-                    <h2>⏳ Pending Bets <span class="pending-count" id="pending-count">0</span></h2>
-                    <div id="pending-list"></div>
-                </div>
-                
-                <div class="history-section">
-                    <h2>📜 Recent Settled Bets</h2>
-                    <div id="history-list"></div>
-                </div>
-            `;
-            
-            document.getElementById('add-bet-form').addEventListener('submit', addBet);
-            loadBets();
-        }
+        // Load saved theme
+        (function() {
+            const saved = localStorage.getItem('theme');
+            if (saved) document.documentElement.setAttribute('data-theme', saved);
+        })();
         
-        async function loadBets() {
+        // Predictions data - loaded from API
+        let predictions = [];
+        
+        // Load predictions from API
+        async function loadPredictions() {
             try {
-                const res = await fetch('/api/bets', {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                const data = await res.json();
-                
+                const response = await fetch('/api/monitor/predictions');
+                const data = await response.json();
+                if (data.success && data.predictions) {
+                    predictions = data.predictions.map(p => ({
+                        date: p.date || new Date().toISOString().split('T')[0],
+                        home: p.home_team || p.home || 'Unknown',
+                        away: p.away_team || p.away || 'Unknown',
+                        league: p.league || 'Unknown',
+                        prediction: p.prediction || p.predicted_outcome || '-',
+                        confidence: Math.round((p.confidence || 0) * 100),
+                        odds: p.odds || 1.0,
+                        result: p.result || '-',
+                        status: p.status || 'pending'
+                    }));
+                    renderPredictions();
+                }
+            } catch (e) {
+                console.log('Could not load predictions:', e);
+                // Show empty state
+                predictions = [];
+                renderPredictions();
+            }
+        }
+        
+        // Render predictions
+        function renderPredictions(filter = 'all') {
+            const tbody = document.getElementById('predictions-body');
+            let filtered = predictions;
+            
+            if (filter !== 'all') {
+                filtered = predictions.filter(p => p.status === filter);
+            }
+            
+            if (filtered.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="7">
+                            <div class="empty-state">
+                                <div class="empty-icon">📭</div>
+                                <div>No predictions found</div>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = filtered.map(p => `
+                <tr>
+                    <td>${p.date}</td>
+                    <td>
+                        <div class="match-cell">
+                            <span class="match-teams">${p.home} vs ${p.away}</span>
+                            <span class="match-league">${p.league}</span>
+                        </div>
+                    </td>
+                    <td><span class="badge badge-info">${p.prediction}</span></td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <div class="confidence-bar">
+                                <div class="confidence-fill" style="width: ${p.confidence}%"></div>
+                            </div>
+                            <span style="font-size: 0.85rem; font-weight: 600;">${p.confidence}%</span>
+                        </div>
+                    </td>
+                    <td style="font-weight: 600;">${p.odds.toFixed(2)}</td>
+                    <td style="font-weight: 600;">${p.result}</td>
+                    <td>
+                        <span class="badge badge-${p.status === 'correct' ? 'success' : p.status === 'wrong' ? 'danger' : 'pending'}">
+                            ${p.status === 'correct' ? '✓ Correct' : p.status === 'wrong' ? '✗ Wrong' : '⏳ Pending'}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+            
+            document.getElementById('count-badge').textContent = `${filtered.length} predictions`;
+        }
+        
+        // Filter buttons
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                renderPredictions(btn.dataset.filter);
+            });
+        });
+        
+        // Initial render
+        document.addEventListener('DOMContentLoaded', () => {
+            loadPredictions();
+            loadStats();
+        });
+        
+        async function loadStats() {
+            try {
+                const response = await fetch('/api/monitor/stats');
+                const data = await response.json();
                 if (data.success) {
-                    const pending = data.bets.filter(b => b.status === 'pending');
-                    const settled = data.bets.filter(b => b.status !== 'pending');
-                    
-                    document.getElementById('pending-count').textContent = pending.length;
-                    
-                    // Update quick stats
-                    const pendingStake = pending.reduce((sum, b) => sum + b.stake, 0);
-                    const potentialReturn = pending.reduce((sum, b) => sum + (b.stake * b.odds), 0);
-                    document.getElementById('pending-stake').textContent = '$' + pendingStake.toFixed(2);
-                    document.getElementById('potential-return').textContent = '$' + potentialReturn.toFixed(2);
-                    
-                    // Render pending bets
-                    if (pending.length > 0) {
-                        document.getElementById('pending-list').innerHTML = pending.map(bet => `
-                            <div class="bet-card">
-                                <div class="bet-details">
-                                    <div class="bet-match">${bet.home_team} vs ${bet.away_team}</div>
-                                    <div class="bet-selection">${bet.selection}</div>
-                                    <div class="bet-meta">
-                                        <span>Odds: ${bet.odds.toFixed(2)}</span>
-                                        <span>Stake: $${bet.stake}</span>
-                                        <span>Return: $${(bet.stake * bet.odds).toFixed(2)}</span>
-                                    </div>
-                                </div>
-                                <div class="bet-actions">
-                                    <button class="btn-won" onclick="settleBet('${bet.id}', true)">✓ Won</button>
-                                    <button class="btn-lost" onclick="settleBet('${bet.id}', false)">✗ Lost</button>
-                                </div>
-                            </div>
-                        `).join('');
-                    } else {
-                        document.getElementById('pending-list').innerHTML = `
-                            <div class="empty-state">No pending bets</div>
-                        `;
-                    }
-                    
-                    // Render history
-                    if (settled.length > 0) {
-                        document.getElementById('history-list').innerHTML = settled.slice(0, 10).map(bet => `
-                            <div class="history-item">
-                                <div>
-                                    <div style="font-weight: 500;">${bet.home_team} vs ${bet.away_team}</div>
-                                    <div style="color: #a0a0a0; font-size: 0.85rem;">${bet.selection} @ ${bet.odds.toFixed(2)}</div>
-                                </div>
-                                <div style="text-align: right;">
-                                    <div class="profit-display ${bet.profit_loss >= 0 ? 'positive' : 'negative'}">
-                                        ${bet.profit_loss >= 0 ? '+' : ''}$${bet.profit_loss.toFixed(2)}
-                                    </div>
-                                    <span class="history-result ${bet.status}">${bet.status.toUpperCase()}</span>
-                                </div>
-                            </div>
-                        `).join('');
-                    } else {
-                        document.getElementById('history-list').innerHTML = `
-                            <div class="empty-state">No settled bets yet</div>
-                        `;
-                    }
+                    document.getElementById('total-preds').textContent = data.total || 0;
+                    document.getElementById('correct').textContent = data.correct || 0;
+                    document.getElementById('wrong').textContent = (data.total - data.correct) || 0;
+                    document.getElementById('accuracy').textContent = data.accuracy_pct || '0%';
                 }
-            } catch (err) {
-                console.error('Failed to load bets:', err);
-            }
-        }
-        
-        async function addBet(e) {
-            e.preventDefault();
-            const form = e.target;
-            
-            const data = {
-                home_team: form.home_team.value,
-                away_team: form.away_team.value,
-                selection: form.selection.value,
-                odds: parseFloat(form.odds.value),
-                stake: parseFloat(form.stake.value)
-            };
-            
-            try {
-                const res = await fetch('/api/bets', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify(data)
-                });
-                
-                const result = await res.json();
-                
-                if (result.success) {
-                    form.reset();
-                    loadBets();
-                } else {
-                    alert(result.error || 'Failed to add bet');
-                }
-            } catch (err) {
-                alert('Network error');
-            }
-        }
-        
-        async function settleBet(betId, won) {
-            try {
-                const res = await fetch(`/api/bets/${betId}/settle`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify({ won })
-                });
-                
-                const result = await res.json();
-                
-                if (result.success) {
-                    loadBets();
-                } else {
-                    alert(result.error || 'Failed to settle bet');
-                }
-            } catch (err) {
-                alert('Network error');
-            }
+            } catch (e) {}
         }
     </script>
 </body>

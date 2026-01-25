@@ -3,437 +3,786 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎰 Accumulators | Football Predictions</title>
+    <title>Accumulators | FootyPredict Pro</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/style.css">
-    <link rel="stylesheet" href="/static/css/premium-ui.css">
+    <meta name="theme-color" content="#6366f1">
+    <link rel="manifest" href="/static/manifest.json">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
-        .acca-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
+        :root {
+            --bg-primary: #050510;
+            --bg-secondary: #0d0d1a;
+            --bg-tertiary: #14142a;
+            --accent: #6366f1;
+            --accent-glow: rgba(99, 102, 241, 0.4);
+            --gold: #fbbf24;
+            --emerald: #10b981;
+            --text: #ffffff;
+            --text-muted: rgba(255, 255, 255, 0.5);
         }
         
-        .page-header {
-            text-align: center;
-            margin-bottom: 30px;
+        [data-theme="light"] {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f1f5f9;
+            --text: #0f172a;
+            --text-muted: #64748b;
         }
         
-        .page-header h1 {
-            font-size: 2.5rem;
-            margin-bottom: 10px;
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            background-image: radial-gradient(ellipse at top, rgba(99, 102, 241, 0.15) 0%, transparent 50%);
+            color: var(--text);
+            min-height: 100vh;
         }
         
-        .page-header p {
-            color: #a0a0b0;
+        [data-theme="light"] body {
+            background-image: radial-gradient(ellipse at top, rgba(99, 102, 241, 0.08) 0%, transparent 50%);
         }
         
-        .strategy-tabs {
+        .app { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        
+        /* Header */
+        .header {
             display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            justify-content: center;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            background: rgba(13, 13, 26, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 20px;
             margin-bottom: 30px;
         }
         
-        .strategy-tab {
-            padding: 12px 24px;
-            background: rgba(26, 26, 46, 0.7);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 12px;
-            color: #a0a0a0;
-            cursor: pointer;
-            transition: all 0.2s ease;
+        [data-theme="light"] .header {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(0, 0, 0, 0.08);
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 8px 32px rgba(251, 191, 36, 0.3);
+        }
+        
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 800;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .nav-link {
+            padding: 10px 18px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
             font-size: 0.9rem;
+            border-radius: 10px;
+            transition: all 0.2s;
         }
         
-        .strategy-tab:hover {
-            background: rgba(99, 102, 241, 0.2);
-            border-color: rgba(99, 102, 241, 0.5);
+        .nav-link:hover, .nav-link.active {
+            background: rgba(99, 102, 241, 0.15);
+            color: #a5b4fc;
         }
         
-        .strategy-tab.active {
+        .theme-toggle {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 10px 16px;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+        
+        /* Layout */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 400px;
+            gap: 24px;
+        }
+        
+        @media (max-width: 1024px) {
+            .main-grid { grid-template-columns: 1fr; }
+        }
+        
+        /* Section Card */
+        .section-card {
+            background: rgba(20, 20, 42, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 20px;
+            padding: 24px;
+        }
+        
+        [data-theme="light"] .section-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(0, 0, 0, 0.08);
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .section-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        /* Selection List */
+        .selection-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        .selection-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 14px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .selection-item:hover {
+            background: rgba(99, 102, 241, 0.1);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+        
+        .selection-item.selected {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.1));
+            border-color: rgba(99, 102, 241, 0.4);
+        }
+        
+        .match-details {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .match-time {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            padding: 4px 10px;
+            background: rgba(255, 255, 255, 0.06);
+            border-radius: 6px;
+        }
+        
+        .match-teams-col {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        
+        .team-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 500;
+        }
+        
+        .selection-odds {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .odds-btn {
+            padding: 8px 14px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text);
+        }
+        
+        .odds-btn:hover {
+            background: rgba(99, 102, 241, 0.15);
+            border-color: rgba(99, 102, 241, 0.4);
+        }
+        
+        .odds-btn.selected {
             background: linear-gradient(135deg, #6366f1, #8b5cf6);
             border-color: transparent;
             color: white;
         }
         
-        .strategy-tab .emoji {
-            margin-right: 6px;
+        /* Betslip */
+        .betslip {
+            position: sticky;
+            top: 20px;
         }
         
-        .acca-display {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 20px;
-        }
-        
-        .acca-card {
-            background: rgba(26, 26, 46, 0.8);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 16px;
-            padding: 24px;
-            transition: all 0.3s ease;
-        }
-        
-        .acca-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 10px 30px rgba(99, 102, 241, 0.2);
-        }
-        
-        .acca-header {
+        .betslip-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 20px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
         }
         
-        .acca-title {
-            font-size: 1.3rem;
-            font-weight: 600;
+        .betslip-title {
+            font-size: 1.2rem;
+            font-weight: 700;
         }
         
-        .acca-title .emoji {
-            margin-right: 8px;
-        }
-        
-        .risk-badge {
+        .betslip-count {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            font-size: 0.85rem;
+            font-weight: 700;
             padding: 4px 12px;
             border-radius: 20px;
-            font-size: 0.75rem;
-            font-weight: 600;
         }
         
-        .risk-badge.very-low { background: rgba(16, 185, 129, 0.2); color: #10b981; }
-        .risk-badge.low { background: rgba(59, 130, 246, 0.2); color: #3b82f6; }
-        .risk-badge.medium { background: rgba(245, 158, 11, 0.2); color: #f59e0b; }
-        .risk-badge.medium-high { background: rgba(249, 115, 22, 0.2); color: #f97316; }
-        .risk-badge.high { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
-        
-        .pick-list {
+        .betslip-selections {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
             margin-bottom: 20px;
+            min-height: 100px;
         }
         
-        .pick-item {
+        .betslip-empty {
+            text-align: center;
+            padding: 40px;
+            color: var(--text-muted);
+        }
+        
+        .betslip-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 12px;
-            background: rgba(0,0,0,0.2);
-            border-radius: 8px;
+            padding: 14px;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            animation: slideIn 0.3s ease;
+        }
+        
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-20px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .betslip-match {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        
+        .betslip-selection {
+            font-size: 0.8rem;
+            color: #a5b4fc;
+        }
+        
+        .betslip-odds {
+            font-weight: 700;
+            color: var(--emerald);
+        }
+        
+        .remove-btn {
+            background: none;
+            border: none;
+            color: #ef4444;
+            cursor: pointer;
+            font-size: 1rem;
+            padding: 4px;
+        }
+        
+        /* Betslip Summary */
+        .betslip-summary {
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 14px;
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+        
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
             margin-bottom: 8px;
         }
         
-        .pick-match {
+        .summary-label {
+            color: var(--text-muted);
             font-size: 0.9rem;
         }
         
-        .pick-selection {
-            color: #10b981;
-            font-weight: 500;
-            font-size: 0.85rem;
-        }
-        
-        .pick-odds {
-            background: rgba(99, 102, 241, 0.2);
-            color: #6366f1;
-            padding: 4px 10px;
-            border-radius: 6px;
-            font-weight: 600;
-            font-size: 0.85rem;
-        }
-        
-        .acca-summary {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            padding-top: 15px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-        }
-        
-        .summary-item {
-            text-align: center;
-        }
-        
         .summary-value {
-            font-size: 1.4rem;
             font-weight: 700;
-            color: #fff;
         }
         
-        .summary-value.odds { color: #6366f1; }
-        .summary-value.probability { color: #f59e0b; }
-        .summary-value.return { color: #10b981; }
-        
-        .summary-label {
-            font-size: 0.75rem;
-            color: #a0a0a0;
-            margin-top: 4px;
+        .summary-value.total {
+            font-size: 1.3rem;
+            color: var(--emerald);
         }
         
-        .acca-actions {
-            margin-top: 20px;
+        /* Stake Input */
+        .stake-input-wrapper {
+            margin-bottom: 20px;
+        }
+        
+        .stake-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+        
+        .stake-input {
+            width: 100%;
+            padding: 14px 16px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text);
+            text-align: center;
+        }
+        
+        .stake-input:focus {
+            outline: none;
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+        
+        /* Quick Stakes */
+        .quick-stakes {
             display: flex;
-            gap: 10px;
+            gap: 8px;
+            margin-bottom: 20px;
         }
         
-        .btn-place-bet {
+        .quick-stake {
             flex: 1;
-            padding: 12px;
-            background: linear-gradient(135deg, #6366f1, #8b5cf6);
-            border: none;
+            padding: 10px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 10px;
-            color: white;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.2s;
+            color: var(--text);
         }
         
-        .btn-place-bet:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(99, 102, 241, 0.4);
+        .quick-stake:hover {
+            background: rgba(99, 102, 241, 0.15);
         }
         
-        .btn-share {
-            padding: 12px 20px;
-            background: rgba(255,255,255,0.1);
-            border: 1px solid rgba(255,255,255,0.2);
-            border-radius: 10px;
+        /* Place Bet Button */
+        .place-bet-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border: none;
+            border-radius: 14px;
+            font-size: 1.1rem;
+            font-weight: 700;
             color: white;
             cursor: pointer;
-            transition: all 0.2s ease;
+            transition: all 0.2s;
+            box-shadow: 0 8px 32px rgba(16, 185, 129, 0.3);
         }
         
-        .btn-share:hover {
-            background: rgba(255,255,255,0.2);
+        .place-bet-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(16, 185, 129, 0.4);
         }
         
-        .loading {
-            text-align: center;
-            padding: 40px;
-            color: #a0a0a0;
+        .place-bet-btn:disabled {
+            background: rgba(255, 255, 255, 0.1);
+            box-shadow: none;
+            cursor: not-allowed;
         }
         
-        .loading-spinner {
-            width: 40px;
-            height: 40px;
-            border: 3px solid rgba(99, 102, 241, 0.2);
-            border-top-color: #6366f1;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 15px;
+        /* Kelly Badge */
+        .kelly-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            margin-top: 16px;
+            padding: 12px;
+            background: rgba(251, 191, 36, 0.1);
+            border: 1px solid rgba(251, 191, 36, 0.3);
+            border-radius: 12px;
+            font-size: 0.85rem;
         }
         
-        @keyframes spin {
-            to { transform: rotate(360deg); }
+        .kelly-badge span {
+            color: var(--gold);
+            font-weight: 600;
         }
         
-        .no-acca {
-            text-align: center;
-            padding: 40px;
-            color: #a0a0a0;
-            background: rgba(26, 26, 46, 0.5);
-            border-radius: 16px;
+        /* Animations */
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
         
-        .back-link {
-            display: inline-block;
-            margin-bottom: 20px;
-            color: #a0a0a0;
-            text-decoration: none;
-        }
-        
-        .back-link:hover {
-            color: #fff;
+        .pulse-animation {
+            animation: pulse 2s infinite;
         }
     </style>
 </head>
 <body>
-    <div class="acca-container">
-        <a href="/" class="back-link">← Back to Predictions</a>
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">🎰</div>
+                <span class="logo-text">Accumulators</span>
+            </div>
+            
+            <nav class="nav-links">
+                <a href="/" class="nav-link">🏠 Home</a>
+                <a href="/accumulators" class="nav-link active">🎰 Accumulators</a>
+                <a href="/tracker" class="nav-link">📊 Tracker</a>
+                <a href="/analytics" class="nav-link">📈 Analytics</a>
+                <a href="/dashboard" class="nav-link">🎯 Dashboard</a>
+            </nav>
+            
+            <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
+        </header>
         
-        <div class="page-header">
-            <h1>🎰 Accumulators</h1>
-            <p>AI-generated betting accumulators with different risk profiles</p>
-        </div>
-        
-        <div class="strategy-tabs">
-            <button class="strategy-tab active" data-strategy="all">
-                <span class="emoji">📊</span>All Strategies
-            </button>
-            <button class="strategy-tab" data-strategy="safe">
-                <span class="emoji">🛡️</span>Safe
-            </button>
-            <button class="strategy-tab" data-strategy="banker">
-                <span class="emoji">🏦</span>Banker
-            </button>
-            <button class="strategy-tab" data-strategy="value">
-                <span class="emoji">💎</span>Value
-            </button>
-            <button class="strategy-tab" data-strategy="btts">
-                <span class="emoji">⚽</span>BTTS
-            </button>
-            <button class="strategy-tab" data-strategy="goals">
-                <span class="emoji">🎯</span>Goals
-            </button>
-            <button class="strategy-tab" data-strategy="risky">
-                <span class="emoji">🎲</span>Risky
-            </button>
-        </div>
-        
-        <div id="acca-content" class="acca-display">
-            <div class="loading">
-                <div class="loading-spinner"></div>
-                <p>Loading accumulators...</p>
+        <!-- Main Grid -->
+        <div class="main-grid">
+            <!-- Matches List -->
+            <div class="section-card">
+                <div class="section-header">
+                    <h2 class="section-title">📋 Available Matches</h2>
+                    <select id="league-filter" style="padding: 8px 16px; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1); border-radius: 10px; color: var(--text);">
+                        <option value="all">All Leagues</option>
+                        <option value="bundesliga">🇩🇪 Bundesliga</option>
+                        <option value="premier_league">🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League</option>
+                        <option value="la_liga">🇪🇸 La Liga</option>
+                        <option value="serie_a">🇮🇹 Serie A</option>
+                    </select>
+                </div>
+                
+                <div class="selection-list" id="matches-list">
+                    <!-- Matches will load here -->
+                </div>
+            </div>
+            
+            <!-- Betslip -->
+            <div class="section-card betslip">
+                <div class="betslip-header">
+                    <h2 class="betslip-title">🎫 Betslip</h2>
+                    <span class="betslip-count" id="selection-count">0</span>
+                </div>
+                
+                <div class="betslip-selections" id="betslip-selections">
+                    <div class="betslip-empty">
+                        Click odds to add selections
+                    </div>
+                </div>
+                
+                <div class="betslip-summary">
+                    <div class="summary-row">
+                        <span class="summary-label">Selections</span>
+                        <span class="summary-value" id="summary-selections">0</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">Combined Odds</span>
+                        <span class="summary-value" id="summary-odds">1.00</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="summary-label">Potential Return</span>
+                        <span class="summary-value total" id="summary-return">€0.00</span>
+                    </div>
+                </div>
+                
+                <div class="stake-input-wrapper">
+                    <div class="stake-label">Stake (€)</div>
+                    <input type="number" class="stake-input" id="stake-input" value="10" min="1" oninput="updateReturn()">
+                </div>
+                
+                <div class="quick-stakes">
+                    <button class="quick-stake" onclick="setStake(5)">€5</button>
+                    <button class="quick-stake" onclick="setStake(10)">€10</button>
+                    <button class="quick-stake" onclick="setStake(25)">€25</button>
+                    <button class="quick-stake" onclick="setStake(50)">€50</button>
+                </div>
+                
+                <button class="place-bet-btn" id="place-bet-btn" disabled onclick="placeBet()">
+                    🎯 Build Accumulator
+                </button>
+                
+                <div class="kelly-badge">
+                    💡 <span>Kelly Stake: €<span id="kelly-stake">0</span></span>
+                </div>
             </div>
         </div>
     </div>
     
     <script>
-        const STRATEGY_INFO = {
-            safe: { emoji: '🛡️', name: 'Safe Acca', risk: 'Very Low' },
-            banker: { emoji: '🏦', name: 'Banker Acca', risk: 'Low' },
-            value: { emoji: '💎', name: 'Value Acca', risk: 'Medium' },
-            btts: { emoji: '⚽', name: 'BTTS Acca', risk: 'Medium' },
-            goals: { emoji: '🎯', name: 'Goals Acca', risk: 'Medium-High' },
-            risky: { emoji: '🎲', name: 'Risky Acca', risk: 'High' }
-        };
+        // State
+        let selections = [];
+        let matches = [];
         
-        let currentStrategy = 'all';
-        let accumulators = {};
+        // Theme toggle
+        function toggleTheme() {
+            const html = document.documentElement;
+            const current = html.getAttribute('data-theme');
+            html.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+        }
         
-        // Tab switching
-        document.querySelectorAll('.strategy-tab').forEach(tab => {
-            tab.addEventListener('click', () => {
-                document.querySelectorAll('.strategy-tab').forEach(t => t.classList.remove('active'));
-                tab.classList.add('active');
-                currentStrategy = tab.dataset.strategy;
-                renderAccumulators();
-            });
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadMatches();
+            
+            // League filter change
+            document.getElementById('league-filter').addEventListener('change', loadMatches);
         });
         
-        // Fetch accumulators
-        async function loadAccumulators() {
-            try {
-                const response = await fetch('/api/accumulators');
-                const data = await response.json();
-                
-                if (data.success) {
-                    accumulators = data.accumulators;
-                    renderAccumulators();
-                } else {
-                    showError('Failed to load accumulators');
-                }
-            } catch (err) {
-                showError('Network error: ' + err.message);
-            }
-        }
-        
-        function renderAccumulators() {
-            const container = document.getElementById('acca-content');
-            let html = '';
+        async function loadMatches() {
+            const list = document.getElementById('matches-list');
+            const league = document.getElementById('league-filter').value;
             
-            const strategies = currentStrategy === 'all' 
-                ? Object.keys(STRATEGY_INFO)
-                : [currentStrategy];
-            
-            strategies.forEach(strategy => {
-                const acca = accumulators[strategy];
-                if (acca) {
-                    html += renderAccaCard(strategy, acca);
-                }
-            });
-            
-            if (!html) {
-                html = '<div class="no-acca">No accumulators available for today\'s fixtures. Check back later!</div>';
-            }
-            
-            container.innerHTML = html;
-        }
-        
-        function renderAccaCard(strategy, acca) {
-            const info = STRATEGY_INFO[strategy];
-            const riskClass = info.risk.toLowerCase().replace(' ', '-');
-            
-            let picksHtml = '';
-            acca.picks.forEach(pick => {
-                picksHtml += `
-                    <div class="pick-item">
-                        <div>
-                            <div class="pick-match">${pick.home_team} vs ${pick.away_team}</div>
-                            <div class="pick-selection">${pick.selection}</div>
-                        </div>
-                        <span class="pick-odds">${pick.odds.toFixed(2)}</span>
-                    </div>
-                `;
-            });
-            
-            return `
-                <div class="acca-card">
-                    <div class="acca-header">
-                        <div class="acca-title">
-                            <span class="emoji">${info.emoji}</span>${info.name}
-                        </div>
-                        <span class="risk-badge ${riskClass}">${info.risk} Risk</span>
-                    </div>
-                    
-                    <div class="pick-list">
-                        ${picksHtml}
-                    </div>
-                    
-                    <div class="acca-summary">
-                        <div class="summary-item">
-                            <div class="summary-value odds">${acca.combined_odds.toFixed(2)}</div>
-                            <div class="summary-label">Combined Odds</div>
-                        </div>
-                        <div class="summary-item">
-                            <div class="summary-value probability">${(acca.combined_probability * 100).toFixed(1)}%</div>
-                            <div class="summary-label">Probability</div>
-                        </div>
-                        <div class="summary-item">
-                            <div class="summary-value return">$${acca.potential_return.toFixed(0)}</div>
-                            <div class="summary-label">Return ($${acca.stake_suggestion})</div>
-                        </div>
-                    </div>
-                    
-                    <div class="acca-actions">
-                        <button class="btn-place-bet" onclick="placeBet('${strategy}')">
-                            Place Bet
-                        </button>
-                        <button class="btn-share" onclick="shareAcca('${strategy}')">
-                            📤
-                        </button>
-                    </div>
+            list.innerHTML = `
+                <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+                    Loading matches and predictions...
                 </div>
             `;
-        }
-        
-        function showError(message) {
-            document.getElementById('acca-content').innerHTML = `
-                <div class="no-acca">${message}</div>
-            `;
-        }
-        
-        function placeBet(strategy) {
-            alert('Redirecting to bookmaker... (Affiliate link would go here)');
-        }
-        
-        function shareAcca(strategy) {
-            const text = `Check out this ${STRATEGY_INFO[strategy].name} on Football Predictions!`;
-            if (navigator.share) {
-                navigator.share({ title: 'Football Accumulator', text });
-            } else {
-                navigator.clipboard.writeText(text);
-                alert('Copied to clipboard!');
+            
+            try {
+                // Fetch fixtures with predictions
+                const leagues = league === 'all' 
+                    ? ['bundesliga', 'premier_league', 'la_liga', 'serie_a'] 
+                    : [league];
+                
+                matches = [];
+                
+                for (const lg of leagues) {
+                    const fixturesRes = await fetch(`/api/fixtures/${lg}`);
+                    const fixturesData = await fixturesRes.json();
+                    
+                    if (fixturesData.success && fixturesData.fixtures) {
+                        for (const fixture of fixturesData.fixtures) {
+                            const home = fixture.home_team?.name || fixture.home_team || 'Unknown';
+                            const away = fixture.away_team?.name || fixture.away_team || 'Unknown';
+                            
+                            // Get prediction for this match
+                            try {
+                                const predRes = await fetch(`/api/v3/predict?home=${encodeURIComponent(home)}&away=${encodeURIComponent(away)}&league=${lg}`);
+                                const predData = await predRes.json();
+                                
+                                if (predData.success) {
+                                    const pred = predData.final_prediction || {};
+                                    const goals = predData.goals || {};
+                                    
+                                    matches.push({
+                                        id: matches.length + 1,
+                                        home,
+                                        away,
+                                        time: fixture.time || fixture.date || 'TBD',
+                                        league: lg,
+                                        leagueFlag: getLeagueFlag(lg),
+                                        // ML prediction for tip
+                                        tip: pred.predicted_outcome || 'Home Win',
+                                        confidence: Math.round((pred.confidence || 0.5) * 100),
+                                        // Odds (estimated from probabilities)
+                                        homeOdds: calculateOdds(pred.home_win_prob || 0.4),
+                                        drawOdds: calculateOdds(pred.draw_prob || 0.3),
+                                        awayOdds: calculateOdds(pred.away_win_prob || 0.3),
+                                        // Goals predictions
+                                        homeXG: goals.home_xg?.toFixed(1) || '-',
+                                        awayXG: goals.away_xg?.toFixed(1) || '-',
+                                        over25: goals['over_2.5'] ? Math.round(goals['over_2.5'] * 100) : 50,
+                                        btts: goals.btts ? Math.round(goals.btts * 100) : 50
+                                    });
+                                }
+                            } catch (e) {
+                                console.log('Prediction error:', e);
+                            }
+                        }
+                    }
+                }
+                
+                if (matches.length > 0) {
+                    renderMatches();
+                } else {
+                    list.innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: var(--text-muted);">
+                            No matches found for this league. Try another league.
+                        </div>
+                    `;
+                }
+            } catch (err) {
+                console.error('Loading error:', err);
+                list.innerHTML = `
+                    <div style="text-align: center; padding: 40px; color: #ef4444;">
+                        Error loading matches. Please try again.
+                    </div>
+                `;
             }
         }
         
-        // Load on page load
-        document.addEventListener('DOMContentLoaded', loadAccumulators);
+        function getLeagueFlag(league) {
+            const flags = {
+                'bundesliga': '🇩🇪',
+                'premier_league': '🏴󠁧󠁢󠁥󠁮󠁧󠁿',
+                'la_liga': '🇪🇸',
+                'serie_a': '🇮🇹',
+                'ligue_1': '🇫🇷'
+            };
+            return flags[league] || '⚽';
+        }
+        
+        function calculateOdds(prob) {
+            // Convert probability to decimal odds
+            if (!prob || prob <= 0) return 5.0;
+            return Math.max(1.05, parseFloat((1 / prob).toFixed(2)));
+        }
+        
+        function renderMatches() {
+            const list = document.getElementById('matches-list');
+            list.innerHTML = matches.map(m => `
+                <div class="selection-item" data-id="${m.id}">
+                    <div class="match-details">
+                        <div style="display: flex; flex-direction: column; gap: 4px;">
+                            <span class="match-time">${m.time}</span>
+                            <span style="font-size: 0.7rem; padding: 2px 8px; background: rgba(99, 102, 241, 0.2); border-radius: 4px; color: #a5b4fc;">
+                                🎯 ${m.tip} (${m.confidence}%)
+                            </span>
+                        </div>
+                        <div class="match-teams-col">
+                            <div class="team-row">${m.leagueFlag} ${m.home}</div>
+                            <div class="team-row" style="color: var(--text-muted);">${m.away}</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 8px;">
+                        <div class="selection-odds">
+                            <button class="odds-btn" onclick="addSelection(${m.id}, '1', ${m.homeOdds}, '${m.home}', '${m.away}')" title="Home Win">${m.homeOdds.toFixed(2)}</button>
+                            <button class="odds-btn" onclick="addSelection(${m.id}, 'X', ${m.drawOdds}, '${m.home}', '${m.away}')" title="Draw">${m.drawOdds.toFixed(2)}</button>
+                            <button class="odds-btn" onclick="addSelection(${m.id}, '2', ${m.awayOdds}, '${m.home}', '${m.away}')" title="Away Win">${m.awayOdds.toFixed(2)}</button>
+                        </div>
+                        <div style="font-size: 0.7rem; color: var(--text-muted); display: flex; gap: 10px;">
+                            <span>xG: ${m.homeXG}-${m.awayXG}</span>
+                            <span style="color: ${m.over25 > 50 ? '#10b981' : '#ef4444'};">O2.5: ${m.over25}%</span>
+                            <span style="color: ${m.btts > 50 ? '#10b981' : '#ef4444'};">BTTS: ${m.btts}%</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function addSelection(matchId, type, odds, home, away) {
+            // Remove if exists
+            const existingIndex = selections.findIndex(s => s.matchId === matchId);
+            if (existingIndex >= 0) {
+                if (selections[existingIndex].type === type) {
+                    selections.splice(existingIndex, 1);
+                    updateBetslip();
+                    return;
+                }
+                selections.splice(existingIndex, 1);
+            }
+            
+            selections.push({ matchId, type, odds, home, away });
+            updateBetslip();
+        }
+        
+        function updateBetslip() {
+            const container = document.getElementById('betslip-selections');
+            const countEl = document.getElementById('selection-count');
+            const btn = document.getElementById('place-bet-btn');
+            
+            countEl.textContent = selections.length;
+            btn.disabled = selections.length === 0;
+            
+            if (selections.length === 0) {
+                container.innerHTML = '<div class="betslip-empty">Click odds to add selections</div>';
+            } else {
+                container.innerHTML = selections.map((s, i) => `
+                    <div class="betslip-item">
+                        <div>
+                            <div class="betslip-match">${s.home} vs ${s.away}</div>
+                            <div class="betslip-selection">${s.type === '1' ? 'Home Win' : s.type === '2' ? 'Away Win' : 'Draw'}</div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <span class="betslip-odds">${s.odds.toFixed(2)}</span>
+                            <button class="remove-btn" onclick="removeSelection(${i})">✕</button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            updateReturn();
+        }
+        
+        function removeSelection(index) {
+            selections.splice(index, 1);
+            updateBetslip();
+        }
+        
+        function updateReturn() {
+            const stake = parseFloat(document.getElementById('stake-input').value) || 0;
+            const totalOdds = selections.reduce((acc, s) => acc * s.odds, 1);
+            const potentialReturn = stake * totalOdds;
+            
+            document.getElementById('summary-selections').textContent = selections.length;
+            document.getElementById('summary-odds').textContent = totalOdds.toFixed(2);
+            document.getElementById('summary-return').textContent = `€${potentialReturn.toFixed(2)}`;
+            
+            // Kelly calculation (based on average confidence from matches)
+            const avgConfidence = matches.length > 0 
+                ? matches.reduce((sum, m) => sum + m.confidence, 0) / matches.length / 100
+                : 0.7;
+            const kellyFraction = (avgConfidence * totalOdds - 1) / (totalOdds - 1);
+            const kellyStake = Math.max(0, kellyFraction * 100).toFixed(2);
+            document.getElementById('kelly-stake').textContent = kellyStake;
+        }
+        
+        function setStake(amount) {
+            document.getElementById('stake-input').value = amount;
+            updateReturn();
+        }
+        
+        function placeBet() {
+            if (selections.length === 0) return;
+            
+            const stake = parseFloat(document.getElementById('stake-input').value) || 0;
+            const totalOdds = selections.reduce((acc, s) => acc * s.odds, 1);
+            
+            alert(`🎉 Accumulator Created!\n\nSelections: ${selections.length}\nTotal Odds: ${totalOdds.toFixed(2)}\nStake: €${stake}\nPotential Return: €${(stake * totalOdds).toFixed(2)}`);
+            
+            selections = [];
+            updateBetslip();
+        }
     </script>
 </body>
 </html>

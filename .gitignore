@@ -33,3 +33,4 @@ Thumbs.db
 
 # W5 research submodule (separate project)
 w5-football-prediction/
+.vercel

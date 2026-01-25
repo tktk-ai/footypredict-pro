@@ -1,275 +1,746 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>📊 Analytics Dashboard | Football Predictions</title>
-    <link rel="stylesheet" href="/static/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>Dashboard | FootyPredict Pro</title>
+    
+    <meta name="description" content="Real-time analytics dashboard for football predictions">
+    <meta name="theme-color" content="#6366f1">
+    <link rel="manifest" href="/static/manifest.json">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/design-system.css">
+    
+    <style>
+        :root {
+            --bg-primary: #050510;
+            --bg-secondary: #0d0d1a;
+            --bg-tertiary: #14142a;
+            --accent-primary: #6366f1;
+            --accent-glow: rgba(99, 102, 241, 0.4);
+            --gold: #fbbf24;
+            --emerald: #10b981;
+        }
+        
+        /* Light Theme */
+        [data-theme="light"] {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f1f5f9;
+            --text-primary: #0f172a;
+            --text-secondary: #475569;
+            --text-muted: #94a3b8;
+            --border-color: rgba(0, 0, 0, 0.08);
+            --card-bg: rgba(255, 255, 255, 0.9);
+        }
+        
+        [data-theme="light"] body {
+            background: var(--bg-primary);
+            background-image: 
+                radial-gradient(ellipse at top, rgba(99, 102, 241, 0.08) 0%, transparent 50%);
+        }
+        
+        [data-theme="light"] .glass-card,
+        [data-theme="light"] .stat-card,
+        [data-theme="light"] .chart-card {
+            background: var(--card-bg);
+            border-color: var(--border-color);
+        }
+        
+        [data-theme="light"] .header {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: var(--border-color);
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            background-image: 
+                radial-gradient(ellipse at top, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at bottom right, rgba(139, 92, 246, 0.1) 0%, transparent 40%);
+            color: var(--text-primary, #fff);
+            min-height: 100vh;
+            margin: 0;
+        }
+        
+        .app {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            background: rgba(13, 13, 26, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 8px 32px var(--accent-glow);
+        }
+        
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff, #a5b4fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        [data-theme="light"] .logo-text {
+            background: linear-gradient(135deg, #1e1b4b, #6366f1);
+            -webkit-background-clip: text;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .nav-link {
+            padding: 10px 18px;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            border-radius: 10px;
+            transition: all 0.2s;
+        }
+        
+        [data-theme="light"] .nav-link {
+            color: var(--text-secondary);
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            background: rgba(99, 102, 241, 0.15);
+            color: #a5b4fc;
+        }
+        
+        /* Theme Toggle */
+        .theme-toggle {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 10px 16px;
+            cursor: pointer;
+            font-size: 1.2rem;
+            transition: all 0.2s;
+        }
+        
+        .theme-toggle:hover {
+            background: rgba(255, 255, 255, 0.15);
+        }
+        
+        /* Dashboard Grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        @media (max-width: 1200px) {
+            .dashboard-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        
+        @media (max-width: 768px) {
+            .dashboard-grid { grid-template-columns: 1fr; }
+        }
+        
+        .stat-card {
+            background: rgba(20, 20, 42, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 20px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+        }
+        
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+        }
+        
+        .stat-card.purple::before { background: linear-gradient(90deg, #6366f1, #8b5cf6); }
+        .stat-card.gold::before { background: linear-gradient(90deg, #fbbf24, #f59e0b); }
+        .stat-card.emerald::before { background: linear-gradient(90deg, #10b981, #059669); }
+        .stat-card.rose::before { background: linear-gradient(90deg, #f43f5e, #e11d48); }
+        
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            margin-bottom: 16px;
+        }
+        
+        .stat-icon.purple { background: rgba(99, 102, 241, 0.2); }
+        .stat-icon.gold { background: rgba(251, 191, 36, 0.2); }
+        .stat-icon.emerald { background: rgba(16, 185, 129, 0.2); }
+        .stat-icon.rose { background: rgba(244, 63, 94, 0.2); }
+        
+        .stat-label {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #fff;
+            line-height: 1;
+        }
+        
+        .stat-change {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 12px;
+            font-size: 0.8rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+        
+        .stat-change.up { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+        .stat-change.down { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+        
+        /* Charts Section */
+        .charts-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        @media (max-width: 1024px) {
+            .charts-grid { grid-template-columns: 1fr; }
+        }
+        
+        .chart-card {
+            background: rgba(20, 20, 42, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 20px;
+            padding: 24px;
+        }
+        
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .chart-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+        
+        .chart-period {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .period-btn {
+            padding: 6px 14px;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .period-btn.active, .period-btn:hover {
+            background: rgba(99, 102, 241, 0.2);
+            border-color: rgba(99, 102, 241, 0.4);
+            color: #a5b4fc;
+        }
+        
+        /* Accuracy Chart */
+        .accuracy-chart {
+            height: 200px;
+            display: flex;
+            align-items: flex-end;
+            gap: 12px;
+            padding-top: 20px;
+        }
+        
+        .chart-bar {
+            flex: 1;
+            background: linear-gradient(180deg, rgba(99, 102, 241, 0.8), rgba(99, 102, 241, 0.3));
+            border-radius: 8px 8px 0 0;
+            position: relative;
+            min-height: 20px;
+            transition: all 0.5s ease;
+        }
+        
+        .chart-bar:hover {
+            background: linear-gradient(180deg, rgba(99, 102, 241, 1), rgba(99, 102, 241, 0.5));
+        }
+        
+        .chart-bar-label {
+            position: absolute;
+            bottom: -24px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.7rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .chart-bar-value {
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #a5b4fc;
+        }
+        
+        /* Recent Predictions Table */
+        .predictions-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .predictions-table th,
+        .predictions-table td {
+            padding: 14px 16px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        
+        .predictions-table th {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: rgba(255, 255, 255, 0.5);
+            font-weight: 600;
+        }
+        
+        .predictions-table tr:hover td {
+            background: rgba(99, 102, 241, 0.05);
+        }
+        
+        .match-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        
+        .match-teams {
+            font-weight: 600;
+        }
+        
+        .match-league {
+            font-size: 0.8rem;
+            color: rgba(255, 255, 255, 0.5);
+        }
+        
+        .badge {
+            display: inline-flex;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .badge-success { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+        .badge-warning { background: rgba(251, 191, 36, 0.15); color: #fbbf24; }
+        .badge-danger { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+        .badge-info { background: rgba(99, 102, 241, 0.15); color: #a5b4fc; }
+        
+        /* Animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-in {
+            animation: fadeInUp 0.5s ease forwards;
+        }
+        
+        .stat-card:nth-child(1) { animation-delay: 0.1s; }
+        .stat-card:nth-child(2) { animation-delay: 0.2s; }
+        .stat-card:nth-child(3) { animation-delay: 0.3s; }
+        .stat-card:nth-child(4) { animation-delay: 0.4s; }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <header>
-            <h1>📊 Analytics Dashboard</h1>
-            <p class="subtitle">Track prediction accuracy and betting performance</p>
-            <a href="/" class="back-link">← Back to Predictions</a>
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">📊</div>
+                <span class="logo-text">Dashboard</span>
+            </div>
+            
+            <nav class="nav-links">
+                <a href="/" class="nav-link">🏠 Home</a>
+                <a href="/accumulators" class="nav-link">🎰 Accumulators</a>
+                <a href="/tracker" class="nav-link">📊 Tracker</a>
+                <a href="/analytics" class="nav-link active">📈 Analytics</a>
+                <a href="/dashboard" class="nav-link">🎯 Dashboard</a>
+            </nav>
+            
+            <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme">
+                🌓
+            </button>
         </header>
-
+        
+        <!-- Stats Grid -->
         <div class="dashboard-grid">
-            <!-- Accuracy Stats Card -->
-            <div class="dashboard-card">
-                <h3>📈 Prediction Accuracy</h3>
-                <div id="accuracy-stats">
-                    <div class="stat-row">
-                        <span>Total Predictions</span>
-                        <span id="total-preds">0</span>
-                    </div>
-                    <div class="stat-row">
-                        <span>Correct</span>
-                        <span id="correct-preds" class="success">0</span>
-                    </div>
-                    <div class="stat-row">
-                        <span>Accuracy</span>
-                        <span id="accuracy-pct" class="highlight">0%</span>
-                    </div>
-                </div>
-                <canvas id="accuracyChart"></canvas>
+            <div class="stat-card purple animate-in">
+                <div class="stat-icon purple">📊</div>
+                <div class="stat-label">Total Predictions</div>
+                <div class="stat-value" id="total-preds">--</div>
+                <div class="stat-change up" id="preds-change">Loading...</div>
             </div>
-
-            <!-- Kelly Calculator Card -->
-            <div class="dashboard-card">
-                <h3>🎯 Kelly Criterion Calculator</h3>
-                <div class="kelly-form">
-                    <div class="input-group">
-                        <label>Win Probability (%)</label>
-                        <input type="number" id="kelly-prob" value="65" min="1" max="99">
-                    </div>
-                    <div class="input-group">
-                        <label>Decimal Odds</label>
-                        <input type="number" id="kelly-odds" value="1.8" step="0.1" min="1.01">
-                    </div>
-                    <div class="input-group">
-                        <label>Bankroll (€)</label>
-                        <input type="number" id="kelly-bankroll" value="100" min="1">
-                    </div>
-                    <button onclick="calculateKelly()">Calculate</button>
-                </div>
-                <div id="kelly-result"></div>
+            
+            <div class="stat-card emerald animate-in">
+                <div class="stat-icon emerald">✅</div>
+                <div class="stat-label">Overall Accuracy</div>
+                <div class="stat-value" id="accuracy">--%</div>
+                <div class="stat-change up" id="accuracy-change">Loading...</div>
             </div>
-
-            <!-- Patterns Card -->
-            <div class="dashboard-card">
-                <h3>🔍 High-Confidence Patterns</h3>
-                <div id="patterns-list">
-                    <p class="muted">Track more predictions to discover patterns...</p>
-                </div>
+            
+            <div class="stat-card gold animate-in">
+                <div class="stat-icon gold">🔒</div>
+                <div class="stat-label">Sure Wins Today</div>
+                <div class="stat-value" id="sure-wins">--</div>
+                <div class="stat-change up">91%+ confidence</div>
             </div>
-
-            <!-- Backtest Results -->
-            <div class="dashboard-card full-width">
-                <h3>📊 Strategy Backtest</h3>
-                <div id="backtest-results">
-                    <p class="muted">Need 5+ tracked predictions to run backtest</p>
-                </div>
-                <canvas id="roiChart"></canvas>
-            </div>
-
-            <!-- Recent Predictions -->
-            <div class="dashboard-card full-width">
-                <h3>📝 Track New Prediction</h3>
-                <div class="track-form">
-                    <input type="text" id="track-home" placeholder="Home Team">
-                    <input type="text" id="track-away" placeholder="Away Team">
-                    <select id="track-outcome">
-                        <option value="H">Home Win</option>
-                        <option value="D">Draw</option>
-                        <option value="A">Away Win</option>
-                    </select>
-                    <input type="number" id="track-prob" placeholder="Probability %" value="60" min="1" max="99">
-                    <button onclick="trackPrediction()">Track</button>
-                </div>
-                <div id="track-result"></div>
+            
+            <div class="stat-card rose animate-in">
+                <div class="stat-icon rose">💰</div>
+                <div class="stat-label">Value Bets Found</div>
+                <div class="stat-value" id="value-bets">--</div>
+                <div class="stat-change up" id="value-change">Loading...</div>
             </div>
         </div>
-
-        <footer>
-            <p>⚠️ For entertainment purposes only. Gamble responsibly.</p>
-        </footer>
+        
+        <!-- Charts -->
+        <div class="charts-grid">
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3 class="chart-title">📈 Accuracy Trend</h3>
+                    <div class="chart-period">
+                        <button class="period-btn">7D</button>
+                        <button class="period-btn active">30D</button>
+                        <button class="period-btn">90D</button>
+                    </div>
+                </div>
+                <div class="accuracy-chart" id="accuracy-chart">
+                    <!-- Chart bars will be generated -->
+                </div>
+            </div>
+            
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3 class="chart-title">🏆 Top Leagues</h3>
+                </div>
+                <div id="league-stats">
+                    <div class="loading-state" style="text-align: center; padding: 20px; color: var(--text-muted);">
+                        Loading league stats...
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Predictions -->
+        <div class="chart-card">
+            <div class="chart-header">
+                <h3 class="chart-title">📋 Recent Predictions</h3>
+                <a href="/tracker" style="color: #6366f1; text-decoration: none; font-size: 0.9rem;">View All →</a>
+            </div>
+            <table class="predictions-table">
+                <thead>
+                    <tr>
+                        <th>Match</th>
+                        <th>Prediction</th>
+                        <th>Confidence</th>
+                        <th>Result</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="recent-predictions">
+                    <tr>
+                        <td colspan="5" style="text-align: center; padding: 30px; color: var(--text-muted);">
+                            Loading predictions...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
-
+    
     <script>
-        let accuracyChart, roiChart;
-
-        async function loadDashboard() {
-            // Load accuracy stats
+        // Theme toggle
+        function toggleTheme() {
+            const html = document.documentElement;
+            const current = html.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+        }
+        
+        // Load saved theme
+        document.addEventListener('DOMContentLoaded', () => {
+            const saved = localStorage.getItem('theme') || 'dark';
+            document.documentElement.setAttribute('data-theme', saved);
+            
+            // Load all data
+            loadStats();
+            loadLeagueStats();
+            loadRecentPredictions();
+            loadChartData();
+        });
+        
+        // Load main stats from API
+        async function loadStats() {
             try {
-                const accRes = await fetch('/api/accuracy');
-                const accData = await accRes.json();
+                // Try multiple API endpoints
+                const [statsRes, sureWinsRes, valueBetsRes] = await Promise.allSettled([
+                    fetch('/api/monitor/stats'),
+                    fetch('/api/v4/recommendations/sure-wins'),
+                    fetch('/api/accumulators/value-bets')
+                ]);
                 
-                if (accData.success) {
-                    document.getElementById('total-preds').textContent = accData.stats.total || 0;
-                    document.getElementById('correct-preds').textContent = accData.stats.correct || 0;
-                    document.getElementById('accuracy-pct').textContent = 
-                        ((accData.stats.accuracy || 0) * 100).toFixed(1) + '%';
-                    
-                    updateAccuracyChart(accData.stats);
-                }
-            } catch (e) {
-                console.log('No accuracy data yet');
-            }
-
-            // Load patterns
-            try {
-                const patRes = await fetch('/api/patterns');
-                const patData = await patRes.json();
-                
-                if (patData.success && patData.patterns.recommendations) {
-                    const list = document.getElementById('patterns-list');
-                    if (patData.patterns.recommendations.length > 0) {
-                        list.innerHTML = patData.patterns.recommendations
-                            .map(r => `<p class="pattern">${r}</p>`).join('');
+                // Main stats
+                if (statsRes.status === 'fulfilled' && statsRes.value.ok) {
+                    const data = await statsRes.value.json();
+                    if (data.success || data.total !== undefined) {
+                        document.getElementById('total-preds').textContent = data.total || 0;
+                        document.getElementById('preds-change').textContent = `↑ ${data.weekly_change || 0} this week`;
+                        
+                        const accuracy = data.accuracy || data.accuracy_pct || 0;
+                        const accNum = typeof accuracy === 'string' ? parseFloat(accuracy) : accuracy * 100;
+                        document.getElementById('accuracy').textContent = `${accNum.toFixed(1)}%`;
+                        document.getElementById('accuracy-change').textContent = `↑ Tracking ${data.correct || 0} correct`;
                     }
-                }
-            } catch (e) {
-                console.log('No pattern data yet');
-            }
-
-            // Load backtest
-            try {
-                const btRes = await fetch('/api/backtest');
-                const btData = await btRes.json();
-                
-                if (btData.success) {
-                    displayBacktest(btData.backtest);
-                }
-            } catch (e) {
-                console.log('No backtest data yet');
-            }
-        }
-
-        function updateAccuracyChart(stats) {
-            const ctx = document.getElementById('accuracyChart').getContext('2d');
-            
-            if (accuracyChart) accuracyChart.destroy();
-            
-            const leagues = Object.keys(stats.by_league || {});
-            const accuracies = leagues.map(l => (stats.by_league[l].accuracy * 100).toFixed(1));
-            
-            if (leagues.length === 0) return;
-            
-            accuracyChart = new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: leagues,
-                    datasets: [{
-                        label: 'Accuracy %',
-                        data: accuracies,
-                        backgroundColor: 'rgba(0, 212, 255, 0.6)',
-                        borderColor: '#00d4ff',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    scales: {
-                        y: { beginAtZero: true, max: 100 }
-                    },
-                    plugins: {
-                        legend: { display: false }
-                    }
-                }
-            });
-        }
-
-        function displayBacktest(data) {
-            if (!data.strategies) return;
-            
-            const container = document.getElementById('backtest-results');
-            let html = '<table class="backtest-table"><tr><th>Strategy</th><th>Bets</th><th>Accuracy</th><th>ROI</th></tr>';
-            
-            for (const [name, result] of Object.entries(data.strategies)) {
-                const roiClass = result.roi > 0 ? 'success' : 'danger';
-                html += `<tr>
-                    <td>${name}</td>
-                    <td>${result.total_predictions}</td>
-                    <td>${(result.accuracy * 100).toFixed(1)}%</td>
-                    <td class="${roiClass}">${(result.roi * 100).toFixed(1)}%</td>
-                </tr>`;
-            }
-            html += '</table>';
-            
-            if (data.best_strategy) {
-                html += `<p class="best-strategy">🏆 Best: ${data.best_strategy} (${(data.best_roi * 100).toFixed(1)}% ROI)</p>`;
-            }
-            
-            container.innerHTML = html;
-        }
-
-        async function calculateKelly() {
-            const prob = parseFloat(document.getElementById('kelly-prob').value) / 100;
-            const odds = parseFloat(document.getElementById('kelly-odds').value);
-            const bankroll = parseFloat(document.getElementById('kelly-bankroll').value);
-            
-            const response = await fetch(`/api/kelly?prob=${prob}&odds=${odds}&bankroll=${bankroll}`);
-            const data = await response.json();
-            
-            if (data.success) {
-                const k = data.kelly;
-                const resultDiv = document.getElementById('kelly-result');
-                
-                if (k.recommendation === 'NO BET') {
-                    resultDiv.innerHTML = `
-                        <div class="kelly-output danger">
-                            <h4>❌ NO BET</h4>
-                            <p>Negative expected value</p>
-                        </div>`;
                 } else {
-                    resultDiv.innerHTML = `
-                        <div class="kelly-output success">
-                            <h4>✅ ${k.recommendation}</h4>
-                            <div class="kelly-amounts">
-                                <div><span>Full Kelly:</span> €${k.full_kelly}</div>
-                                <div><span>Half Kelly:</span> €${k.half_kelly}</div>
-                                <div><span>Quarter Kelly:</span> €${k.quarter_kelly}</div>
-                            </div>
-                            <p>Edge: ${k.edge_percent}% | EV: ${(k.expected_value * 100).toFixed(1)}%</p>
-                        </div>`;
+                    document.getElementById('total-preds').textContent = '0';
+                    document.getElementById('preds-change').textContent = 'No data yet';
+                    document.getElementById('accuracy').textContent = '0%';
+                    document.getElementById('accuracy-change').textContent = 'Start tracking';
                 }
+                
+                // Sure wins count
+                if (sureWinsRes.status === 'fulfilled' && sureWinsRes.value.ok) {
+                    const data = await sureWinsRes.value.json();
+                    document.getElementById('sure-wins').textContent = data.count || data.sure_wins?.length || 0;
+                } else {
+                    document.getElementById('sure-wins').textContent = '0';
+                }
+                
+                // Value bets count
+                if (valueBetsRes.status === 'fulfilled' && valueBetsRes.value.ok) {
+                    const data = await valueBetsRes.value.json();
+                    const count = data.count || data.value_bets?.length || 0;
+                    document.getElementById('value-bets').textContent = count;
+                    document.getElementById('value-change').textContent = count > 0 ? '+15% avg edge' : 'Scanning...';
+                } else {
+                    document.getElementById('value-bets').textContent = '0';
+                    document.getElementById('value-change').textContent = 'Scanning...';
+                }
+                
+            } catch (e) {
+                console.error('Stats loading error:', e);
+                document.getElementById('total-preds').textContent = '0';
+                document.getElementById('accuracy').textContent = '0%';
+                document.getElementById('sure-wins').textContent = '0';
+                document.getElementById('value-bets').textContent = '0';
             }
         }
-
-        async function trackPrediction() {
-            const home = document.getElementById('track-home').value;
-            const away = document.getElementById('track-away').value;
-            const outcome = document.getElementById('track-outcome').value;
-            const prob = parseFloat(document.getElementById('track-prob').value) / 100;
+        
+        // Load league performance stats
+        async function loadLeagueStats() {
+            const container = document.getElementById('league-stats');
             
-            const response = await fetch('/api/track', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    home_team: home,
-                    away_team: away,
-                    predicted: outcome,
-                    probability: prob,
-                    confidence: prob
-                })
+            try {
+                const response = await fetch('/api/v4/stats/leagues');
+                const data = await response.json();
+                
+                if (data.success && data.analytics && data.analytics.by_league) {
+                    const leagues = data.analytics.by_league.slice(0, 4);
+                    const colors = ['#10b981', '#6366f1', '#fbbf24', '#a5b4fc'];
+                    const flags = {
+                        'bundesliga': '🇩🇪', 'premier_league': '🏴󠁧󠁢󠁥󠁮󠁧󠁿', 'la_liga': '🇪🇸',
+                        'serie_a': '🇮🇹', 'ligue_1': '🇫🇷', 'champions_league': '🏆'
+                    };
+                    
+                    container.innerHTML = leagues.map((l, i) => `
+                        <div style="margin-bottom: 16px;">
+                            <div style="display: flex; justify-content: space-between; margin-bottom: 6px;">
+                                <span>${flags[l.league] || '⚽'} ${l.league.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase())}</span>
+                                <span style="color: ${colors[i]};">${l.accuracy}%</span>
+                            </div>
+                            <div style="height: 6px; background: rgba(255,255,255,0.1); border-radius: 3px; overflow: hidden;">
+                                <div style="width: ${l.accuracy}%; height: 100%; background: ${colors[i]};"></div>
+                            </div>
+                        </div>
+                    `).join('');
+                } else {
+                    renderDefaultLeagues(container);
+                }
+            } catch (e) {
+                console.error('League stats error:', e);
+                renderDefaultLeagues(container);
+            }
+        }
+        
+        function renderDefaultLeagues(container) {
+            container.innerHTML = `
+                <div style="text-align: center; padding: 20px; color: var(--text-muted);">
+                    <p>📊 League stats will appear here once predictions are tracked.</p>
+                    <p style="font-size: 0.85rem; margin-top: 8px;">Make predictions to start seeing accuracy by league.</p>
+                </div>
+            `;
+        }
+        
+        // Load recent predictions
+        async function loadRecentPredictions() {
+            const tbody = document.getElementById('recent-predictions');
+            
+            try {
+                const response = await fetch('/api/v4/stats/accuracy');
+                const data = await response.json();
+                
+                if (data.success && data.recent && data.recent.length > 0) {
+                    tbody.innerHTML = data.recent.slice(0, 5).map(p => {
+                        const conf = (p.confidence * 100).toFixed(0);
+                        const confClass = conf >= 80 ? 'badge-success' : conf >= 60 ? 'badge-warning' : 'badge-info';
+                        const statusClass = p.status === 'won' || p.correct ? 'badge-success' : 
+                                           p.status === 'lost' ? 'badge-danger' : 'badge-info';
+                        const statusText = p.status === 'won' || p.correct ? '✓ Correct' : 
+                                          p.status === 'lost' ? '✗ Wrong' : '⏳ Pending';
+                        
+                        return `
+                            <tr>
+                                <td>
+                                    <div class="match-info">
+                                        <span class="match-teams">${p.home || p.match} vs ${p.away || ''}</span>
+                                        <span class="match-league">⚽ ${p.league || 'N/A'}</span>
+                                    </div>
+                                </td>
+                                <td>${p.predicted_outcome || p.prediction || 'N/A'}</td>
+                                <td><span class="badge ${confClass}">${conf}%</span></td>
+                                <td>${p.actual_score || p.result || '-'}</td>
+                                <td><span class="badge ${statusClass}">${statusText}</span></td>
+                            </tr>
+                        `;
+                    }).join('');
+                } else {
+                    renderNoPredictions(tbody);
+                }
+            } catch (e) {
+                console.error('Predictions loading error:', e);
+                renderNoPredictions(tbody);
+            }
+        }
+        
+        function renderNoPredictions(tbody) {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" style="text-align: center; padding: 30px; color: var(--text-muted);">
+                        <p>📋 No predictions tracked yet.</p>
+                        <p style="font-size: 0.85rem; margin-top: 8px;">
+                            <a href="/" style="color: #6366f1;">Make predictions</a> to start tracking your accuracy.
+                        </p>
+                    </td>
+                </tr>
+            `;
+        }
+        
+        // Load chart data from API
+        async function loadChartData() {
+            const chart = document.getElementById('accuracy-chart');
+            const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+            
+            try {
+                const response = await fetch('/api/v4/stats/accuracy');
+                const data = await response.json();
+                
+                let values = [0, 0, 0, 0, 0, 0, 0];
+                
+                if (data.success && data.stats && data.stats.daily_accuracy) {
+                    // Use real daily accuracy if available
+                    values = data.stats.daily_accuracy.slice(-7);
+                }
+                
+                renderChart(chart, days, values);
+            } catch (e) {
+                console.error('Chart loading error:', e);
+                renderChart(chart, days, [0, 0, 0, 0, 0, 0, 0]);
+            }
+        }
+        
+        function renderChart(chart, days, values) {
+            chart.innerHTML = '';
+            
+            if (values.every(v => v === 0)) {
+                chart.innerHTML = `
+                    <div style="width: 100%; text-align: center; padding: 60px 20px; color: var(--text-muted);">
+                        <p>📈 Accuracy chart will appear here</p>
+                        <p style="font-size: 0.85rem; margin-top: 8px;">Track predictions to see your daily performance.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            values.forEach((value, i) => {
+                const bar = document.createElement('div');
+                bar.className = 'chart-bar';
+                bar.style.height = `${Math.max(value, 5)}%`;
+                bar.innerHTML = `
+                    <span class="chart-bar-value">${value}%</span>
+                    <span class="chart-bar-label">${days[i]}</span>
+                `;
+                chart.appendChild(bar);
             });
-            
-            const data = await response.json();
-            const resultDiv = document.getElementById('track-result');
-            
-            if (data.success) {
-                resultDiv.innerHTML = `<p class="success">✅ Tracked: ${home} vs ${away}</p>`;
-                // Clear form
-                document.getElementById('track-home').value = '';
-                document.getElementById('track-away').value = '';
-            }
         }
-
-        // Load on page load
-        document.addEventListener('DOMContentLoaded', loadDashboard);
     </script>
 </body>
 </html>

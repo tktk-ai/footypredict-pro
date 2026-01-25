@@ -1,57 +1,25 @@
-# Koyeb Deployment Configuration
-# https://www.koyeb.com/docs/build-and-deploy/app-spec
-
 name: football-predictions
 type: web
-
-# Build from Dockerfile
+instance_types:
+  - type: free
+regions:
+  - fra
+ports:
+  - port: 5000
+    protocol: http
+routes:
+  - path: /
+env:
+  - key: FLASK_ENV
+    value: production
+  - key: PORT
+    value: "5000"
 build:
-  dockerfile:
-    dockerfile: Dockerfile
-
-# Service configuration
-service:
-  name: football-predictions
-  regions:
-    - fra # Frankfurt (free tier)
-
-  # Instance configuration (free tier)
-  instance_types:
-    - type: free
-
-  # Scaling
-  scaling:
-    min: 1
-    max: 1
-
-  # Port
-  ports:
-    - port: 8000
-      protocol: http
-
-  # Health check
-  health_checks:
-    - path: /
-      port: 8000
-      protocol: http
-      interval_seconds: 30
-      timeout_seconds: 5
-      healthy_threshold: 2
-      unhealthy_threshold: 3
-
-  # Environment variables (set these in Koyeb dashboard)
-  env:
-    - key: FOOTBALL_DATA_API_KEY
-      value: ""
-      secret: true
-    - key: THE_ODDS_API_KEY
-      value: ""
-      secret: true
-    - key: API_FOOTBALL_KEY
-      value: ""
-      secret: true
-    - key: TELEGRAM_BOT_TOKEN
-      value: ""
-      secret: true
-    - key: FLASK_ENV
-      value: "production"
+  type: buildpack
+run: gunicorn app:app --bind 0.0.0.0:5000 --workers 2
+health_checks:
+  - type: http
+    path: /api/health
+    port: 5000
+    interval_seconds: 60
+    timeout_seconds: 20

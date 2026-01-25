@@ -1,0 +1,102 @@
+version: '3.8'
+
+services:
+  # Main Flask Application
+  flask-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: soccer-prediction-flask
+    ports:
+      - "8000:8000"
+    environment:
+      - FLASK_ENV=production
+      - REDIS_URL=redis://redis:6379/0
+      - SECRET_KEY=${SECRET_KEY:-supersecretkey}
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      - ODDS_API_KEY=${ODDS_API_KEY}
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+      - ./.cache:/app/.cache
+    depends_on:
+      - redis
+    restart: unless-stopped
+    networks:
+      - soccer-net
+
+  # FastAPI V3.0 Service
+  fastapi-v3:
+    build:
+      context: .
+      dockerfile: Dockerfile.fastapi
+    container_name: soccer-prediction-fastapi
+    ports:
+      - "8001:8001"
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+    depends_on:
+      - redis
+    restart: unless-stopped
+    networks:
+      - soccer-net
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: soccer-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+    networks:
+      - soccer-net
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    container_name: soccer-nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - flask-app
+      - fastapi-v3
+    restart: unless-stopped
+    networks:
+      - soccer-net
+
+  # Scheduled Jobs Runner
+  scheduler:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: soccer-scheduler
+    command: python -c "from src.scheduler import start_scheduler; start_scheduler(); import time; time.sleep(86400*365)"
+    environment:
+      - REDIS_URL=redis://redis:6379/0
+      - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+    volumes:
+      - ./data:/app/data
+      - ./models:/app/models
+    depends_on:
+      - redis
+      - flask-app
+    restart: unless-stopped
+    networks:
+      - soccer-net
+
+networks:
+  soccer-net:
+    driver: bridge
+
+volumes:
+  redis-data:

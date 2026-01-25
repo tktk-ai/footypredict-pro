@@ -3,143 +3,253 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Leaderboard | Football Predictions</title>
+    <title>Leaderboard | FootyPredict Pro</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/design-system.css">
-    <link rel="stylesheet" href="/static/css/premium-ui.css">
+    <meta name="theme-color" content="#6366f1">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
-        .leaderboard-container {
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
+        :root {
+            --bg-primary: #050510;
+            --bg-secondary: #0d0d1a;
+            --bg-tertiary: #14142a;
+            --accent: #6366f1;
+            --gold: #fbbf24;
+            --silver: #94a3b8;
+            --bronze: #cd7c2d;
+            --emerald: #10b981;
+            --text: #ffffff;
+            --text-muted: rgba(255, 255, 255, 0.5);
         }
         
-        .page-header {
-            text-align: center;
+        [data-theme="light"] {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f1f5f9;
+            --text: #0f172a;
+            --text-muted: #64748b;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            background-image: radial-gradient(ellipse at top, rgba(99, 102, 241, 0.15) 0%, transparent 50%);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        
+        [data-theme="light"] body {
+            background-image: radial-gradient(ellipse at top, rgba(99, 102, 241, 0.08) 0%, transparent 50%);
+        }
+        
+        .app { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            background: rgba(13, 13, 26, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 20px;
             margin-bottom: 30px;
         }
         
-        .page-header h1 { font-size: 2rem; }
-        .page-header p { color: #a0a0a0; }
+        [data-theme="light"] .header {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(0, 0, 0, 0.08);
+        }
         
+        .logo { display: flex; align-items: center; gap: 12px; }
+        
+        .logo-icon {
+            width: 48px; height: 48px;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 8px 32px rgba(251, 191, 36, 0.3);
+        }
+        
+        .logo-text { font-size: 1.5rem; font-weight: 800; }
+        
+        .nav-links { display: flex; gap: 8px; }
+        
+        .nav-link {
+            padding: 10px 18px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            border-radius: 10px;
+            transition: all 0.2s;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            background: rgba(99, 102, 241, 0.15);
+            color: #a5b4fc;
+        }
+        
+        .theme-toggle {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 10px 16px;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+        
+        /* Top 3 Podium */
         .podium {
             display: flex;
             justify-content: center;
             align-items: flex-end;
             gap: 20px;
             margin-bottom: 40px;
+            padding: 40px 0;
         }
         
-        .podium-spot {
+        .podium-item {
             text-align: center;
+            padding: 24px;
+            background: rgba(20, 20, 42, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 20px;
+            width: 200px;
+            position: relative;
         }
         
-        .podium-avatar {
-            width: 60px;
-            height: 60px;
+        [data-theme="light"] .podium-item {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(0, 0, 0, 0.08);
+        }
+        
+        .podium-item.first {
+            transform: scale(1.1);
+            border-color: rgba(251, 191, 36, 0.4);
+            box-shadow: 0 0 40px rgba(251, 191, 36, 0.2);
+        }
+        
+        .podium-item.second {
+            border-color: rgba(148, 163, 184, 0.4);
+        }
+        
+        .podium-item.third {
+            border-color: rgba(205, 124, 45, 0.4);
+        }
+        
+        .rank-badge {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.5rem;
-            margin: 0 auto 10px;
+            font-size: 1.2rem;
+            font-weight: 800;
         }
         
-        .podium-name {
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
+        .rank-badge.gold { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #1a1a2e; }
+        .rank-badge.silver { background: linear-gradient(135deg, #94a3b8, #64748b); color: #1a1a2e; }
+        .rank-badge.bronze { background: linear-gradient(135deg, #cd7c2d, #a16207); color: #1a1a2e; }
         
-        .podium-profit {
-            color: #10b981;
-            font-weight: 700;
-        }
-        
-        .podium-base {
-            width: 100px;
-            border-radius: 8px 8px 0 0;
+        .podium-avatar {
+            width: 80px;
+            height: 80px;
+            background: rgba(99, 102, 241, 0.2);
+            border-radius: 50%;
+            margin: 10px auto 16px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 2rem;
+        }
+        
+        .podium-name {
             font-weight: 700;
-            margin-top: 10px;
+            font-size: 1.1rem;
+            margin-bottom: 8px;
         }
         
-        .first .podium-avatar {
-            background: linear-gradient(135deg, #f59e0b, #fbbf24);
-            width: 80px;
-            height: 80px;
-            font-size: 2rem;
+        .podium-stats {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            font-size: 0.85rem;
+            color: var(--text-muted);
         }
         
-        .first .podium-base {
-            height: 120px;
-            background: linear-gradient(135deg, #f59e0b, #fbbf24);
-            color: #000;
+        .podium-accuracy {
+            color: var(--emerald);
+            font-weight: 700;
         }
         
-        .second .podium-avatar {
-            background: linear-gradient(135deg, #9ca3af, #d1d5db);
-        }
-        
-        .second .podium-base {
-            height: 90px;
-            background: linear-gradient(135deg, #9ca3af, #d1d5db);
-            color: #000;
-        }
-        
-        .third .podium-avatar {
-            background: linear-gradient(135deg, #b45309, #d97706);
-        }
-        
-        .third .podium-base {
-            height: 70px;
-            background: linear-gradient(135deg, #b45309, #d97706);
-            color: #000;
-        }
-        
-        .leaderboard-table {
-            background: rgba(26, 26, 46, 0.8);
-            border: 1px solid rgba(255,255,255,0.1);
-            border-radius: 16px;
+        /* Leaderboard Table */
+        .section-card {
+            background: rgba(20, 20, 42, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 20px;
             overflow: hidden;
         }
         
-        .table-header {
-            display: grid;
-            grid-template-columns: 60px 1fr 100px 100px 100px;
-            padding: 15px 20px;
-            background: rgba(0,0,0,0.3);
-            font-weight: 600;
-            color: #a0a0a0;
-            font-size: 0.85rem;
+        [data-theme="light"] .section-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(0, 0, 0, 0.08);
         }
         
-        .table-row {
-            display: grid;
-            grid-template-columns: 60px 1fr 100px 100px 100px;
-            padding: 15px 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
+        .section-header {
+            display: flex;
+            justify-content: space-between;
             align-items: center;
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
         }
         
-        .table-row:hover {
-            background: rgba(99, 102, 241, 0.1);
-        }
-        
-        .table-row:last-child { border-bottom: none; }
-        
-        .rank {
+        .section-title {
+            font-size: 1.2rem;
             font-weight: 700;
+        }
+        
+        .leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .leaderboard-table th,
+        .leaderboard-table td {
+            padding: 16px 20px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+        
+        .leaderboard-table th {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+            font-weight: 600;
+            background: rgba(255, 255, 255, 0.02);
+        }
+        
+        .leaderboard-table tr:hover td {
+            background: rgba(99, 102, 241, 0.05);
+        }
+        
+        .rank-cell {
+            font-weight: 800;
             font-size: 1.1rem;
         }
-        
-        .rank.gold { color: #f59e0b; }
-        .rank.silver { color: #9ca3af; }
-        .rank.bronze { color: #d97706; }
         
         .user-cell {
             display: flex;
@@ -147,158 +257,223 @@
             gap: 12px;
         }
         
-        .mini-avatar {
-            width: 36px;
-            height: 36px;
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            background: rgba(99, 102, 241, 0.2);
             border-radius: 50%;
-            background: linear-gradient(135deg, #6366f1, #8b5cf6);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 0.9rem;
+            font-size: 1.2rem;
         }
         
-        .profit-cell {
-            color: #10b981;
+        .user-name { font-weight: 600; }
+        
+        .accuracy-cell {
+            font-weight: 700;
+            color: var(--emerald);
+        }
+        
+        .badge {
+            display: inline-flex;
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.75rem;
             font-weight: 600;
         }
         
-        .stat-cell {
-            color: #a0a0a0;
+        .badge-success { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+        .badge-info { background: rgba(99, 102, 241, 0.15); color: #a5b4fc; }
+        
+        /* Animations */
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
-        .your-rank {
-            background: rgba(99, 102, 241, 0.2);
-            border: 1px solid #6366f1;
-        }
-        
-        .empty-state {
-            text-align: center;
-            padding: 60px 20px;
-            color: #a0a0a0;
-        }
-        
-        .back-link {
-            display: inline-block;
-            margin-bottom: 20px;
-            color: #a0a0a0;
-            text-decoration: none;
-        }
-        
-        .back-link:hover { color: #fff; }
-        
-        @media (max-width: 600px) {
-            .podium { flex-direction: column; align-items: center; }
-            .table-header, .table-row {
-                grid-template-columns: 40px 1fr 80px;
-            }
-            .table-header > *:nth-child(4),
-            .table-header > *:nth-child(5),
-            .table-row > *:nth-child(4),
-            .table-row > *:nth-child(5) {
-                display: none;
-            }
-        }
+        .podium-item { animation: fadeInUp 0.5s ease forwards; }
+        .podium-item:nth-child(1) { animation-delay: 0.2s; }
+        .podium-item:nth-child(2) { animation-delay: 0.1s; }
+        .podium-item:nth-child(3) { animation-delay: 0.3s; }
     </style>
 </head>
 <body>
-    <div class="leaderboard-container">
-        <a href="/" class="back-link">← Back to Predictions</a>
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">🏆</div>
+                <span class="logo-text">Leaderboard</span>
+            </div>
+            
+            <nav class="nav-links">
+                <a href="/" class="nav-link">🏠 Home</a>
+                <a href="/accumulators" class="nav-link">🎰 Accumulators</a>
+                <a href="/tracker" class="nav-link">📊 Tracker</a>
+                <a href="/leaderboard" class="nav-link active">🏆 Leaderboard</a>
+                <a href="/profile" class="nav-link">👤 Profile</a>
+            </nav>
+            
+            <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
+        </header>
         
-        <div class="page-header">
-            <h1>🏆 Leaderboard</h1>
-            <p>Top bettors ranked by profit</p>
-        </div>
-        
+        <!-- Top 3 Podium -->
         <div class="podium" id="podium">
-            <!-- Podium loaded via JS -->
+            <div style="text-align: center; padding: 60px; color: var(--text-muted); width: 100%;">
+                Loading top performers...
+            </div>
         </div>
         
-        <div class="leaderboard-table">
-            <div class="table-header">
-                <span>Rank</span>
-                <span>User</span>
-                <span>Profit</span>
-                <span>Win Rate</span>
-                <span>Bets</span>
+        <!-- Full Leaderboard -->
+        <div class="section-card">
+            <div class="section-header">
+                <h2 class="section-title">📊 Full Rankings</h2>
+                <span class="badge badge-info" id="rank-count">Loading...</span>
             </div>
-            <div id="table-body">
-                <div class="empty-state">
-                    <p>Loading leaderboard...</p>
-                </div>
-            </div>
+            
+            <table class="leaderboard-table">
+                <thead>
+                    <tr>
+                        <th>Rank</th>
+                        <th>User</th>
+                        <th>Accuracy</th>
+                        <th>Predictions</th>
+                        <th>Streak</th>
+                        <th>ROI</th>
+                    </tr>
+                </thead>
+                <tbody id="leaderboard-body">
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                            Loading leaderboard...
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
         </div>
     </div>
     
     <script>
-        const currentUser = JSON.parse(localStorage.getItem('user') || 'null');
+        function toggleTheme() {
+            const html = document.documentElement;
+            const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+        }
         
+        (function() {
+            const saved = localStorage.getItem('theme');
+            if (saved) document.documentElement.setAttribute('data-theme', saved);
+        })();
+        
+        // Load leaderboard from API
         async function loadLeaderboard() {
             try {
-                const res = await fetch('/api/leaderboard');
-                const data = await res.json();
+                const response = await fetch('/api/bet-tracker/leaderboard');
+                const data = await response.json();
                 
-                if (data.success && data.leaderboard.length > 0) {
+                if (data.success && data.leaderboard && data.leaderboard.length > 0) {
                     renderPodium(data.leaderboard.slice(0, 3));
                     renderTable(data.leaderboard);
+                    document.getElementById('rank-count').textContent = `Top ${data.leaderboard.length}`;
                 } else {
-                    document.getElementById('podium').innerHTML = '';
-                    document.getElementById('table-body').innerHTML = `
-                        <div class="empty-state">
-                            <h3>No rankings yet</h3>
-                            <p>Complete at least 5 bets to appear on the leaderboard</p>
-                        </div>
-                    `;
+                    renderEmptyState();
                 }
-            } catch (err) {
-                console.error('Failed to load leaderboard:', err);
+            } catch (e) {
+                console.error('Leaderboard loading error:', e);
+                renderEmptyState();
             }
         }
         
         function renderPodium(top3) {
-            const positions = ['second', 'first', 'third'];
-            const medals = ['🥈', '🥇', '🥉'];
-            const order = [1, 0, 2]; // Display order: 2nd, 1st, 3rd
+            const podium = document.getElementById('podium');
             
-            let html = '';
-            order.forEach((idx, displayIdx) => {
-                if (top3[idx]) {
-                    const user = top3[idx];
-                    html += `
-                        <div class="podium-spot ${positions[displayIdx]}">
-                            <div class="podium-avatar">${user.user_id[0].toUpperCase()}</div>
-                            <div class="podium-name">${user.user_id}</div>
-                            <div class="podium-profit">+$${user.profit.toFixed(0)}</div>
-                            <div class="podium-base">${medals[displayIdx]}</div>
-                        </div>
-                    `;
-                }
-            });
-            
-            document.getElementById('podium').innerHTML = html;
-        }
-        
-        function renderTable(leaders) {
-            const rankClasses = ['gold', 'silver', 'bronze'];
-            
-            document.getElementById('table-body').innerHTML = leaders.map((user, idx) => {
-                const isYou = currentUser && user.user_id === currentUser.id;
-                return `
-                    <div class="table-row ${isYou ? 'your-rank' : ''}">
-                        <span class="rank ${rankClasses[idx] || ''}">#${user.rank}</span>
-                        <div class="user-cell">
-                            <div class="mini-avatar">${user.user_id[0].toUpperCase()}</div>
-                            <span>${user.user_id}${isYou ? ' (You)' : ''}</span>
-                        </div>
-                        <span class="profit-cell">+$${user.profit.toFixed(2)}</span>
-                        <span class="stat-cell">${user.win_rate}%</span>
-                        <span class="stat-cell">${user.total_bets}</span>
+            if (top3.length === 0) {
+                podium.innerHTML = `
+                    <div style="text-align: center; padding: 60px; color: var(--text-muted); width: 100%;">
+                        <p>🏆 No rankings yet</p>
+                        <p style="font-size: 0.9rem; margin-top: 8px;">Start tracking predictions to appear on the leaderboard!</p>
                     </div>
                 `;
-            }).join('');
+                return;
+            }
+            
+            const [first, second, third] = top3;
+            const medals = ['🥇', '🥈', '🥉'];
+            const classes = ['second', 'first', 'third'];
+            const badgeClasses = ['silver', 'gold', 'bronze'];
+            
+            // Reorder for visual display: 2nd, 1st, 3rd
+            const ordered = [second, first, third].filter(Boolean);
+            const orderClasses = top3.length >= 3 ? classes : (top3.length === 2 ? ['second', 'first'] : ['first']);
+            const orderBadges = top3.length >= 3 ? badgeClasses : (top3.length === 2 ? ['silver', 'gold'] : ['gold']);
+            const orderMedals = top3.length >= 3 ? ['🥈', '🥇', '🥉'] : (top3.length === 2 ? ['🥈', '🥇'] : ['🥇']);
+            const orderRanks = top3.length >= 3 ? [2, 1, 3] : (top3.length === 2 ? [2, 1] : [1]);
+            
+            podium.innerHTML = ordered.map((user, i) => `
+                <div class="podium-item ${orderClasses[i]}">
+                    <div class="rank-badge ${orderBadges[i]}">${orderRanks[i]}</div>
+                    <div class="podium-avatar">${orderMedals[i]}</div>
+                    <div class="podium-name">${user.username || user.name || 'User'}</div>
+                    <div class="podium-stats">
+                        <span class="podium-accuracy">${user.accuracy?.toFixed(1) || 0}%</span>
+                        <span>${user.predictions || user.total || 0} picks</span>
+                    </div>
+                </div>
+            `).join('');
         }
         
-        loadLeaderboard();
+        function renderTable(users) {
+            const tbody = document.getElementById('leaderboard-body');
+            
+            tbody.innerHTML = users.map((u, i) => `
+                <tr>
+                    <td class="rank-cell">${i + 1}</td>
+                    <td>
+                        <div class="user-cell">
+                            <div class="user-avatar">${i < 3 ? ['🥇', '🥈', '🥉'][i] : '👤'}</div>
+                            <span class="user-name">${u.username || u.name || 'User'}</span>
+                        </div>
+                    </td>
+                    <td class="accuracy-cell">${u.accuracy?.toFixed(1) || 0}%</td>
+                    <td>${u.predictions || u.total || 0}</td>
+                    <td><span class="badge badge-success">🔥 ${u.streak || 0}</span></td>
+                    <td style="color: #10b981; font-weight: 600;">+${u.roi?.toFixed(1) || 0}%</td>
+                </tr>
+            `).join('');
+        }
+        
+        function renderEmptyState() {
+            const podium = document.getElementById('podium');
+            const tbody = document.getElementById('leaderboard-body');
+            
+            podium.innerHTML = `
+                <div style="text-align: center; padding: 60px; color: var(--text-muted); width: 100%;">
+                    <p style="font-size: 2rem; margin-bottom: 16px;">🏆</p>
+                    <p>No rankings yet</p>
+                    <p style="font-size: 0.9rem; margin-top: 8px; opacity: 0.7;">
+                        Start tracking predictions to appear on the leaderboard!
+                    </p>
+                </div>
+            `;
+            
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="6" style="text-align: center; padding: 40px; color: var(--text-muted);">
+                        <p>📊 Leaderboard is empty</p>
+                        <p style="font-size: 0.85rem; margin-top: 8px;">
+                            <a href="/" style="color: #6366f1;">Make predictions</a> and track results to climb the rankings!
+                        </p>
+                    </td>
+                </tr>
+            `;
+            
+            document.getElementById('rank-count').textContent = 'No data';
+        }
+        
+        // Load on page load
+        document.addEventListener('DOMContentLoaded', loadLeaderboard);
     </script>
 </body>
 </html>

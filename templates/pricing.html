@@ -3,382 +3,475 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pricing | Football Predictions</title>
+    <title>Pricing | FootyPredict Pro</title>
     
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/design-system.css">
+    <meta name="theme-color" content="#6366f1">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
-        .pricing-container {
+        :root {
+            --bg-primary: #050510;
+            --bg-secondary: #0d0d1a;
+            --bg-tertiary: #14142a;
+            --accent: #6366f1;
+            --gold: #fbbf24;
+            --emerald: #10b981;
+            --text: #ffffff;
+            --text-muted: rgba(255, 255, 255, 0.5);
+        }
+        
+        [data-theme="light"] {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f1f5f9;
+            --text: #0f172a;
+            --text-muted: #64748b;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            background-image: radial-gradient(ellipse at top, rgba(99, 102, 241, 0.15) 0%, transparent 50%);
+            color: var(--text);
             min-height: 100vh;
-            padding: var(--spacing-2xl);
-            background: linear-gradient(135deg, var(--bg-primary) 0%, #1a1a3e 100%);
         }
         
-        .pricing-header {
+        [data-theme="light"] body {
+            background-image: radial-gradient(ellipse at top, rgba(99, 102, 241, 0.08) 0%, transparent 50%);
+        }
+        
+        .app { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            background: rgba(13, 13, 26, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 20px;
+            margin-bottom: 40px;
+        }
+        
+        [data-theme="light"] .header {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(0, 0, 0, 0.08);
+        }
+        
+        .logo { display: flex; align-items: center; gap: 12px; }
+        
+        .logo-icon {
+            width: 48px; height: 48px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px;
+        }
+        
+        .logo-text { font-size: 1.5rem; font-weight: 800; }
+        
+        .nav-links { display: flex; gap: 8px; }
+        
+        .nav-link {
+            padding: 10px 18px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            border-radius: 10px;
+            transition: all 0.2s;
+        }
+        
+        .nav-link:hover { background: rgba(99, 102, 241, 0.15); color: #a5b4fc; }
+        
+        /* Page Title */
+        .page-header {
             text-align: center;
-            margin-bottom: var(--spacing-2xl);
+            margin-bottom: 50px;
         }
         
-        .pricing-header h1 {
-            font-size: var(--font-size-4xl);
-            font-weight: 700;
-            margin-bottom: var(--spacing-md);
-            background: var(--accent-gradient);
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, #fff, #a5b4fc);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
         
-        .pricing-header p {
-            color: var(--text-secondary);
-            font-size: var(--font-size-lg);
-        }
-        
-        .billing-toggle {
-            display: flex;
-            justify-content: center;
-            gap: var(--spacing-md);
-            margin-bottom: var(--spacing-2xl);
-        }
-        
-        .billing-toggle button {
-            padding: var(--spacing-md) var(--spacing-xl);
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-full);
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: all var(--transition-fast);
-        }
-        
-        .billing-toggle button.active {
-            background: var(--accent-primary);
-            border-color: var(--accent-primary);
-            color: white;
-        }
-        
-        .savings-badge {
-            background: var(--success-bg);
-            color: var(--success);
-            padding: 2px 8px;
-            border-radius: var(--radius-full);
-            font-size: var(--font-size-xs);
-            font-weight: 600;
-            margin-left: var(--spacing-sm);
-        }
-        
-        .pricing-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: var(--spacing-xl);
-            max-width: 1000px;
+        .page-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            max-width: 600px;
             margin: 0 auto;
         }
         
-        .pricing-card {
-            background: var(--bg-card);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-xl);
-            padding: var(--spacing-xl);
+        /* Pricing Toggle */
+        .pricing-toggle {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+        
+        .toggle-label {
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+        
+        .toggle-label.active { color: var(--text); }
+        
+        .toggle-switch {
+            width: 60px;
+            height: 32px;
+            background: rgba(99, 102, 241, 0.3);
+            border-radius: 16px;
             position: relative;
-            transition: all var(--transition-base);
+            cursor: pointer;
+        }
+        
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 26px;
+            height: 26px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 50%;
+            top: 3px;
+            left: 3px;
+            transition: all 0.3s;
+        }
+        
+        .toggle-switch.yearly::after { left: 31px; }
+        
+        .save-badge {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.1));
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: var(--emerald);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        /* Pricing Cards */
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+        
+        @media (max-width: 900px) {
+            .pricing-grid { grid-template-columns: 1fr; }
+        }
+        
+        .pricing-card {
+            background: rgba(20, 20, 42, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 24px;
+            padding: 32px;
+            position: relative;
+            transition: all 0.3s;
+        }
+        
+        [data-theme="light"] .pricing-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(0, 0, 0, 0.08);
         }
         
         .pricing-card:hover {
             transform: translateY(-8px);
-            box-shadow: var(--shadow-lg);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
         }
         
-        .pricing-card.featured {
-            border-color: var(--accent-primary);
-            box-shadow: 0 0 40px rgba(99, 102, 241, 0.3);
+        .pricing-card.popular {
+            border-color: rgba(99, 102, 241, 0.5);
+            box-shadow: 0 0 60px rgba(99, 102, 241, 0.2);
         }
         
-        .pricing-card.featured::before {
-            content: 'MOST POPULAR';
+        .popular-badge {
             position: absolute;
             top: -12px;
             left: 50%;
             transform: translateX(-50%);
-            background: var(--accent-gradient);
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
             color: white;
-            padding: 4px 16px;
-            border-radius: var(--radius-full);
-            font-size: var(--font-size-xs);
-            font-weight: 600;
-        }
-        
-        .tier-icon {
-            font-size: 2.5rem;
-            margin-bottom: var(--spacing-md);
-        }
-        
-        .tier-name {
-            font-size: var(--font-size-xl);
+            padding: 6px 20px;
+            border-radius: 20px;
+            font-size: 0.8rem;
             font-weight: 700;
-            margin-bottom: var(--spacing-sm);
         }
         
-        .tier-description {
-            color: var(--text-secondary);
-            margin-bottom: var(--spacing-lg);
+        .plan-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 8px;
         }
         
-        .tier-price {
-            margin-bottom: var(--spacing-lg);
+        .plan-desc {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 24px;
+        }
+        
+        .plan-price {
+            margin-bottom: 24px;
         }
         
         .price-amount {
-            font-size: var(--font-size-4xl);
-            font-weight: 700;
+            font-size: 3rem;
+            font-weight: 800;
         }
         
         .price-period {
-            color: var(--text-secondary);
+            color: var(--text-muted);
+            font-size: 0.9rem;
         }
         
-        .tier-features {
+        .plan-features {
             list-style: none;
-            margin-bottom: var(--spacing-xl);
+            margin-bottom: 32px;
         }
         
-        .tier-features li {
+        .plan-features li {
             display: flex;
             align-items: center;
-            gap: var(--spacing-sm);
-            padding: var(--spacing-sm) 0;
-            color: var(--text-secondary);
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
         }
         
-        .tier-features li::before {
-            content: '✓';
-            color: var(--success);
-            font-weight: 600;
-        }
+        .plan-features li:last-child { border-bottom: none; }
         
-        .tier-features li.disabled {
-            opacity: 0.5;
-        }
+        .feature-icon { font-size: 1.2rem; }
         
-        .tier-features li.disabled::before {
-            content: '✗';
-            color: var(--danger);
-        }
+        .feature-icon.check { color: var(--emerald); }
+        .feature-icon.lock { color: var(--text-muted); }
         
-        .tier-cta {
+        .plan-btn {
             width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 14px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
         }
         
-        .tier-cta.btn-outline {
-            background: transparent;
-            border: 2px solid var(--accent-primary);
-            color: var(--accent-primary);
-        }
-        
-        .tier-cta.btn-outline:hover {
-            background: var(--accent-primary);
+        .plan-btn.primary {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
             color: white;
+            box-shadow: 0 8px 32px rgba(99, 102, 241, 0.4);
         }
         
-        /* Affiliates Section */
-        .affiliates-section {
-            max-width: 1000px;
-            margin: var(--spacing-2xl) auto 0;
+        .plan-btn.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(99, 102, 241, 0.5);
+        }
+        
+        .plan-btn.secondary {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .plan-btn.secondary:hover {
+            background: rgba(255, 255, 255, 0.12);
+        }
+        
+        /* Features Section */
+        .features-section {
+            margin-top: 80px;
             text-align: center;
         }
         
-        .affiliates-section h2 {
-            font-size: var(--font-size-2xl);
-            margin-bottom: var(--spacing-lg);
+        .features-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 40px;
         }
         
-        .affiliates-grid {
+        .features-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: var(--spacing-lg);
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
         }
         
-        .affiliate-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-lg);
-            padding: var(--spacing-lg);
-            text-decoration: none;
-            color: var(--text-primary);
-            transition: all var(--transition-fast);
+        @media (max-width: 900px) {
+            .features-grid { grid-template-columns: repeat(2, 1fr); }
         }
         
-        .affiliate-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--shadow-md);
-            border-color: var(--accent-primary);
+        .feature-card {
+            background: rgba(20, 20, 42, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 24px;
         }
         
-        .affiliate-name {
-            font-weight: 600;
-            margin-bottom: var(--spacing-sm);
+        [data-theme="light"] .feature-card {
+            background: rgba(255, 255, 255, 0.8);
+            border-color: rgba(0, 0, 0, 0.08);
         }
         
-        .affiliate-bonus {
-            font-size: var(--font-size-sm);
-            color: var(--success);
+        .feature-card-icon {
+            font-size: 2rem;
+            margin-bottom: 16px;
         }
         
-        .back-link {
-            display: inline-block;
-            margin-bottom: var(--spacing-xl);
-            color: var(--text-secondary);
-            text-decoration: none;
+        .feature-card-title {
+            font-weight: 700;
+            margin-bottom: 8px;
         }
         
-        .back-link:hover {
-            color: var(--text-primary);
+        .feature-card-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
         }
     </style>
 </head>
 <body>
-    <div class="pricing-container">
-        <a href="/" class="back-link">← Back to Predictions</a>
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">⚽</div>
+                <span class="logo-text">FootyPredict Pro</span>
+            </div>
+            
+            <nav class="nav-links">
+                <a href="/" class="nav-link">🏠 Home</a>
+                <a href="/pricing" class="nav-link active">💎 Pricing</a>
+                <a href="/login" class="nav-link">🔐 Login</a>
+            </nav>
+        </header>
         
-        <div class="pricing-header">
-            <h1>Choose Your Plan</h1>
-            <p>Unlock premium predictions and boost your winning rate</p>
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1 class="page-title">Choose Your Plan</h1>
+            <p class="page-subtitle">Get access to AI-powered predictions with up to 82% accuracy. Start winning more today.</p>
         </div>
         
-        <div class="billing-toggle">
-            <button class="active" onclick="toggleBilling('monthly')">Monthly</button>
-            <button onclick="toggleBilling('yearly')">
-                Yearly <span class="savings-badge">Save 17%</span>
-            </button>
+        <!-- Pricing Toggle -->
+        <div class="pricing-toggle">
+            <span class="toggle-label active">Monthly</span>
+            <div class="toggle-switch" onclick="this.classList.toggle('yearly')"></div>
+            <span class="toggle-label">Yearly</span>
+            <span class="save-badge">Save 20%</span>
         </div>
         
-        <div class="pricing-grid stagger-list">
-            <!-- Free Tier -->
+        <!-- Pricing Cards -->
+        <div class="pricing-grid">
+            <!-- Free -->
             <div class="pricing-card">
-                <div class="tier-icon">🆓</div>
-                <div class="tier-name">Free</div>
-                <p class="tier-description">Get started with basic predictions</p>
+                <div class="plan-name">Free</div>
+                <div class="plan-desc">Get started with basic predictions</div>
                 
-                <div class="tier-price">
-                    <span class="price-amount">$0</span>
+                <div class="plan-price">
+                    <span class="price-amount">€0</span>
                     <span class="price-period">/month</span>
                 </div>
                 
-                <ul class="tier-features">
-                    <li>10 predictions per day</li>
-                    <li>Bundesliga only</li>
-                    <li>Basic accumulator</li>
-                    <li>Email support</li>
-                    <li class="disabled">Value bet alerts</li>
-                    <li class="disabled">All leagues</li>
-                    <li class="disabled">API access</li>
+                <ul class="plan-features">
+                    <li><span class="feature-icon check">✓</span> German leagues only</li>
+                    <li><span class="feature-icon check">✓</span> 5 predictions/day</li>
+                    <li><span class="feature-icon check">✓</span> Basic ML model</li>
+                    <li><span class="feature-icon lock">🔒</span> No odds data</li>
+                    <li><span class="feature-icon lock">🔒</span> No Telegram alerts</li>
                 </ul>
                 
-                <a href="/login" class="btn btn-secondary tier-cta">Get Started</a>
+                <button class="plan-btn secondary">Current Plan</button>
             </div>
             
-            <!-- Pro Tier -->
-            <div class="pricing-card featured">
-                <div class="tier-icon">⭐</div>
-                <div class="tier-name">Pro</div>
-                <p class="tier-description">For serious bettors</p>
+            <!-- Pro -->
+            <div class="pricing-card popular">
+                <span class="popular-badge">⭐ Most Popular</span>
+                <div class="plan-name">Pro</div>
+                <div class="plan-desc">For serious bettors</div>
                 
-                <div class="tier-price">
-                    <span class="price-amount" data-monthly="$9.99" data-yearly="$99.99">$9.99</span>
+                <div class="plan-price">
+                    <span class="price-amount">€19</span>
                     <span class="price-period">/month</span>
                 </div>
                 
-                <ul class="tier-features">
-                    <li>50 predictions per day</li>
-                    <li>All leagues</li>
-                    <li>All accumulator types</li>
-                    <li>Value bet alerts</li>
-                    <li>Live odds comparison</li>
-                    <li>Priority support</li>
-                    <li class="disabled">API access</li>
+                <ul class="plan-features">
+                    <li><span class="feature-icon check">✓</span> All European leagues</li>
+                    <li><span class="feature-icon check">✓</span> Unlimited predictions</li>
+                    <li><span class="feature-icon check">✓</span> 5-model ML ensemble</li>
+                    <li><span class="feature-icon check">✓</span> Live odds integration</li>
+                    <li><span class="feature-icon check">✓</span> Telegram alerts</li>
                 </ul>
                 
-                <a href="/login?plan=pro" class="btn btn-primary tier-cta">Start Pro Trial</a>
+                <button class="plan-btn primary">Start Pro Trial</button>
             </div>
             
-            <!-- Premium Tier -->
+            <!-- Premium -->
             <div class="pricing-card">
-                <div class="tier-icon">👑</div>
-                <div class="tier-name">Premium</div>
-                <p class="tier-description">Maximum winning potential</p>
+                <div class="plan-name">Premium</div>
+                <div class="plan-desc">Maximum winning potential</div>
                 
-                <div class="tier-price">
-                    <span class="price-amount" data-monthly="$24.99" data-yearly="$249.99">$24.99</span>
+                <div class="plan-price">
+                    <span class="price-amount">€49</span>
                     <span class="price-period">/month</span>
                 </div>
                 
-                <ul class="tier-features">
-                    <li>Unlimited predictions</li>
-                    <li>All leagues + international</li>
-                    <li>Telegram & WhatsApp alerts</li>
-                    <li>API access</li>
-                    <li>Private Discord community</li>
-                    <li>Early feature access</li>
-                    <li>1-on-1 support</li>
+                <ul class="plan-features">
+                    <li><span class="feature-icon check">✓</span> All 60+ leagues worldwide</li>
+                    <li><span class="feature-icon check">✓</span> Sure Win alerts (91%+)</li>
+                    <li><span class="feature-icon check">✓</span> API access</li>
+                    <li><span class="feature-icon check">✓</span> Kelly stake optimizer</li>
+                    <li><span class="feature-icon check">✓</span> Priority support</li>
                 </ul>
                 
-                <a href="/login?plan=premium" class="btn btn-outline tier-cta">Go Premium</a>
+                <button class="plan-btn secondary">Get Premium</button>
             </div>
         </div>
         
-        <!-- Affiliates Section -->
-        <div class="affiliates-section">
-            <h2>🎰 Recommended Bookmakers</h2>
-            <p style="color: var(--text-secondary); margin-bottom: var(--spacing-lg);">
-                Sign up through our links for exclusive bonuses
-            </p>
+        <!-- Features Section -->
+        <div class="features-section">
+            <h2 class="features-title">Why Choose FootyPredict Pro?</h2>
             
-            <div class="affiliates-grid stagger-list">
-                <a href="#" class="affiliate-card">
-                    <div class="affiliate-name">bet365</div>
-                    <div class="affiliate-bonus">Up to $100 in Bet Credits</div>
-                </a>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-card-icon">🤖</div>
+                    <div class="feature-card-title">5-Model ML Ensemble</div>
+                    <div class="feature-card-desc">Advanced AI combining multiple algorithms for higher accuracy</div>
+                </div>
                 
-                <a href="#" class="affiliate-card">
-                    <div class="affiliate-name">Betway</div>
-                    <div class="affiliate-bonus">$30 Free Bet</div>
-                </a>
+                <div class="feature-card">
+                    <div class="feature-card-icon">📊</div>
+                    <div class="feature-card-title">72-82% Accuracy</div>
+                    <div class="feature-card-desc">Proven track record with live monitoring</div>
+                </div>
                 
-                <a href="#" class="affiliate-card">
-                    <div class="affiliate-name">Unibet</div>
-                    <div class="affiliate-bonus">$40 Money Back</div>
-                </a>
+                <div class="feature-card">
+                    <div class="feature-card-icon">⚡</div>
+                    <div class="feature-card-title">Real-Time Alerts</div>
+                    <div class="feature-card-desc">Instant Telegram & WhatsApp notifications</div>
+                </div>
                 
-                <a href="#" class="affiliate-card">
-                    <div class="affiliate-name">1xBet</div>
-                    <div class="affiliate-bonus">100% up to $130</div>
-                </a>
-                
-                <a href="#" class="affiliate-card">
-                    <div class="affiliate-name">Betfair</div>
-                    <div class="affiliate-bonus">Up to $20 Free</div>
-                </a>
+                <div class="feature-card">
+                    <div class="feature-card-icon">🌍</div>
+                    <div class="feature-card-title">60+ Leagues</div>
+                    <div class="feature-card-desc">Coverage across all major leagues worldwide</div>
+                </div>
             </div>
         </div>
     </div>
     
     <script>
-        function toggleBilling(period) {
-            const buttons = document.querySelectorAll('.billing-toggle button');
-            buttons.forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            const priceElements = document.querySelectorAll('.price-amount[data-monthly]');
-            priceElements.forEach(el => {
-                el.textContent = el.dataset[period];
-            });
-            
-            const periodLabels = document.querySelectorAll('.price-period');
-            periodLabels.forEach(el => {
-                el.textContent = period === 'monthly' ? '/month' : '/year';
-            });
-        }
+        (function() {
+            const saved = localStorage.getItem('theme');
+            if (saved) document.documentElement.setAttribute('data-theme', saved);
+        })();
     </script>
 </body>
 </html>

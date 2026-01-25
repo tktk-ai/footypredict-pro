@@ -1,0 +1,68 @@
+"""
+ML Models Package
+
+Provides pre-trained and custom ML models for match prediction.
+
+Usage:
+    from src.models import predict, get_registry, list_models
+    
+    # Quick prediction
+    pred = predict('Bayern', 'Dortmund')
+    print(pred.home_win_prob, pred.confidence)
+    
+    # Full registry access
+    registry = get_registry()
+    health = registry.health_check()
+"""
+
+from .model_registry import (
+    ModelRegistry,
+    get_registry,
+    predict
+)
+
+from .ensemble import (
+    ModelEnsemble,
+    EnsemblePrediction
+)
+
+from .pretrained_loader import (
+    PretrainedModelLoader,
+    get_loader,
+    download_all,
+    get_model,
+    list_models
+)
+
+from .mock_models import (
+    MockPodosPredictor,
+    MockFootballerPredictor,
+    MockXGBoostPredictor,
+    MockPrediction,
+    create_mock_predictor
+)
+
+__all__ = [
+    # Registry
+    'ModelRegistry',
+    'get_registry',
+    'predict',
+    
+    # Ensemble
+    'ModelEnsemble',
+    'EnsemblePrediction',
+    
+    # Loader
+    'PretrainedModelLoader',
+    'get_loader',
+    'download_all',
+    'get_model',
+    'list_models',
+    
+    # Mock
+    'MockPodosPredictor',
+    'MockFootballerPredictor',
+    'MockXGBoostPredictor',
+    'MockPrediction',
+    'create_mock_predictor'
+]

@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Accumulators | FootyPredict Pro</title>
+    
+    <meta name="theme-color" content="#6366f1">
+    <link rel="manifest" href="/static/manifest.json">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-primary: #050510;
+            --bg-secondary: #0d0d1a;
+            --bg-tertiary: #14142a;
+            --accent: #6366f1;
+            --accent-glow: rgba(99, 102, 241, 0.4);
+            --gold: #fbbf24;
+            --emerald: #10b981;
+            --rose: #f43f5e;
+            --text: #ffffff;
+            --text-muted: rgba(255, 255, 255, 0.5);
+        }
+        
+        [data-theme="light"] {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f1f5f9;
+            --text: #0f172a;
+            --text-muted: #64748b;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            background-image: radial-gradient(ellipse at top, rgba(99, 102, 241, 0.15) 0%, transparent 50%);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        
+        .app { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            background: rgba(13, 13, 26, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 20px;
+            margin-bottom: 30px;
+        }
+        
+        [data-theme="light"] .header {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(0, 0, 0, 0.08);
+        }
+        
+        .logo { display: flex; align-items: center; gap: 12px; }
+        
+        .logo-icon {
+            width: 48px; height: 48px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 8px 32px rgba(16, 185, 129, 0.3);
+        }
+        
+        .logo-text { font-size: 1.5rem; font-weight: 800; }
+        
+        .nav-links { display: flex; gap: 8px; flex-wrap: wrap; }
+        
+        .nav-link {
+            padding: 10px 18px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            border-radius: 10px;
+            transition: all 0.2s;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            background: rgba(99, 102, 241, 0.15);
+            color: #a5b4fc;
+        }
+        
+        .theme-toggle {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 10px 16px;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+        
+        /* Category Tabs */
+        .category-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+        
+        .category-tab {
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: var(--text-muted);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        
+        .category-tab:hover {
+            background: rgba(99, 102, 241, 0.1);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+        
+        .category-tab.active {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-color: transparent;
+            color: white;
+        }
+        
+        /* Accumulators Grid */
+        .accas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 24px;
+        }
+        
+        @media (max-width: 768px) {
+            .accas-grid { grid-template-columns: 1fr; }
+        }
+        
+        /* Accumulator Card */
+        .acca-card {
+            background: rgba(20, 20, 42, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+        
+        .acca-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 60px rgba(99, 102, 241, 0.2);
+        }
+        
+        [data-theme="light"] .acca-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(0, 0, 0, 0.08);
+        }
+        
+        .acca-header {
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.1));
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        
+        .acca-title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .acca-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .acca-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        
+        .badge-sure { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+        .badge-goals { background: rgba(251, 191, 36, 0.2); color: #fbbf24; }
+        .badge-result { background: rgba(99, 102, 241, 0.2); color: #a5b4fc; }
+        .badge-htft { background: rgba(244, 63, 94, 0.2); color: #f43f5e; }
+        
+        .acca-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        
+        .acca-picks {
+            padding: 16px 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .pick-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+        
+        .pick-item:last-child { border-bottom: none; }
+        
+        .pick-match {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        
+        .pick-teams {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .pick-bet {
+            font-size: 0.75rem;
+            color: #a5b4fc;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .cascade-badge {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            font-weight: 700;
+        }
+        
+        .pick-odds {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 2px;
+        }
+        
+        .odds-value {
+            font-weight: 700;
+            color: var(--emerald);
+        }
+        
+        .prob-value {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        
+        /* Acca Footer */
+        .acca-footer {
+            padding: 16px 20px;
+            background: rgba(255, 255, 255, 0.02);
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        
+        .acca-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+        
+        .stat-value.odds { color: var(--gold); }
+        .stat-value.prob { color: var(--emerald); }
+        .stat-value.return { color: var(--accent); }
+        
+        .stat-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+        
+        .copy-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .copy-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+        }
+        
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: var(--text-muted);
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(99, 102, 241, 0.2);
+            border-top-color: #6366f1;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 80px 20px;
+            color: var(--text-muted);
+        }
+        
+        .empty-icon { font-size: 4rem; margin-bottom: 16px; }
+        
+        /* Risk indicators */
+        .risk-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+        
+        .risk-low { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+        .risk-medium { background: rgba(251, 191, 36, 0.15); color: #fbbf24; }
+        .risk-high { background: rgba(244, 63, 94, 0.15); color: #f43f5e; }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .animate-in {
+            animation: fadeIn 0.4s ease forwards;
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">🎯</div>
+                <span class="logo-text">Smart Accumulators</span>
+            </div>
+            
+            <nav class="nav-links">
+                <a href="/" class="nav-link">🏠 Home</a>
+                <a href="/accumulators" class="nav-link">🎰 Manual Accas</a>
+                <a href="/smart-accas" class="nav-link active">🎯 Smart Accas</a>
+                <a href="/tracker" class="nav-link">📊 Tracker</a>
+                <a href="/dashboard" class="nav-link">📈 Dashboard</a>
+            </nav>
+            
+            <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
+        </header>
+        
+        <!-- Info Banner -->
+        <div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(99, 102, 241, 0.1)); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 16px; padding: 20px; margin-bottom: 24px;">
+            <h3 style="margin-bottom: 8px; display: flex; align-items: center; gap: 10px;">
+                🧠 Cascade Logic Intelligence
+            </h3>
+            <p style="color: var(--text-muted); font-size: 0.9rem;">
+                Our smart system uses <strong>cascade logic</strong>: if we predict a match will have xG ≥ 3.5, then Over 0.5, Over 1.5, and Over 2.5 are all <span style="color: var(--emerald);">automatically considered "sure bets"</span>. 
+                Similarly, a strong 85% home win favorite makes Double Chance (1X) a banker pick.
+            </p>
+        </div>
+        
+        <!-- Category Tabs -->
+        <div class="category-tabs" id="category-tabs">
+            <button class="category-tab active" data-category="all">📋 All</button>
+            <button class="category-tab" data-category="sure_wins">🔥 Sure Wins (91%+)</button>
+            <button class="category-tab" data-category="over_0_5">⚽ Over 0.5</button>
+            <button class="category-tab" data-category="over_1_5">🎯 Over 1.5</button>
+            <button class="category-tab" data-category="over_2_5">🔥 Over 2.5</button>
+            <button class="category-tab" data-category="btts">⚔️ BTTS</button>
+            <button class="category-tab" data-category="result">🏆 1X2</button>
+            <button class="category-tab" data-category="double_chance">🛡️ DC</button>
+            <button class="category-tab" data-category="htft">⏱️ HT/FT</button>
+            <!-- COMBO TABS (Over25Tips inspired) -->
+            <button class="category-tab" data-category="win_over_2_5">🎰 Win + O2.5</button>
+            <button class="category-tab" data-category="btts_win">💎 BTTS + Win</button>
+            <button class="category-tab" data-category="btts_over_2_5">🌟 BTTS + O2.5</button>
+            <button class="category-tab" data-category="win_to_nil">🧤 Win to Nil</button>
+        </div>
+        
+        <!-- Accumulators Grid -->
+        <div class="accas-grid" id="accas-grid">
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <div>Loading smart accumulators...</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Theme toggle
+        function toggleTheme() {
+            const html = document.documentElement;
+            const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+        }
+        
+        // Load saved theme
+        (function() {
+            const saved = localStorage.getItem('theme');
+            if (saved) document.documentElement.setAttribute('data-theme', saved);
+        })();
+        
+        // State
+        let allAccumulators = {};
+        let currentCategory = 'all';
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSmartAccumulators();
+            
+            // Category tab clicks
+            document.querySelectorAll('.category-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    currentCategory = tab.dataset.category;
+                    renderAccumulators();
+                });
+            });
+        });
+        
+        async function loadSmartAccumulators() {
+            const grid = document.getElementById('accas-grid');
+            
+            try {
+                const response = await fetch('/api/smart-accumulators');
+                const data = await response.json();
+                
+                if (data.success && data.accumulators) {
+                    allAccumulators = data.accumulators;
+                    renderAccumulators();
+                } else {
+                    grid.innerHTML = `
+                        <div class="empty-state" style="grid-column: 1/-1;">
+                            <div class="empty-icon">📭</div>
+                            <div>No smart accumulators available</div>
+                            <p style="color: var(--text-muted); margin-top: 8px;">Check back when more fixtures are available</p>
+                        </div>
+                    `;
+                }
+            } catch (err) {
+                console.error('Error loading accumulators:', err);
+                grid.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1/-1;">
+                        <div class="empty-icon">⚠️</div>
+                        <div>Error loading accumulators</div>
+                        <p style="color: var(--text-muted); margin-top: 8px;">${err.message}</p>
+                    </div>
+                `;
+            }
+        }
+        
+        function renderAccumulators() {
+            const grid = document.getElementById('accas-grid');
+            
+            let accasToShow = currentCategory === 'all' 
+                ? Object.entries(allAccumulators) 
+                : Object.entries(allAccumulators).filter(([key]) => key === currentCategory);
+            
+            if (accasToShow.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1/-1;">
+                        <div class="empty-icon">📭</div>
+                        <div>No ${currentCategory.replace('_', ' ')} accumulators found</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            grid.innerHTML = accasToShow.map(([key, acca], idx) => {
+                const badgeClass = getBadgeClass(key);
+                const riskClass = `risk-${acca.risk_level || 'medium'}`;
+                
+                return `
+                    <div class="acca-card animate-in" style="animation-delay: ${idx * 0.1}s;">
+                        <div class="acca-header">
+                            <div class="acca-title-row">
+                                <h3 class="acca-title">
+                                    ${acca.emoji || '🎯'} ${acca.name}
+                                </h3>
+                                <span class="acca-badge ${badgeClass}">${acca.num_picks} picks</span>
+                            </div>
+                            <p class="acca-desc">${acca.description}</p>
+                        </div>
+                        
+                        <div class="acca-picks">
+                            ${acca.picks.map(pick => `
+                                <div class="pick-item">
+                                    <div class="pick-match">
+                                        <span class="pick-teams">${pick.home_team} vs ${pick.away_team}</span>
+                                        <span class="pick-bet">
+                                            ${pick.bet_label}
+                                            ${pick.is_cascade ? '<span class="cascade-badge">CASCADE</span>' : ''}
+                                        </span>
+                                    </div>
+                                    <div class="pick-odds">
+                                        <span class="odds-value">${pick.odds.toFixed(2)}</span>
+                                        <span class="prob-value">${(pick.probability * 100).toFixed(0)}%</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        
+                        <div class="acca-footer">
+                            <div class="acca-stats">
+                                <div class="stat-item">
+                                    <div class="stat-value odds">${acca.combined_odds.toFixed(2)}</div>
+                                    <div class="stat-label">Combined Odds</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value prob">${acca.win_chance_pct}%</div>
+                                    <div class="stat-label">Win Chance</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value return">€${acca.potential_return}</div>
+                                    <div class="stat-label">€${acca.suggested_stake} Stake</div>
+                                </div>
+                            </div>
+                            <div style="display: flex; gap: 8px; margin-bottom: 12px; justify-content: center;">
+                                <span class="risk-indicator ${riskClass}">
+                                    ${acca.risk_level === 'low' ? '🟢' : acca.risk_level === 'medium' ? '🟡' : '🔴'}
+                                    ${(acca.risk_level || 'medium').toUpperCase()} RISK
+                                </span>
+                                <span class="risk-indicator" style="background: rgba(99, 102, 241, 0.15); color: #a5b4fc;">
+                                    ⭐ ${(acca.confidence_rating || 'medium').toUpperCase()}
+                                </span>
+                            </div>
+                            <button class="copy-btn" onclick="copyAcca('${key}')">
+                                📋 Copy Accumulator
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        function getBadgeClass(key) {
+            if (key === 'sure_wins' || key === 'double_chance' || key === 'win_to_nil') return 'badge-sure';
+            if (key.startsWith('over_') || key === 'btts' || key.includes('btts_')) return 'badge-goals';
+            if (key === 'result' || key === 'win_over_2_5') return 'badge-result';
+            if (key === 'htft') return 'badge-htft';
+            return 'badge-result';
+        }
+        
+        function copyAcca(key) {
+            const acca = allAccumulators[key];
+            if (!acca) return;
+            
+            let text = `🎯 ${acca.name}\n`;
+            text += `━━━━━━━━━━━━━━━\n`;
+            acca.picks.forEach((p, i) => {
+                text += `${i+1}. ${p.home_team} vs ${p.away_team}\n`;
+                text += `   📌 ${p.bet_label} @ ${p.odds.toFixed(2)}\n`;
+            });
+            text += `━━━━━━━━━━━━━━━\n`;
+            text += `💰 Combined Odds: ${acca.combined_odds.toFixed(2)}\n`;
+            text += `📊 Win Chance: ${acca.win_chance_pct}%\n`;
+            text += `💵 Suggested: €${acca.suggested_stake} → €${acca.potential_return}\n`;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Accumulator copied to clipboard! 📋');
+            }).catch(() => {
+                // Fallback
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                alert('Accumulator copied! 📋');
+            });
+        }
+    </script>
+</body>
+</html>

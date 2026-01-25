@@ -2,23 +2,125 @@
 Vercel Serverless Function Entry Point
 
 This file adapts Flask to work with Vercel's serverless functions.
+Uses proper WSGI adapter for Vercel's Python runtime.
 """
 
-import sys
+from flask import Flask, render_template, jsonify
 import os
+import sys
 
-# Add parent directory to path for imports
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Simple Flask app for Vercel (minimal version to avoid crashes)
+app = Flask(__name__, 
+            template_folder='../templates',
+            static_folder='../static')
 
-# Import the Flask app
-from app import app
+# Basic routes that work in serverless
+@app.route('/')
+def index():
+    """Main page"""
+    return render_template('index.html')
 
-# Vercel expects the WSGI app to be named 'app' or 'handler'
-# For Flask, we export the app directly
+@app.route('/api/health')
+def health():
+    """Health check endpoint"""
+    return jsonify({'status': 'ok', 'platform': 'vercel'})
 
-def handler(request):
-    """Handle incoming requests for Vercel"""
-    return app(request.environ, request.start_response)
+@app.route('/login')
+def login():
+    return render_template('login.html')
 
-# Export for Vercel
-app = app
+@app.route('/pricing')
+def pricing():
+    return render_template('pricing.html')
+
+@app.route('/accumulators')
+def accumulators():
+    return render_template('accumulators.html')
+
+@app.route('/profile')
+def profile():
+    return render_template('profile.html')
+
+@app.route('/tracker')
+def tracker():
+    return render_template('tracker.html')
+
+@app.route('/leaderboard')
+def leaderboard():
+    return render_template('leaderboard.html')
+
+@app.route('/dashboard')
+def dashboard():
+    return render_template('dashboard.html')
+
+# API endpoints (simplified for serverless)
+@app.route('/api/leagues')
+def get_leagues():
+    """Get available leagues"""
+    leagues = [
+        {'id': 'bundesliga', 'name': 'Bundesliga', 'country': 'Germany'},
+        {'id': 'premier_league', 'name': 'Premier League', 'country': 'England'},
+        {'id': 'la_liga', 'name': 'La Liga', 'country': 'Spain'},
+        {'id': 'serie_a', 'name': 'Serie A', 'country': 'Italy'},
+        {'id': 'ligue_1', 'name': 'Ligue 1', 'country': 'France'},
+    ]
+    return jsonify({'success': True, 'leagues': leagues})
+
+@app.route('/api/fixtures')
+def get_fixtures():
+    """Get demo fixtures for serverless"""
+    fixtures = [
+        {
+            'id': '1',
+            'home_team': 'Bayern Munich',
+            'away_team': 'Dortmund',
+            'home_prob': 0.65,
+            'draw_prob': 0.20,
+            'away_prob': 0.15,
+            'confidence': 0.88
+        },
+        {
+            'id': '2',
+            'home_team': 'Leverkusen',
+            'away_team': 'Leipzig',
+            'home_prob': 0.45,
+            'draw_prob': 0.30,
+            'away_prob': 0.25,
+            'confidence': 0.75
+        }
+    ]
+    return jsonify({'success': True, 'fixtures': fixtures})
+
+@app.route('/api/pricing')
+def get_pricing():
+    """Get pricing info"""
+    return jsonify({
+        'success': True,
+        'tiers': [
+            {'id': 'free', 'name': 'Free', 'price': 0},
+            {'id': 'pro', 'name': 'Pro', 'price': 9.99},
+            {'id': 'premium', 'name': 'Premium', 'price': 24.99}
+        ]
+    })
+
+@app.route('/api/accumulators')
+def get_accumulators():
+    """Get demo accumulators"""
+    return jsonify({
+        'success': True,
+        'accumulators': {
+            'safe': {
+                'picks': [
+                    {'home_team': 'Bayern', 'away_team': 'Augsburg', 'selection': 'Over 0.5 Goals', 'odds': 1.10}
+                ],
+                'combined_odds': 1.79,
+                'combined_probability': 0.768,
+                'potential_return': 36,
+                'stake_suggestion': 20
+            }
+        }
+    })
+
+# Vercel needs the app to handle requests
+if __name__ == '__main__':
+    app.run(debug=True)
