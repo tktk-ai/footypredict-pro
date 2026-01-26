@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Model Training | FootyPredict Pro</title>
+    <style>
+        :root {
+            --primary: #10b981;
+            --secondary: #6366f1;
+            --background: #0f172a;
+            --card-bg: #1e293b;
+            --text: #f8fafc;
+            --text-muted: #94a3b8;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --error: #ef4444;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--background);
+            color: var(--text);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .subtitle {
+            color: var(--text-muted);
+            margin-bottom: 2rem;
+        }
+        
+        .card {
+            background: var(--card-bg);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        
+        .card-header h2 {
+            font-size: 1.25rem;
+        }
+        
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+        
+        .status-idle {
+            background: rgba(148, 163, 184, 0.2);
+            color: var(--text-muted);
+        }
+        
+        .status-training {
+            background: rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+            animation: pulse 2s infinite;
+        }
+        
+        .status-complete {
+            background: rgba(34, 197, 94, 0.2);
+            color: var(--success);
+        }
+        
+        .status-error {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--error);
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), #059669);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(16, 185, 129, 0.3);
+        }
+        
+        .btn-secondary {
+            background: linear-gradient(135deg, var(--secondary), #4f46e5);
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(99, 102, 241, 0.3);
+        }
+        
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+            margin-top: 1rem;
+        }
+        
+        .progress-container {
+            margin-top: 1rem;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background: rgba(99, 102, 241, 0.2);
+            border-radius: 9999px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            transition: width 0.5s;
+        }
+        
+        .progress-text {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+        
+        .log-container {
+            background: #0a0f1a;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.875rem;
+            line-height: 1.6;
+        }
+        
+        .log-entry {
+            margin-bottom: 0.25rem;
+        }
+        
+        .log-time {
+            color: var(--text-muted);
+        }
+        
+        .log-info {
+            color: #38bdf8;
+        }
+        
+        .log-success {
+            color: var(--success);
+        }
+        
+        .log-error {
+            color: var(--error);
+        }
+        
+        .log-warning {
+            color: var(--warning);
+        }
+        
+        .models-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .model-card {
+            background: rgba(99, 102, 241, 0.1);
+            border-radius: 0.5rem;
+            padding: 1rem;
+            text-align: center;
+        }
+        
+        .model-icon {
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .model-name {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+        
+        .model-status {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        
+        .config-form {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .form-group label {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+        
+        .form-group input, .form-group select {
+            background: #0a0f1a;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 0.5rem;
+            padding: 0.75rem;
+            color: var(--text);
+            font-size: 1rem;
+        }
+        
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .stat-label {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+        
+        .alert {
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        
+        .alert-info {
+            background: rgba(56, 189, 248, 0.1);
+            border: 1px solid rgba(56, 189, 248, 0.3);
+            color: #38bdf8;
+        }
+        
+        .alert-warning {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.3);
+            color: var(--warning);
+        }
+        
+        .back-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            text-decoration: none;
+            margin-bottom: 1rem;
+        }
+        
+        .back-link:hover {
+            color: var(--primary);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <a href="/" class="back-link">← Back to Home</a>
+        
+        <h1>🧠 Model Training Center</h1>
+        <p class="subtitle">Train and optimize ML models on Hugging Face Spaces (2GB RAM)</p>
+        
+        <div class="alert alert-info">
+            <strong>ℹ️ HF Spaces Free Tier:</strong> Training runs on CPU with 2GB RAM. 
+            XGBoost, LightGBM, and CatBoost train quickly. Neural networks may be limited.
+        </div>
+        
+        <!-- Training Status Card -->
+        <div class="card">
+            <div class="card-header">
+                <h2>📊 Training Status</h2>
+                <span id="statusBadge" class="status-badge status-idle">
+                    <span>⏸️</span> Idle
+                </span>
+            </div>
+            
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-value" id="trainingSessions">0</div>
+                    <div class="stat-label">Training Sessions</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="modelsCount">4</div>
+                    <div class="stat-label">Models</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="lastAccuracy">--</div>
+                    <div class="stat-label">Last Accuracy</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="memoryUsage">--</div>
+                    <div class="stat-label">Memory Usage</div>
+                </div>
+            </div>
+            
+            <div id="progressContainer" class="progress-container" style="display: none;">
+                <div class="progress-bar">
+                    <div id="progressFill" class="progress-fill" style="width: 0%"></div>
+                </div>
+                <div class="progress-text">
+                    <span id="progressStep">Starting...</span>
+                    <span id="progressPercent">0%</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quick Actions Card -->
+        <div class="card">
+            <div class="card-header">
+                <h2>🚀 Quick Training</h2>
+            </div>
+            
+            <p style="color: var(--text-muted); margin-bottom: 1rem;">
+                Start training with default or optimized hyperparameters.
+            </p>
+            
+            <div class="btn-group">
+                <button id="btnStartTraining" class="btn btn-primary" onclick="startTraining()">
+                    ▶️ Start Training
+                </button>
+                <button id="btnAutoTune" class="btn btn-secondary" onclick="startAutoTune()">
+                    🎯 Auto-Tune & Train
+                </button>
+                <button id="btnStopTraining" class="btn" style="background: var(--error);" onclick="stopTraining()" disabled>
+                    ⏹️ Stop
+                </button>
+            </div>
+        </div>
+        
+        <!-- Models Card -->
+        <div class="card">
+            <div class="card-header">
+                <h2>🤖 Models to Train</h2>
+            </div>
+            
+            <div class="models-grid">
+                <div class="model-card">
+                    <div class="model-icon">🌲</div>
+                    <div class="model-name">XGBoost</div>
+                    <div class="model-status" id="xgbStatus">Ready</div>
+                </div>
+                <div class="model-card">
+                    <div class="model-icon">💡</div>
+                    <div class="model-name">LightGBM</div>
+                    <div class="model-status" id="lgbStatus">Ready</div>
+                </div>
+                <div class="model-card">
+                    <div class="model-icon">🐱</div>
+                    <div class="model-name">CatBoost</div>
+                    <div class="model-status" id="catStatus">Ready</div>
+                </div>
+                <div class="model-card">
+                    <div class="model-icon">🧠</div>
+                    <div class="model-name">Neural Net</div>
+                    <div class="model-status" id="nnStatus">Ready (PyTorch)</div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Training Configuration -->
+        <div class="card">
+            <div class="card-header">
+                <h2>⚙️ Training Configuration</h2>
+            </div>
+            
+            <div class="config-form">
+                <div class="form-group">
+                    <label>XGBoost Trees</label>
+                    <input type="number" id="xgbTrees" value="100" min="10" max="500">
+                </div>
+                <div class="form-group">
+                    <label>XGBoost Depth</label>
+                    <input type="number" id="xgbDepth" value="6" min="3" max="15">
+                </div>
+                <div class="form-group">
+                    <label>LightGBM Leaves</label>
+                    <input type="number" id="lgbLeaves" value="31" min="10" max="100">
+                </div>
+                <div class="form-group">
+                    <label>CatBoost Iterations</label>
+                    <input type="number" id="catIter" value="100" min="10" max="500">
+                </div>
+                <div class="form-group">
+                    <label>NN Epochs</label>
+                    <input type="number" id="nnEpochs" value="50" min="10" max="200">
+                </div>
+                <div class="form-group">
+                    <label>NN Hidden Size</label>
+                    <input type="number" id="nnHidden" value="128" min="32" max="512">
+                </div>
+            </div>
+            
+            <div class="btn-group">
+                <button class="btn btn-primary" onclick="startCustomTraining()">
+                    🎚️ Train with Custom Config
+                </button>
+            </div>
+        </div>
+        
+        <!-- Training Logs -->
+        <div class="card">
+            <div class="card-header">
+                <h2>📜 Training Logs</h2>
+            </div>
+            
+            <div id="logContainer" class="log-container">
+                <div class="log-entry">
+                    <span class="log-time">[System]</span>
+                    <span class="log-info">Training Center initialized. Ready to train models.</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let pollingInterval = null;
+        let isTraining = false;
+        
+        // Add log entry
+        function addLog(message, type = 'info') {
+            const container = document.getElementById('logContainer');
+            const time = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = 'log-entry';
+            entry.innerHTML = `<span class="log-time">[${time}]</span> <span class="log-${type}">${message}</span>`;
+            container.appendChild(entry);
+            container.scrollTop = container.scrollHeight;
+        }
+        
+        // Update status badge
+        function updateStatus(status, text) {
+            const badge = document.getElementById('statusBadge');
+            badge.className = `status-badge status-${status}`;
+            badge.innerHTML = text;
+        }
+        
+        // Start training
+        async function startTraining() {
+            try {
+                addLog('Starting model training...', 'info');
+                updateStatus('training', '<span>🔄</span> Training...');
+                
+                document.getElementById('btnStartTraining').disabled = true;
+                document.getElementById('btnAutoTune').disabled = true;
+                document.getElementById('progressContainer').style.display = 'block';
+                
+                const response = await fetch('/api/training/start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ async: true })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    addLog('Training started successfully!', 'success');
+                    isTraining = true;
+                    startPolling();
+                } else {
+                    addLog('Failed to start training: ' + data.error, 'error');
+                    resetButtons();
+                }
+            } catch (error) {
+                addLog('Error: ' + error.message, 'error');
+                resetButtons();
+            }
+        }
+        
+        // Auto-tune and train
+        async function startAutoTune() {
+            try {
+                addLog('Starting auto-tuning and training...', 'info');
+                updateStatus('training', '<span>🎯</span> Tuning...');
+                
+                document.getElementById('btnStartTraining').disabled = true;
+                document.getElementById('btnAutoTune').disabled = true;
+                document.getElementById('progressContainer').style.display = 'block';
+                
+                const response = await fetch('/api/training/retrain-with-tune', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    addLog('Auto-tuning complete. Training started!', 'success');
+                    isTraining = true;
+                    startPolling();
+                } else {
+                    addLog('Failed: ' + data.error, 'error');
+                    resetButtons();
+                }
+            } catch (error) {
+                addLog('Error: ' + error.message, 'error');
+                resetButtons();
+            }
+        }
+        
+        // Custom training with config
+        async function startCustomTraining() {
+            const params = {
+                xgb: {
+                    n_estimators: parseInt(document.getElementById('xgbTrees').value),
+                    max_depth: parseInt(document.getElementById('xgbDepth').value)
+                },
+                lgb: {
+                    num_leaves: parseInt(document.getElementById('lgbLeaves').value)
+                },
+                cat: {
+                    iterations: parseInt(document.getElementById('catIter').value)
+                },
+                nn: {
+                    epochs: parseInt(document.getElementById('nnEpochs').value),
+                    hidden_size: parseInt(document.getElementById('nnHidden').value)
+                }
+            };
+            
+            try {
+                addLog('Starting custom training with config...', 'info');
+                addLog(JSON.stringify(params, null, 2), 'info');
+                updateStatus('training', '<span>🔄</span> Training...');
+                
+                document.getElementById('btnStartTraining').disabled = true;
+                document.getElementById('btnAutoTune').disabled = true;
+                document.getElementById('progressContainer').style.display = 'block';
+                
+                const response = await fetch('/api/training/start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ params: params, async: true })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    addLog('Custom training started!', 'success');
+                    isTraining = true;
+                    startPolling();
+                } else {
+                    addLog('Failed: ' + data.error, 'error');
+                    resetButtons();
+                }
+            } catch (error) {
+                addLog('Error: ' + error.message, 'error');
+                resetButtons();
+            }
+        }
+        
+        // Stop training
+        function stopTraining() {
+            addLog('Stop requested (training will complete current step)', 'warning');
+            // Note: Actual stopping depends on backend implementation
+        }
+        
+        // Poll for status
+        function startPolling() {
+            pollingInterval = setInterval(async () => {
+                try {
+                    const response = await fetch('/api/training/status');
+                    const data = await response.json();
+                    
+                    document.getElementById('trainingSessions').textContent = data.history_count || 0;
+                    
+                    if (data.is_training) {
+                        updateStatus('training', '<span>🔄</span> Training...');
+                        document.getElementById('progressFill').style.width = '50%';
+                        document.getElementById('progressStep').textContent = 'Training models...';
+                        document.getElementById('progressPercent').textContent = 'In Progress';
+                    } else if (data.last_result) {
+                        // Training completed
+                        addLog('Training completed!', 'success');
+                        
+                        if (data.last_result.accuracy) {
+                            document.getElementById('lastAccuracy').textContent = 
+                                (data.last_result.accuracy * 100).toFixed(1) + '%';
+                            addLog(`Final accuracy: ${(data.last_result.accuracy * 100).toFixed(1)}%`, 'success');
+                        }
+                        
+                        updateStatus('complete', '<span>✅</span> Complete');
+                        document.getElementById('progressFill').style.width = '100%';
+                        document.getElementById('progressStep').textContent = 'Training complete!';
+                        document.getElementById('progressPercent').textContent = '100%';
+                        
+                        isTraining = false;
+                        stopPolling();
+                        resetButtons();
+                    }
+                } catch (error) {
+                    console.error('Polling error:', error);
+                }
+            }, 3000);
+        }
+        
+        function stopPolling() {
+            if (pollingInterval) {
+                clearInterval(pollingInterval);
+                pollingInterval = null;
+            }
+        }
+        
+        function resetButtons() {
+            document.getElementById('btnStartTraining').disabled = false;
+            document.getElementById('btnAutoTune').disabled = false;
+        }
+        
+        // Initial status check
+        async function checkInitialStatus() {
+            try {
+                const response = await fetch('/api/training/status');
+                const data = await response.json();
+                
+                document.getElementById('trainingSessions').textContent = data.history_count || 0;
+                
+                if (data.is_training) {
+                    updateStatus('training', '<span>🔄</span> Training...');
+                    document.getElementById('btnStartTraining').disabled = true;
+                    document.getElementById('btnAutoTune').disabled = true;
+                    document.getElementById('progressContainer').style.display = 'block';
+                    startPolling();
+                } else if (data.last_result && data.last_result.accuracy) {
+                    document.getElementById('lastAccuracy').textContent = 
+                        (data.last_result.accuracy * 100).toFixed(1) + '%';
+                }
+                
+                addLog('Connected to training backend', 'success');
+            } catch (error) {
+                addLog('Warning: Could not connect to training API', 'warning');
+            }
+        }
+        
+        // Initialize
+        checkInitialStatus();
+    </script>
+</body>
+</html>

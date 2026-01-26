@@ -253,6 +253,12 @@ def tips_page():
     return render_template('tips.html')
 
 
+@app.route('/training')
+def training_page():
+    """Model training center page"""
+    return render_template('training.html')
+
+
 
 # ============================================================
 # User Authentication API
