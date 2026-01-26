@@ -34,3 +34,12 @@ Thumbs.db
 # W5 research submodule (separate project)
 w5-football-prediction/
 .vercel
+
+# Large model files (use HF model hub for these)
+models/backup/
+models/trained/xgb_football.json
+models/cnn_bilstm_best.pt
+models/trained/footypredict_models.zip
+*.pt
+*.h5
+*.pkl
