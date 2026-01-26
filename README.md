@@ -1,33 +1,58 @@
-# Soccer Prediction System
+---
+title: FootyPredict Pro
+emoji: ⚽
+colorFrom: green
+colorTo: blue
+sdk: docker
+pinned: false
+license: mit
+---
 
-AI-powered football match prediction with real fixtures and ML models.
+# FootyPredict Pro ⚽
 
-## Quick Start
+AI-powered football match prediction with real fixtures and advanced ML models.
 
-```bash
-cd /home/netboss/Desktop/pers_bus/soccer
-source venv/bin/activate
-python app.py
-```
+## 🚀 Live Demo
 
-Open http://localhost:5000
+This app is deployed on Hugging Face Spaces with full ML capabilities including PyTorch for reinforcement learning models.
 
 ## Features
 
-- 🏆 11+ leagues (Bundesliga, Premier League, La Liga, Serie A, etc.)
-- 📊 ELO-based predictions with ML ensemble
-- ⚽ Goal predictions (xG, O2.5, BTTS)
-- 💰 Value bet detection & Kelly Criterion
-- 🎰 Accumulator generator
-- 📱 PWA mobile app
-- 🤖 Telegram & WhatsApp bots
+- 🏆 **35+ leagues** (Premier League, La Liga, Bundesliga, Serie A, etc.)
+- 📊 **ELO-based predictions** with ML ensemble (XGBoost, LightGBM, CatBoost)
+- 🤖 **RL Models** - PyTorch-powered reinforcement learning predictions
+- ⚽ **Goal predictions** (xG, O2.5, BTTS)
+- 💰 **Value bet detection** & Kelly Criterion
+- 🎰 **Accumulator generator** with smart filtering
+- 📱 **PWA mobile app** support
+- 🤖 **Telegram & WhatsApp bots**
 
 ## API Endpoints
 
 ```
-GET /api/fixtures?league=bundesliga&days=7
+GET /api/fixtures?league=premier_league&days=7
 GET /api/predict?home=Bayern&away=Dortmund
-GET /api/standings?league=bundesliga
+GET /api/standings?league=premier_league
 GET /api/leagues
 GET /api/h2h?home=Bayern&away=Dortmund
+GET /api/accumulators
 ```
+
+## Tech Stack
+
+- **Backend**: Flask + Gunicorn
+- **ML Models**: XGBoost, LightGBM, CatBoost, PyTorch (RL)
+- **Data**: Real-time fixtures from multiple free APIs
+
+## Memory Requirements
+
+This app requires ~1.5GB RAM to load all ML models. Hugging Face Spaces free tier (2GB) provides sufficient memory.
+
+## Local Development
+
+```bash
+pip install -r requirements.txt
+python app.py
+```
+
+Open http://localhost:5000
