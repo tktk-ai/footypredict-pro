@@ -189,7 +189,13 @@ register_v3_api(app)
 
 @app.route('/')
 def index():
-    """Main page with upcoming fixtures and predictions"""
+    """Landing page for new visitors"""
+    return render_template('landing.html')
+
+
+@app.route('/app')
+def main_app():
+    """Main app with upcoming fixtures and predictions"""
     return render_template('index.html')
 
 
@@ -239,6 +245,13 @@ def leaderboard_page():
 def smart_accas_page():
     """Smart auto-accumulators page with cascade logic"""
     return render_template('smart_accas.html')
+
+
+@app.route('/tips')
+def tips_page():
+    """Tips page with time-based sections"""
+    return render_template('tips.html')
+
 
 
 # ============================================================
@@ -764,42 +777,45 @@ def get_fixtures_by_league(league):
     days = int(request.args.get('days', 7))
     
     try:
-        # Try free data provider first
-        matches = free_data_provider.get_upcoming_matches([league], days)
-        
-        if matches:
-            fixtures = []
-            for match in matches:
-                match_dict = match.to_dict()
-                fixtures.append({
-                    'home_team': match_dict.get('home_team', match_dict.get('home', 'Unknown')),
-                    'away_team': match_dict.get('away_team', match_dict.get('away', 'Unknown')),
-                    'date': match_dict.get('date', match_dict.get('datetime', 'TBD')),
-                    'time': match_dict.get('time', ''),
-                    'league': league,
-                    'status': match_dict.get('status', 'scheduled'),
-                    'venue': match_dict.get('venue', '')
-                })
-            
-            return jsonify({
-                'success': True,
-                'count': len(fixtures),
-                'fixtures': fixtures,
-                'league': league
-            })
-        
-        # Fallback: Try data aggregator
+        # Try Football-Data.org API first (with API key) - returns Match objects
         matches = data_aggregator.get_upcoming_matches([league], days)
         
         if matches:
             fixtures = []
             for match in matches:
-                match_dict = match.to_dict()
+                match_dict = match.to_dict() if hasattr(match, 'to_dict') else match
+                
+                # Extract time from kickoff datetime (ISO format)
+                kickoff = match_dict.get('kickoff', '')
+                if kickoff:
+                    # Parse ISO datetime and extract time
+                    try:
+                        from datetime import datetime
+                        if 'T' in kickoff:
+                            dt = datetime.fromisoformat(kickoff.replace('Z', '+00:00'))
+                            time_str = dt.strftime('%H:%M')
+                            date_str = dt.strftime('%Y-%m-%d')
+                        else:
+                            time_str = ''
+                            date_str = kickoff
+                    except:
+                        time_str = ''
+                        date_str = kickoff
+                else:
+                    time_str = match_dict.get('time', 'TBD')
+                    date_str = match_dict.get('date', 'TBD')
+                
+                # Get team names (handle both dict and object formats)
+                home_team = match_dict.get('home_team', {})
+                away_team = match_dict.get('away_team', {})
+                home_name = home_team.get('name', str(home_team)) if isinstance(home_team, dict) else str(home_team)
+                away_name = away_team.get('name', str(away_team)) if isinstance(away_team, dict) else str(away_team)
+                
                 fixtures.append({
-                    'home_team': match_dict.get('home_team', {}).get('name', 'Unknown') if isinstance(match_dict.get('home_team'), dict) else match_dict.get('home_team', 'Unknown'),
-                    'away_team': match_dict.get('away_team', {}).get('name', 'Unknown') if isinstance(match_dict.get('away_team'), dict) else match_dict.get('away_team', 'Unknown'),
-                    'date': match_dict.get('date', match_dict.get('datetime', 'TBD')),
-                    'time': match_dict.get('time', ''),
+                    'home_team': {'name': home_name},
+                    'away_team': {'name': away_name},
+                    'date': date_str,
+                    'time': time_str,
                     'league': league,
                     'status': match_dict.get('status', 'scheduled'),
                     'venue': match_dict.get('venue', '')
@@ -809,7 +825,33 @@ def get_fixtures_by_league(league):
                 'success': True,
                 'count': len(fixtures),
                 'fixtures': fixtures,
-                'league': league
+                'league': league,
+                'source': 'football-data.org'
+            })
+        
+        # Fallback: Try free data provider
+        matches = free_data_provider.get_upcoming_matches([league], days)
+        
+        if matches:
+            fixtures = []
+            for match in matches:
+                match_dict = match.to_dict() if hasattr(match, 'to_dict') else match
+                fixtures.append({
+                    'home_team': {'name': match_dict.get('home_team', match_dict.get('home', 'Unknown'))},
+                    'away_team': {'name': match_dict.get('away_team', match_dict.get('away', 'Unknown'))},
+                    'date': match_dict.get('date', 'TBD'),
+                    'time': match_dict.get('time', 'TBD'),
+                    'league': league,
+                    'status': match_dict.get('status', 'scheduled'),
+                    'venue': match_dict.get('venue', '')
+                })
+            
+            return jsonify({
+                'success': True,
+                'count': len(fixtures),
+                'fixtures': fixtures,
+                'league': league,
+                'source': 'free-data'
             })
         
         # No fixtures found - return empty but successful
@@ -827,6 +869,8 @@ def get_fixtures_by_league(league):
             'error': str(e),
             'league': league
         }), 500
+
+
 
 
 @app.route('/api/predict')
@@ -2337,13 +2381,42 @@ def backtest_summary():
 
 @app.route('/api/live-odds')
 def live_odds_api():
-    """Get live odds with comparison"""
+    """Get live odds with comparison - returns home/draw/away odds"""
     sport = request.args.get('sport', 'soccer_epl')
     try:
-        odds = get_live_odds(sport)
-        return jsonify({'success': True, 'odds': odds, 'count': len(odds)})
+        raw_odds = get_live_odds(sport)
+        
+        # Format odds for easy frontend consumption
+        formatted = []
+        for match in raw_odds:
+            home_team = match.get('home_team', '')
+            away_team = match.get('away_team', '')
+            best = match.get('best_odds', {})
+            
+            # Extract best odds for each outcome
+            home_odds = best.get(home_team, {}).get('price', 2.5)
+            away_odds = best.get(away_team, {}).get('price', 2.5)
+            draw_odds = best.get('Draw', {}).get('price', 3.2)
+            
+            formatted.append({
+                'home_team': home_team,
+                'away_team': away_team,
+                'home_odds': home_odds,
+                'draw_odds': draw_odds,
+                'away_odds': away_odds,
+                'odds': {
+                    'home': home_odds,
+                    'draw': draw_odds,
+                    'away': away_odds
+                },
+                'bookmaker_odds': match.get('bookmaker_odds', {})
+            })
+        
+        return jsonify({'success': True, 'odds': formatted, 'count': len(formatted)})
     except Exception as e:
-        return jsonify({'success': True, 'odds': get_sample_odds(), 'sample': True})
+        return jsonify({'success': True, 'odds': get_sample_odds(), 'sample': True, 'error': str(e)})
+
+
 
 
 # ============================================================
