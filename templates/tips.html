@@ -1182,9 +1182,15 @@
             });
         });
         
-        // Load initial data
+        // Load initial data - default to 'week' if no matches today
         document.addEventListener('DOMContentLoaded', () => {
-            loadSectionData('today');
+            // Start with 'This Week' tab as default (more likely to have matches)
+            loadSectionData('week');
+            // Switch UI to week tab
+            document.querySelectorAll('.time-tab').forEach(t => t.classList.remove('active'));
+            document.querySelector('[data-section="week"]').classList.add('active');
+            document.querySelectorAll('.tips-section').forEach(s => s.classList.remove('active'));
+            document.getElementById('section-week').classList.add('active');
         });
         
         async function loadSectionData(section) {
