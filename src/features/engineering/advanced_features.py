@@ -838,3 +838,8 @@ def create_match_features(historical_df: pd.DataFrame) -> pd.DataFrame:
     """Create all features from historical data."""
     engineer = AdvancedFeatureEngineer(historical_df)
     return engineer.create_all_features()
+
+
+# Alias for backward compatibility
+create_advanced_features = create_match_features
+
