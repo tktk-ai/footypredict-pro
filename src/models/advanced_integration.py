@@ -97,15 +97,18 @@ class AdvancedModelsPredictor:
     
     def _create_features_from_odds(self, home_odds: float, draw_odds: float, 
                                    away_odds: float) -> np.ndarray:
-        """Create features primarily from odds"""
-        # Use median stats + odds
+        """Create features primarily from odds - must match 20 features from training"""
+        # 12 stats + 6 odds + 2 averages = 20 features
         features = [
-            12, 10,  # shots
-            5, 4,    # shots on target
-            11, 12,  # fouls
-            5, 4,    # corners
-            1.5, 1.5,  # yellow cards
-            home_odds, draw_odds, away_odds
+            12, 10,      # HS, AS (shots)
+            5, 4,        # HST, AST (shots on target)
+            11, 12,      # HF, AF (fouls)
+            5, 4,        # HC, AC (corners)
+            1.5, 1.5,    # HY, AY (yellow cards)
+            0.1, 0.1,    # HR, AR (red cards)
+            home_odds, draw_odds, away_odds,  # B365H, B365D, B365A
+            home_odds * 0.95, draw_odds * 0.95, away_odds * 0.95,  # BWH, BWD, BWA (alternate odds)
+            1.5, 1.2     # home_goals_avg, away_goals_avg
         ]
         return np.array(features).reshape(1, -1)
     
