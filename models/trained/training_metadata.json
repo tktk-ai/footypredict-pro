@@ -1,0 +1,31 @@
+{
+  "training_date": "2026-01-26T17:03:25.703336",
+  "total_samples": 18085,
+  "features": [
+    "HomeTeamEnc",
+    "AwayTeamEnc",
+    "LeagueEnc",
+    "B365H",
+    "B365D",
+    "B365A",
+    "BWH",
+    "BWD",
+    "BWA",
+    "HS",
+    "AS",
+    "HST",
+    "AST",
+    "HF",
+    "AF",
+    "HC",
+    "AC",
+    "HY",
+    "AY"
+  ],
+  "accuracies": {
+    "xgboost": 0.6074,
+    "lightgbm": 0.6165,
+    "catboost": 0.6262,
+    "neural_net": 0.6356
+  }
+}

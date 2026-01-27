@@ -2357,6 +2357,65 @@ def schedule_status():
 
 
 # ============================================================
+# Comprehensive Training API (500+ features)
+# ============================================================
+
+@app.route('/api/training/comprehensive', methods=['POST'])
+def start_comprehensive_training():
+    """Start comprehensive training with 500+ features and Optuna"""
+    import threading
+    
+    data = request.get_json() or {}
+    use_optuna = data.get('use_optuna', True)
+    optuna_trials = data.get('optuna_trials', 30)
+    nn_epochs = data.get('nn_epochs', 100)
+    
+    def run_training():
+        try:
+            from src.models.ultimate_trainer import run_comprehensive_training
+            result = run_comprehensive_training(
+                use_optuna=use_optuna,
+                optuna_trials=optuna_trials,
+                nn_epochs=nn_epochs
+            )
+            # Store result for status check
+            app.config['COMPREHENSIVE_TRAINING_RESULT'] = result
+            app.config['COMPREHENSIVE_TRAINING_STATUS'] = 'complete'
+        except Exception as e:
+            app.config['COMPREHENSIVE_TRAINING_STATUS'] = 'error'
+            app.config['COMPREHENSIVE_TRAINING_ERROR'] = str(e)
+    
+    # Start in background
+    app.config['COMPREHENSIVE_TRAINING_STATUS'] = 'running'
+    app.config['COMPREHENSIVE_TRAINING_RESULT'] = None
+    thread = threading.Thread(target=run_training)
+    thread.daemon = True
+    thread.start()
+    
+    return jsonify({
+        'success': True,
+        'message': 'Comprehensive training started',
+        'use_optuna': use_optuna,
+        'optuna_trials': optuna_trials
+    })
+
+
+@app.route('/api/training/comprehensive/status')
+def comprehensive_training_status():
+    """Get comprehensive training status"""
+    status = app.config.get('COMPREHENSIVE_TRAINING_STATUS', 'idle')
+    result = app.config.get('COMPREHENSIVE_TRAINING_RESULT')
+    error = app.config.get('COMPREHENSIVE_TRAINING_ERROR')
+    
+    return jsonify({
+        'success': True,
+        'status': status,
+        'result': result,
+        'error': error
+    })
+
+
+# ============================================================
 # Backtesting API (Phase 18)
 # ============================================================
 

@@ -377,19 +377,65 @@
             </div>
         </div>
         
-        <!-- Quick Actions Card -->
-        <div class="card">
+        <!-- Comprehensive Training Card (500+ Features) -->
+        <div class="card" style="border: 2px solid var(--primary); background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(99, 102, 241, 0.1));">
             <div class="card-header">
-                <h2>🚀 Quick Training</h2>
+                <h2>🏆 Comprehensive Training (500+ Features)</h2>
+                <span class="status-badge" style="background: rgba(16, 185, 129, 0.3); color: var(--primary);">RECOMMENDED</span>
             </div>
             
             <p style="color: var(--text-muted); margin-bottom: 1rem;">
-                Start training with default or optimized hyperparameters.
+                Full training with 500+ features: Elo ratings, H2H, momentum, Poisson, BTTS, form analysis.
+                Downloads 20 years of data from 15 leagues (~80,000+ matches).
+            </p>
+            
+            <div class="config-form" style="margin-bottom: 1rem;">
+                <div class="form-group">
+                    <label>Optuna Trials</label>
+                    <input type="number" id="optunaTrials" value="30" min="5" max="100">
+                </div>
+                <div class="form-group">
+                    <label>Neural Net Epochs</label>
+                    <input type="number" id="comprehensiveEpochs" value="100" min="20" max="300">
+                </div>
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; gap: 0.5rem;">
+                        <input type="checkbox" id="useOptuna" checked style="width: auto;">
+                        Use Optuna Auto-Tuning
+                    </label>
+                </div>
+            </div>
+            
+            <div class="btn-group">
+                <button id="btnComprehensive" class="btn btn-primary" onclick="startComprehensiveTraining()" style="background: linear-gradient(135deg, #059669, #0d9488); font-size: 1.1rem; padding: 1rem 2rem;">
+                    🚀 Start Comprehensive Training
+                </button>
+            </div>
+            
+            <div id="comprehensiveProgress" style="display: none; margin-top: 1rem;">
+                <div class="progress-bar">
+                    <div id="comprehensiveFill" class="progress-fill" style="width: 0%"></div>
+                </div>
+                <div class="progress-text">
+                    <span id="comprehensiveStep">Downloading data...</span>
+                    <span id="comprehensivePercent">0%</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quick Actions Card -->
+        <div class="card">
+            <div class="card-header">
+                <h2>⚡ Quick Training (Basic)</h2>
+            </div>
+            
+            <p style="color: var(--text-muted); margin-bottom: 1rem;">
+                Fast training with limited features. Use for quick tests.
             </p>
             
             <div class="btn-group">
                 <button id="btnStartTraining" class="btn btn-primary" onclick="startTraining()">
-                    ▶️ Start Training
+                    ▶️ Quick Train
                 </button>
                 <button id="btnAutoTune" class="btn btn-secondary" onclick="startAutoTune()">
                     🎯 Auto-Tune & Train
@@ -700,6 +746,133 @@
             } catch (error) {
                 addLog('Warning: Could not connect to training API', 'warning');
             }
+        }
+        
+        // Comprehensive Training (500+ features)
+        let comprehensivePolling = null;
+        
+        async function startComprehensiveTraining() {
+            const useOptuna = document.getElementById('useOptuna').checked;
+            const optunaTrials = parseInt(document.getElementById('optunaTrials').value);
+            const nnEpochs = parseInt(document.getElementById('comprehensiveEpochs').value);
+            
+            try {
+                addLog('🚀 Starting COMPREHENSIVE training with 500+ features...', 'info');
+                addLog(`  - Optuna: ${useOptuna ? 'Yes (' + optunaTrials + ' trials)' : 'No'}`, 'info');
+                addLog(`  - Neural Net Epochs: ${nnEpochs}`, 'info');
+                addLog('  - Downloading 20 years of data from 15 leagues...', 'info');
+                
+                updateStatus('training', '<span>🔄</span> Comprehensive Training...');
+                
+                document.getElementById('btnComprehensive').disabled = true;
+                document.getElementById('btnStartTraining').disabled = true;
+                document.getElementById('btnAutoTune').disabled = true;
+                document.getElementById('comprehensiveProgress').style.display = 'block';
+                document.getElementById('progressContainer').style.display = 'block';
+                
+                const response = await fetch('/api/training/comprehensive', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        use_optuna: useOptuna,
+                        optuna_trials: optunaTrials,
+                        nn_epochs: nnEpochs
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    addLog('Comprehensive training started in background!', 'success');
+                    addLog('This may take 5-15 minutes depending on data size...', 'warning');
+                    isTraining = true;
+                    startComprehensivePolling();
+                } else {
+                    addLog('Failed to start: ' + data.error, 'error');
+                    resetAllButtons();
+                }
+            } catch (error) {
+                addLog('Error: ' + error.message, 'error');
+                resetAllButtons();
+            }
+        }
+        
+        function startComprehensivePolling() {
+            let step = 0;
+            const steps = [
+                'Downloading historical data...',
+                'Processing 15 leagues, 20 seasons...',
+                'Calculating Elo ratings...',
+                'Engineering 500+ features...',
+                'Training XGBoost with Optuna...',
+                'Training LightGBM with Optuna...',
+                'Training CatBoost with Optuna...',
+                'Training Neural Network...',
+                'Saving models...'
+            ];
+            
+            comprehensivePolling = setInterval(async () => {
+                try {
+                    const response = await fetch('/api/training/comprehensive/status');
+                    const data = await response.json();
+                    
+                    if (data.status === 'running') {
+                        step = (step + 1) % steps.length;
+                        const progress = Math.min(10 + step * 10, 90);
+                        
+                        document.getElementById('comprehensiveFill').style.width = progress + '%';
+                        document.getElementById('comprehensiveStep').textContent = steps[step];
+                        document.getElementById('comprehensivePercent').textContent = progress + '%';
+                        document.getElementById('progressFill').style.width = progress + '%';
+                        document.getElementById('progressStep').textContent = steps[step];
+                        document.getElementById('progressPercent').textContent = progress + '%';
+                        
+                    } else if (data.status === 'complete' && data.result) {
+                        addLog('🎉 COMPREHENSIVE TRAINING COMPLETE!', 'success');
+                        
+                        if (data.result.models) {
+                            for (const [model, info] of Object.entries(data.result.models)) {
+                                const acc = info.accuracy ? (info.accuracy * 100).toFixed(2) + '%' : 'N/A';
+                                addLog(`  ${model}: ${acc}`, 'success');
+                            }
+                        }
+                        
+                        if (data.result.best_model) {
+                            addLog(`🏆 Best Model: ${data.result.best_model} (${(data.result.best_accuracy * 100).toFixed(2)}%)`, 'success');
+                            document.getElementById('lastAccuracy').textContent = (data.result.best_accuracy * 100).toFixed(1) + '%';
+                        }
+                        
+                        if (data.result.total_features) {
+                            addLog(`📊 Total Features: ${data.result.total_features}`, 'info');
+                        }
+                        
+                        updateStatus('complete', '<span>✅</span> Complete');
+                        document.getElementById('comprehensiveFill').style.width = '100%';
+                        document.getElementById('comprehensiveStep').textContent = 'Training complete!';
+                        document.getElementById('comprehensivePercent').textContent = '100%';
+                        document.getElementById('progressFill').style.width = '100%';
+                        document.getElementById('progressStep').textContent = 'Training complete!';
+                        document.getElementById('progressPercent').textContent = '100%';
+                        
+                        clearInterval(comprehensivePolling);
+                        resetAllButtons();
+                        
+                    } else if (data.status === 'error') {
+                        addLog('Training error: ' + data.error, 'error');
+                        updateStatus('error', '<span>❌</span> Error');
+                        clearInterval(comprehensivePolling);
+                        resetAllButtons();
+                    }
+                } catch (error) {
+                    console.error('Polling error:', error);
+                }
+            }, 5000);
+        }
+        
+        function resetAllButtons() {
+            document.getElementById('btnComprehensive').disabled = false;
+            document.getElementById('btnStartTraining').disabled = false;
+            document.getElementById('btnAutoTune').disabled = false;
         }
         
         // Initialize
