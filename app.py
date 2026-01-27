@@ -3999,7 +3999,7 @@ def get_retraining_status():
 
 
 @app.route('/api/v4/predictions/log', methods=['POST'])
-def log_prediction():
+def log_prediction_v4():
     """Log a prediction for tracking accuracy"""
     try:
         data = request.get_json() or {}
