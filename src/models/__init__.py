@@ -52,6 +52,14 @@ from .sportybet_predictor import (
     get_available_sportybet_markets
 )
 
+# Advanced Models Integration (XGBoost + LightGBM)
+from .advanced_integration import (
+    AdvancedModelsPredictor,
+    AdvancedPrediction,
+    get_advanced_predictor,
+    advanced_predict
+)
+
 __all__ = [
     # Registry
     'ModelRegistry',
@@ -82,5 +90,12 @@ __all__ = [
     'SportyBetMultiPrediction',
     'get_sportybet_predictor',
     'sportybet_predict',
-    'get_available_sportybet_markets'
+    'get_available_sportybet_markets',
+    
+    # Advanced Models
+    'AdvancedModelsPredictor',
+    'AdvancedPrediction',
+    'get_advanced_predictor',
+    'advanced_predict'
 ]
+

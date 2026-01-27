@@ -146,6 +146,15 @@ from src.models.sportybet_predictor import (
     sportybet_predict, get_available_sportybet_markets
 )
 
+# Phase 32: Advanced Models (XGBoost + LightGBM) with Daily Retraining
+from src.models.advanced_integration import (
+    AdvancedModelsPredictor, get_advanced_predictor, advanced_predict
+)
+from src.models.prediction_tracker import PredictionTracker, get_tracker
+from src.models.scheduled_retrain import (
+    start_daily_retrain, stop_scheduled_retrain, get_schedule_status
+)
+
 
 app = Flask(__name__)
 
@@ -3887,6 +3896,170 @@ def api_auto_predictions():
             'predictions': predictions,
             'auto_generated': True,
             'note': 'Start scheduler to auto-populate predictions'
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+# ============================================================
+# Phase 32: Advanced Models API (XGBoost + LightGBM)
+# ============================================================
+
+@app.route('/api/v4/advanced/predict', methods=['POST', 'GET'])
+def advanced_predict_endpoint():
+    """
+    Get predictions using advanced XGBoost/LightGBM models.
+    
+    Params:
+        home_odds: Home win odds (default: 2.0)
+        draw_odds: Draw odds (default: 3.3)
+        away_odds: Away win odds (default: 3.5)
+    
+    Returns:
+        Predictions for result, over_25, btts with model info
+    """
+    try:
+        if request.method == 'POST':
+            data = request.get_json() or {}
+        else:
+            data = request.args
+        
+        home_odds = float(data.get('home_odds', 2.0))
+        draw_odds = float(data.get('draw_odds', 3.3))
+        away_odds = float(data.get('away_odds', 3.5))
+        
+        predictions = advanced_predict(home_odds, draw_odds, away_odds)
+        
+        return jsonify({
+            'success': True,
+            'predictions': predictions,
+            'odds_used': {
+                'home': home_odds,
+                'draw': draw_odds,
+                'away': away_odds
+            }
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/v4/advanced/models', methods=['GET'])
+def get_advanced_models_info():
+    """Get information about loaded advanced models"""
+    try:
+        predictor = get_advanced_predictor()
+        return jsonify({
+            'success': True,
+            'models': predictor.get_model_info()
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/v4/retraining/start', methods=['POST'])
+def start_retraining():
+    """Start daily auto-retraining schedule"""
+    try:
+        data = request.get_json() or {}
+        hour = int(data.get('hour', 3))  # Default 3 AM
+        
+        result = start_daily_retrain(hour=hour)
+        return jsonify({
+            'success': True,
+            'result': result
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/v4/retraining/stop', methods=['POST'])
+def stop_retraining():
+    """Stop auto-retraining schedule"""
+    try:
+        result = stop_scheduled_retrain()
+        return jsonify({
+            'success': True,
+            'result': result
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/v4/retraining/status', methods=['GET'])
+def get_retraining_status():
+    """Get retraining schedule status"""
+    try:
+        status = get_schedule_status()
+        return jsonify({
+            'success': True,
+            'status': status
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/v4/predictions/log', methods=['POST'])
+def log_prediction():
+    """Log a prediction for tracking accuracy"""
+    try:
+        data = request.get_json() or {}
+        tracker = get_tracker()
+        
+        pred_id = tracker.log_prediction(
+            match_id=data.get('match_id', 'unknown'),
+            home_team=data.get('home_team', 'Home'),
+            away_team=data.get('away_team', 'Away'),
+            prediction=data.get('prediction', 'H'),
+            confidence=float(data.get('confidence', 0.5)),
+            probabilities=data.get('probabilities', {}),
+            market=data.get('market', '1X2'),
+            league=data.get('league', 'Unknown')
+        )
+        
+        return jsonify({
+            'success': True,
+            'prediction_id': pred_id
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/v4/predictions/result', methods=['POST'])
+def log_result():
+    """Log actual result for a prediction"""
+    try:
+        data = request.get_json() or {}
+        tracker = get_tracker()
+        
+        tracker.log_result(
+            prediction_id=data['prediction_id'],
+            actual_result=data['actual_result'],
+            home_goals=int(data.get('home_goals', 0)),
+            away_goals=int(data.get('away_goals', 0))
+        )
+        
+        return jsonify({
+            'success': True,
+            'message': 'Result logged'
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/v4/predictions/accuracy', methods=['GET'])
+def get_prediction_accuracy():
+    """Get daily prediction accuracy metrics"""
+    try:
+        tracker = get_tracker()
+        date = request.args.get('date')  # YYYY-MM-DD format
+        
+        metrics = tracker.get_daily_performance(date)
+        trend = tracker.get_accuracy_trend(7)
+        
+        return jsonify({
+            'success': True,
+            'daily': metrics,
+            'trend': trend
         })
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
