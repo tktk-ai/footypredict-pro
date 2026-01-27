@@ -34,18 +34,29 @@ class ScheduledRetrainer:
             self.scheduler = BackgroundScheduler()
     
     def _retrain_job(self):
-        """Job that runs on schedule"""
-        from src.models.local_trainer import retrain_models
-        from src.models.auto_tuner import get_hyperparams
-        
+        """Job that runs on schedule - includes daily calibration"""
         logger.info("Scheduled retraining started...")
         self.last_run = datetime.now()
         
         try:
+            # Step 1: Run daily pipeline (collect results, calibrate, retrain)
+            try:
+                from src.cron.daily_pipeline import run_daily_pipeline
+                pipeline_result = run_daily_pipeline()
+                logger.info(f"Daily pipeline complete: {pipeline_result.get('steps', {}).get('metrics', {})}")
+            except ImportError:
+                logger.warning("Daily pipeline not available, using legacy retrain")
+                pipeline_result = None
+            
+            # Step 2: Run full model retraining if needed
+            from src.models.local_trainer import retrain_models
+            from src.models.auto_tuner import get_hyperparams
+            
             config = get_hyperparams()
             params = config.get('hyperparameters', {})
             result = retrain_models(params, async_mode=False)
             logger.info(f"Scheduled retraining complete: {result}")
+            
         except Exception as e:
             logger.error(f"Scheduled retraining failed: {e}")
     
