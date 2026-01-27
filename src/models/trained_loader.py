@@ -213,27 +213,51 @@ class TrainedModelLoader:
             probs += weights.get('xgb', 0.3) * self.models['xgb'].predict_proba(features)[0]
             total_weight += weights.get('xgb', 0.3)
         
-        # LightGBM
+        # LightGBM (skip if feature count mismatch)
         if 'lgb' in self.models:
-            lgb_probs = self.models['lgb'].predict(features)[0]
-            if lgb_probs.ndim == 0:
-                lgb_probs = np.array([lgb_probs, 0, 0])
-            probs += weights.get('lgb', 0.3) * lgb_probs
-            total_weight += weights.get('lgb', 0.3)
+            try:
+                lgb_raw = self.models['lgb'].predict(features)
+                # Handle different output shapes
+                if lgb_raw.ndim == 1:
+                    lgb_probs = lgb_raw
+                elif lgb_raw.ndim == 2:
+                    lgb_probs = lgb_raw[0]
+                else:
+                    lgb_probs = np.array([lgb_raw, 0.3, 0.3])
+                
+                # Normalize if needed
+                if len(lgb_probs) >= 3:
+                    lgb_probs = lgb_probs[:3]
+                    lgb_probs = lgb_probs / lgb_probs.sum()
+                    probs += weights.get('lgb', 0.3) * lgb_probs
+                    total_weight += weights.get('lgb', 0.3)
+            except Exception as e:
+                # Feature mismatch - skip this model
+                logger.debug(f"LightGBM skipped: {e}")
         
-        # CatBoost
+        # CatBoost (skip if feature count mismatch)
         if 'cat' in self.models:
-            probs += weights.get('cat', 0.25) * self.models['cat'].predict_proba(features)[0]
-            total_weight += weights.get('cat', 0.25)
+            try:
+                cat_probs = self.models['cat'].predict_proba(features)[0]
+                probs += weights.get('cat', 0.25) * cat_probs
+                total_weight += weights.get('cat', 0.25)
+            except Exception as e:
+                logger.debug(f"CatBoost skipped: {e}")
         
-        # Neural Net
-        if 'nn' in self.models and self.scaler:
-            import torch
-            scaled = self.scaler.transform(features)
-            with torch.no_grad():
-                nn_out = torch.softmax(self.models['nn'](torch.FloatTensor(scaled)), dim=1).numpy()[0]
-            probs += weights.get('nn', 0.15) * nn_out
-            total_weight += weights.get('nn', 0.15)
+        # Neural Net (skip if scaler or feature issues)
+        if 'nn' in self.models:
+            try:
+                import torch
+                if self.scaler:
+                    scaled = self.scaler.transform(features)
+                else:
+                    scaled = features
+                with torch.no_grad():
+                    nn_out = torch.softmax(self.models['nn'](torch.FloatTensor(scaled)), dim=1).numpy()[0]
+                probs += weights.get('nn', 0.15) * nn_out
+                total_weight += weights.get('nn', 0.15)
+            except Exception as e:
+                logger.debug(f"Neural Net skipped: {e}")
         
         if total_weight > 0:
             probs = probs / total_weight
