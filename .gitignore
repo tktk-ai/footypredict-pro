@@ -43,3 +43,8 @@ models/trained/footypredict_models.zip
 *.pt
 *.h5
 *.pkl
+
+# Large training data files (exclude from HF deploy)
+data/comprehensive_training_data.csv
+data/raw/kaggle/football_data_all_leagues.csv
+catboost_info/
