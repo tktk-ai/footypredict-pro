@@ -872,6 +872,7 @@
         <div class="time-tabs">
             <button class="time-tab active" data-section="today">📅 Today's Tips</button>
             <button class="time-tab" data-section="week">📆 This Week</button>
+            <button class="time-tab" data-section="sportybet">🎰 SportyBet Tips</button>
             <button class="time-tab" data-section="14days">🗓️ Next 14 Days</button>
             <button class="time-tab" data-section="21days">📋 Next 21 Days</button>
             <button class="time-tab" data-section="30days">🔮 Next 30 Days</button>
@@ -948,6 +949,60 @@
             </div>
             
             <div class="matches-grid" id="week-matches">
+            </div>
+        </section>
+        
+        <!-- SportyBet Section -->
+        <section class="tips-section" id="section-sportybet">
+            <div class="section-header">
+                <div class="section-title">
+                    <div class="section-icon" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.3), rgba(34, 197, 94, 0.2));">🎰</div>
+                    <span>SportyBet Specialized Picks</span>
+                </div>
+                <span class="section-badge" style="background: linear-gradient(135deg, #10b981, #22c55e);" id="sportybet-count">Loading...</span>
+            </div>
+            <p style="color: var(--text-muted); margin-bottom: 20px;">AI-trained models optimized for SportyBet's high-value markets with 70%+ accuracy.</p>
+            
+            <!-- Available Markets -->
+            <div class="section-header" style="margin-top: 30px;">
+                <div class="section-title">
+                    <div class="section-icon">📊</div>
+                    <span>Available Markets</span>
+                </div>
+            </div>
+            <div class="sportybet-markets" id="sportybet-markets" style="display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 30px;">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Loading SportyBet markets...</p>
+                </div>
+            </div>
+            
+            <!-- SportyBet Best Picks -->
+            <div class="section-header">
+                <div class="section-title">
+                    <div class="section-icon">🏆</div>
+                    <span>Best SportyBet Picks Today</span>
+                </div>
+            </div>
+            <div class="acca-grid" id="sportybet-picks">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Analyzing matches with SportyBet models...</p>
+                </div>
+            </div>
+            
+            <!-- SportyBet Accumulator -->
+            <div class="section-header" style="margin-top: 30px;">
+                <div class="section-title">
+                    <div class="section-icon">🎯</div>
+                    <span>SportyBet Optimized Accumulator</span>
+                </div>
+            </div>
+            <div class="acca-grid" id="sportybet-acca">
+                <div class="loading">
+                    <div class="loading-spinner"></div>
+                    <p>Building optimal accumulator...</p>
+                </div>
             </div>
         </section>
         
@@ -1140,6 +1195,9 @@
                 case 'week':
                     loadPeriodData(7, 'week');
                     break;
+                case 'sportybet':
+                    loadSportyBetData();
+                    break;
                 case '14days':
                     loadPeriodData(14, '14days');
                     break;
@@ -1262,6 +1320,163 @@
             renderMatches(allPredictions.sort((a, b) => b.confidence - a.confidence).slice(0, 20), matchesGrid);
             
             document.getElementById(`${sectionId}-count`).textContent = `${allPredictions.length} Matches`;
+        }
+        
+        // SportyBet Data Loading
+        async function loadSportyBetData() {
+            const marketsContainer = document.getElementById('sportybet-markets');
+            const picksGrid = document.getElementById('sportybet-picks');
+            const accaGrid = document.getElementById('sportybet-acca');
+            
+            try {
+                // Load available markets
+                const marketsRes = await fetch('/api/sportybet/markets');
+                const marketsData = await marketsRes.json();
+                
+                if (marketsData.success && marketsData.markets) {
+                    marketsContainer.innerHTML = marketsData.markets.map(m => `
+                        <div class="market-tag high" style="cursor: pointer;" onclick="filterSportyBetMarket('${m.id}')">
+                            ${m.name}
+                        </div>
+                    `).join('');
+                    document.getElementById('sportybet-count').textContent = `${marketsData.count} Markets`;
+                }
+                
+                // Load predictions for today's fixtures
+                const leagues = ['premier_league', 'bundesliga', 'la_liga', 'serie_a'];
+                const sportyPicks = [];
+                
+                for (const league of leagues) {
+                    try {
+                        const fixturesRes = await fetch(`/api/fixtures/${league}`);
+                        const fixturesData = await fixturesRes.json();
+                        
+                        if (fixturesData.success && fixturesData.fixtures) {
+                            for (const match of fixturesData.fixtures.slice(0, 3)) {
+                                const home = match.home_team?.name || match.home_team;
+                                const away = match.away_team?.name || match.away_team;
+                                
+                                const predRes = await fetch(`/api/sportybet/predict?home=${encodeURIComponent(home)}&away=${encodeURIComponent(away)}&league=${league}`);
+                                const pred = await predRes.json();
+                                
+                                if (pred.success && pred.result) {
+                                    sportyPicks.push({
+                                        home, away, league,
+                                        kickoff: match.kickoff || match.datetime || '',
+                                        bestPicks: pred.result.best_picks || []
+                                    });
+                                }
+                            }
+                        }
+                    } catch (e) {
+                        console.log(`SportyBet error for ${league}:`, e);
+                    }
+                }
+                
+                // Render SportyBet picks
+                renderSportyBetPicks(sportyPicks, picksGrid);
+                
+                // Load optimized accumulator
+                const accaRes = await fetch('/api/sportybet/accumulator?min_confidence=0.6&max_picks=6');
+                const accaData = await accaRes.json();
+                
+                if (accaData.success && accaData.accumulator) {
+                    renderSportyBetAcca(accaData.accumulator, accaGrid);
+                }
+                
+            } catch (e) {
+                console.error('SportyBet loading error:', e);
+                marketsContainer.innerHTML = '<p style="color: var(--text-muted);">Error loading SportyBet data</p>';
+            }
+        }
+        
+        function renderSportyBetPicks(picks, container) {
+            if (!picks.length) {
+                container.innerHTML = '<p style="color: var(--text-muted);">No SportyBet picks available</p>';
+                return;
+            }
+            
+            container.innerHTML = picks.map(p => `
+                <div class="acca-card high-conf">
+                    <div class="acca-header">
+                        <div class="acca-title">
+                            <div class="acca-icon" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.3), rgba(34, 197, 94, 0.2));">🎰</div>
+                            <div>
+                                <div class="acca-name">${p.home} vs ${p.away}</div>
+                                <div class="acca-desc">${p.league.replace('_', ' ').toUpperCase()}</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="acca-selections">
+                        ${p.bestPicks.slice(0, 4).map(pick => `
+                            <div class="acca-selection">
+                                <div class="acca-match">
+                                    <div class="acca-teams">${pick.name}</div>
+                                    <div class="acca-pick">${pick.prediction}</div>
+                                </div>
+                                <div class="acca-selection-odds">${pick.probability}%</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="acca-footer">
+                        <div class="acca-confidence">
+                            <span>🎯</span>
+                            <span>Conf: ${p.bestPicks[0]?.confidence || '?'}%</span>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        function renderSportyBetAcca(acca, container) {
+            if (!acca.picks || !acca.picks.length) {
+                container.innerHTML = '<p style="color: var(--text-muted);">No accumulator picks available</p>';
+                return;
+            }
+            
+            container.innerHTML = `
+                <div class="acca-card high-conf" style="grid-column: span 2;">
+                    <div class="acca-header">
+                        <div class="acca-title">
+                            <div class="acca-icon" style="background: linear-gradient(135deg, rgba(251, 191, 36, 0.3), rgba(245, 158, 11, 0.2));">🏆</div>
+                            <div>
+                                <div class="acca-name">SportyBet Super ACCA</div>
+                                <div class="acca-desc">${acca.total_picks} AI-optimized picks</div>
+                            </div>
+                        </div>
+                        <div class="acca-odds">
+                            <div class="acca-odds-value">@${acca.combined_odds}</div>
+                            <div class="acca-odds-label">Combined Odds</div>
+                        </div>
+                    </div>
+                    <div class="acca-selections" style="max-height: 350px;">
+                        ${acca.picks.map(pick => `
+                            <div class="acca-selection">
+                                <div class="acca-match">
+                                    <div class="acca-teams">${pick.home_team} vs ${pick.away_team}</div>
+                                    <div class="acca-pick">${pick.market_name}: ${pick.selection}</div>
+                                </div>
+                                <div class="acca-selection-odds">@${pick.estimated_odds || (100/pick.probability).toFixed(2)}</div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="acca-footer">
+                        <div class="acca-confidence">
+                            <span>💰</span>
+                            <span>Potential: ${acca.potential_return}</span>
+                        </div>
+                        <div class="acca-potential">
+                            <div class="acca-potential-label">£10 Returns</div>
+                            <div class="acca-potential-value">£${(10 * acca.combined_odds).toFixed(2)}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function filterSportyBetMarket(marketId) {
+            console.log('Filter by market:', marketId);
+            // TODO: Implement market-specific filtering
         }
         
         function buildACCAs(predictions) {

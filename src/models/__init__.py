@@ -42,6 +42,16 @@ from .mock_models import (
     create_mock_predictor
 )
 
+# SportyBet specialized models
+from .sportybet_predictor import (
+    SportyBetPredictor,
+    SportyBetPrediction,
+    SportyBetMultiPrediction,
+    get_sportybet_predictor,
+    sportybet_predict,
+    get_available_sportybet_markets
+)
+
 __all__ = [
     # Registry
     'ModelRegistry',
@@ -64,5 +74,13 @@ __all__ = [
     'MockFootballerPredictor',
     'MockXGBoostPredictor',
     'MockPrediction',
-    'create_mock_predictor'
+    'create_mock_predictor',
+    
+    # SportyBet
+    'SportyBetPredictor',
+    'SportyBetPrediction',
+    'SportyBetMultiPrediction',
+    'get_sportybet_predictor',
+    'sportybet_predict',
+    'get_available_sportybet_markets'
 ]

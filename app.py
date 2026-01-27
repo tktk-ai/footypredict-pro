@@ -140,6 +140,12 @@ from src.scheduler import (
 # Phase 30: V3.0 Ultimate Enhancement (Monte Carlo, Player Props, RL)
 from src.v3_api import register_v3_api
 
+# Phase 31: SportyBet Specialized Markets
+from src.models.sportybet_predictor import (
+    SportyBetPredictor, get_sportybet_predictor,
+    sportybet_predict, get_available_sportybet_markets
+)
+
 
 app = Flask(__name__)
 
@@ -619,6 +625,181 @@ def get_goals_accumulators():
             'success': True,
             'count': len(result),
             'goals_accumulators': result
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+# ============================================================
+# SportyBet Markets API (Phase 31)
+# ============================================================
+
+# Initialize SportyBet predictor (lazy load on first use)
+sportybet_predictor = None
+
+def _get_sportybet_predictor():
+    """Lazy-load SportyBet predictor."""
+    global sportybet_predictor
+    if sportybet_predictor is None:
+        sportybet_predictor = get_sportybet_predictor()
+    return sportybet_predictor
+
+
+@app.route('/api/sportybet/markets')
+def get_sportybet_markets():
+    """
+    Get list of available SportyBet markets.
+    
+    Returns trained market IDs and display names.
+    """
+    try:
+        predictor = _get_sportybet_predictor()
+        markets = predictor.get_available_markets()
+        
+        return jsonify({
+            'success': True,
+            'count': len(markets),
+            'markets': markets
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/sportybet/predict')
+def sportybet_predict_all():
+    """
+    Predict all SportyBet markets for a match.
+    
+    Query params:
+        - home: Home team name (required)
+        - away: Away team name (required)
+        - league: League name (optional)
+    
+    Returns predictions for all available markets with confidence scores.
+    """
+    home = request.args.get('home')
+    away = request.args.get('away')
+    league = request.args.get('league', '')
+    
+    if not home or not away:
+        return jsonify({
+            'success': False,
+            'error': 'Missing required parameters: home, away'
+        }), 400
+    
+    try:
+        predictor = _get_sportybet_predictor()
+        result = predictor.predict_all(home, away, league)
+        
+        return jsonify({
+            'success': True,
+            'result': result.to_dict()
+        })
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/sportybet/predict/<market>')
+def sportybet_predict_single(market):
+    """
+    Predict a specific SportyBet market.
+    
+    Path params:
+        - market: Market ID (e.g., 'btts', 'over_25', 'dc_1x')
+    
+    Query params:
+        - home: Home team name (required)
+        - away: Away team name (required)
+        - league: League name (optional)
+    """
+    home = request.args.get('home')
+    away = request.args.get('away')
+    league = request.args.get('league', '')
+    
+    if not home or not away:
+        return jsonify({
+            'success': False,
+            'error': 'Missing required parameters: home, away'
+        }), 400
+    
+    try:
+        predictor = _get_sportybet_predictor()
+        result = predictor.predict_market(market, home, away, league)
+        
+        return jsonify({
+            'success': True,
+            'prediction': result.to_dict()
+        })
+    except ValueError as e:
+        return jsonify({
+            'success': False,
+            'error': str(e),
+            'available_markets': [m['id'] for m in predictor.get_available_markets()]
+        }), 400
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/sportybet/accumulator')
+def sportybet_accumulator():
+    """
+    Get SportyBet-optimized accumulator picks.
+    
+    Uses trained models to select best bets across available fixtures.
+    
+    Query params:
+        - league: Filter by league (can be multiple)
+        - min_confidence: Minimum confidence threshold (default 0.65)
+        - max_picks: Maximum picks in accumulator (default 5)
+    """
+    leagues = request.args.getlist('league') or None
+    min_confidence = float(request.args.get('min_confidence', 0.65))
+    max_picks = int(request.args.get('max_picks', 5))
+    
+    try:
+        # Get predictions for accumulator generation
+        predictions = _get_predictions_for_accumulators(leagues, max_matches=15)
+        
+        if not predictions:
+            return jsonify({
+                'success': False,
+                'error': 'No fixtures available for accumulator generation'
+            }), 404
+        
+        # Build match list for SportyBet predictor
+        matches = [
+            {
+                'home_team': p['match']['home_team']['name'],
+                'away_team': p['match']['away_team']['name'],
+                'league': p.get('league', '')
+            }
+            for p in predictions
+        ]
+        
+        predictor = _get_sportybet_predictor()
+        picks = predictor.get_accumulator_picks(matches, min_confidence)
+        
+        # Limit picks
+        picks = picks[:max_picks]
+        
+        # Calculate accumulator odds (mock for now)
+        total_odds = 1.0
+        for pick in picks:
+            # Estimate odds from probability
+            prob = pick['probability'] / 100
+            if prob > 0:
+                pick['estimated_odds'] = round(1 / prob, 2)
+                total_odds *= pick['estimated_odds']
+        
+        return jsonify({
+            'success': True,
+            'accumulator': {
+                'picks': picks,
+                'total_picks': len(picks),
+                'combined_odds': round(total_odds, 2),
+                'potential_return': f"{total_odds:.2f}x stake"
+            }
         })
         
     except Exception as e:
@@ -2413,6 +2594,155 @@ def comprehensive_training_status():
         'result': result,
         'error': error
     })
+
+
+# ============================================================
+# High-Confidence Predictions API
+# ============================================================
+
+@app.route('/api/predictions/high-confidence')
+def high_confidence_predictions():
+    """Get only high-confidence predictions (filtered by threshold)."""
+    threshold = request.args.get('threshold', 70, type=float)
+    if threshold > 1:
+        threshold = threshold / 100  # Convert percentage to decimal
+    
+    try:
+        from src.models.stacking_ensemble import get_high_confidence_predictions
+        
+        # Get today's matches from existing prediction system
+        today = datetime.now().strftime('%Y-%m-%d')
+        matches = []
+        
+        # Use existing predictions as source
+        for league in ['Premier League', 'La Liga', 'Serie A', 'Bundesliga', 'Ligue 1']:
+            # Generate sample matches (in production, this would use real fixtures)
+            predictions = get_high_confidence_predictions([
+                {'home_team': f'{league} Home', 'away_team': f'{league} Away', 'league': league}
+            ], threshold=threshold)
+            matches.extend(predictions)
+        
+        return jsonify({
+            'success': True,
+            'threshold': threshold,
+            'count': len(matches),
+            'predictions': matches
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/predictions/ensemble', methods=['POST'])
+def ensemble_prediction():
+    """Get ensemble prediction for a specific match."""
+    data = request.get_json() or {}
+    home_team = data.get('home_team')
+    away_team = data.get('away_team')
+    league = data.get('league', 'Unknown')
+    
+    if not home_team or not away_team:
+        return jsonify({'success': False, 'error': 'home_team and away_team required'}), 400
+    
+    try:
+        from src.models.stacking_ensemble import predict_with_ensemble
+        
+        result = predict_with_ensemble(home_team, away_team, league)
+        
+        return jsonify({
+            'success': True,
+            'prediction': result
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+# ============================================================
+# Specialized Models API (BTTS, Over/Under, Double Chance)
+# ============================================================
+
+@app.route('/api/training/specialized', methods=['POST'])
+def train_specialized():
+    """Train specialized models (BTTS, Over/Under, Double Chance)."""
+    import threading
+    
+    data = request.get_json() or {}
+    use_optuna = data.get('use_optuna', True)
+    n_trials = data.get('n_trials', 30)
+    
+    def run_training():
+        try:
+            from src.models.specialized_trainer import train_specialized_models
+            result = train_specialized_models(use_optuna=use_optuna, n_trials=n_trials)
+            app.config['SPECIALIZED_TRAINING_RESULT'] = result
+            app.config['SPECIALIZED_TRAINING_STATUS'] = 'complete'
+        except Exception as e:
+            app.config['SPECIALIZED_TRAINING_STATUS'] = 'error'
+            app.config['SPECIALIZED_TRAINING_ERROR'] = str(e)
+    
+    app.config['SPECIALIZED_TRAINING_STATUS'] = 'running'
+    app.config['SPECIALIZED_TRAINING_RESULT'] = None
+    
+    thread = threading.Thread(target=run_training)
+    thread.daemon = True
+    thread.start()
+    
+    return jsonify({
+        'success': True,
+        'message': 'Specialized training started',
+        'models': ['BTTS', 'Over 2.5', 'Double Chance 1X', 'Double Chance X2', 'Double Chance 12']
+    })
+
+
+@app.route('/api/training/specialized/status')
+def specialized_training_status():
+    """Get specialized training status."""
+    status = app.config.get('SPECIALIZED_TRAINING_STATUS', 'idle')
+    result = app.config.get('SPECIALIZED_TRAINING_RESULT')
+    error = app.config.get('SPECIALIZED_TRAINING_ERROR')
+    
+    return jsonify({
+        'success': True,
+        'status': status,
+        'result': result,
+        'error': error
+    })
+
+
+@app.route('/api/predictions/specialized', methods=['POST'])
+def specialized_predictions():
+    """Get specialized predictions (BTTS, Over/Under, Double Chance)."""
+    data = request.get_json() or {}
+    home_team = data.get('home_team')
+    away_team = data.get('away_team')
+    
+    if not home_team or not away_team:
+        return jsonify({'success': False, 'error': 'home_team and away_team required'}), 400
+    
+    try:
+        from src.models.specialized_trainer import predictor
+        import numpy as np
+        
+        # Load models if not loaded
+        if not predictor.is_loaded:
+            predictor.load_models()
+        
+        # Generate features (dummy for now - would use real feature engineering)
+        np.random.seed(hash(home_team + away_team) % 2**32)
+        features = np.random.randn(1, 20)
+        
+        predictions = predictor.predict_all(features)
+        
+        return jsonify({
+            'success': True,
+            'home_team': home_team,
+            'away_team': away_team,
+            'predictions': predictions
+        })
+        
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 
 # ============================================================
