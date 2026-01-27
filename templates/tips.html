@@ -1210,9 +1210,39 @@
             }
         }
         
+        // Helper: check if date is today
+        function isToday(dateStr) {
+            const now = new Date();
+            const matchDate = new Date(dateStr);
+            return matchDate.getFullYear() === now.getFullYear() &&
+                   matchDate.getMonth() === now.getMonth() &&
+                   matchDate.getDate() === now.getDate();
+        }
+        
+        // Helper: check if date is within X days from now
+        function isWithinDays(dateStr, days) {
+            const now = new Date();
+            const matchDate = new Date(dateStr);
+            const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const endDate = new Date(startOfToday);
+            endDate.setDate(endDate.getDate() + days);
+            return matchDate >= startOfToday && matchDate < endDate;
+        }
+        
+        // Helper: get time slot for a match
+        function getTimeSlot(dateStr) {
+            const hour = new Date(dateStr).getHours();
+            if (hour < 12) return 'morning';
+            if (hour < 18) return 'afternoon';
+            return 'evening';
+        }
+        
         async function loadTodayData(timeOfDay) {
             const accasGrid = document.getElementById('today-accas');
             const matchesGrid = document.getElementById('today-matches');
+            
+            // Show loading message
+            matchesGrid.innerHTML = '<div style="color: var(--text-muted); text-align: center; padding: 40px;">Loading today\'s matches...</div>';
             
             // Get predictions from multiple leagues
             const leagues = ['bundesliga', 'premier_league', 'la_liga', 'serie_a', 'ligue_1'];
@@ -1224,18 +1254,17 @@
                     const data = await res.json();
                     
                     if (data.success && data.fixtures) {
-                        for (const match of data.fixtures.slice(0, 5)) {
+                        for (const match of data.fixtures) {
                             const home = match.home_team?.name || match.home_team;
                             const away = match.away_team?.name || match.away_team;
                             const kickoff = match.kickoff || match.datetime || '';
                             
-                            // Filter by time of day
-                            const hour = new Date(kickoff).getHours();
-                            let matchTime = 'morning';
-                            if (hour >= 12 && hour < 18) matchTime = 'afternoon';
-                            else if (hour >= 18) matchTime = 'evening';
+                            // IMPORTANT: Only include matches from TODAY
+                            if (!isToday(kickoff)) continue;
                             
-                            if (matchTime !== timeOfDay && timeOfDay !== 'all') continue;
+                            // Filter by time of day (Morning: 00-12, Afternoon: 12-18, Evening: 18-24)
+                            const matchTimeSlot = getTimeSlot(kickoff);
+                            if (timeOfDay !== 'all' && matchTimeSlot !== timeOfDay) continue;
                             
                             const predRes = await fetch(`/api/v3/predict?home=${encodeURIComponent(home)}&away=${encodeURIComponent(away)}&league=${league}`);
                             const pred = await predRes.json();
@@ -1265,17 +1294,32 @@
             const accas = buildACCAs(allPredictions);
             renderACCAs(accas, accasGrid);
             
-            // Render best matches
+            // Render best matches sorted by confidence
             renderMatches(allPredictions.sort((a, b) => b.confidence - a.confidence).slice(0, 12), matchesGrid);
             
-            document.getElementById('today-count').textContent = `${allPredictions.length} Matches`;
+            // Update count with time slot info
+            const timeLabel = timeOfDay === 'morning' ? '🌅 Morning' : 
+                              timeOfDay === 'afternoon' ? '☀️ Afternoon' : 
+                              timeOfDay === 'evening' ? '🌙 Evening' : 'Today';
+            document.getElementById('today-count').textContent = `${allPredictions.length} ${timeLabel} Matches`;
+            
+            if (allPredictions.length === 0) {
+                matchesGrid.innerHTML = `<div style="color: var(--text-muted); text-align: center; padding: 40px;">
+                    No matches scheduled for ${timeLabel.toLowerCase()} today.<br>
+                    Try another time slot or check "This Week" for upcoming matches.
+                </div>`;
+            }
         }
         
         async function loadPeriodData(days, sectionId) {
             const accasGrid = document.getElementById(`${sectionId}-accas`);
             const matchesGrid = document.getElementById(`${sectionId}-matches`);
             
-            // For longer periods, we simulate upcoming matches based on league schedules
+            // Show loading message
+            const periodLabel = days === 7 ? 'This Week' : `Next ${days} Days`;
+            matchesGrid.innerHTML = `<div style="color: var(--text-muted); text-align: center; padding: 40px;">Loading ${periodLabel.toLowerCase()} matches...</div>`;
+            
+            // Get fixtures from multiple leagues
             const leagues = ['bundesliga', 'premier_league', 'la_liga', 'serie_a', 'ligue_1'];
             const allPredictions = [];
             
@@ -1288,7 +1332,10 @@
                         for (const match of data.fixtures) {
                             const home = match.home_team?.name || match.home_team;
                             const away = match.away_team?.name || match.away_team;
-                            const kickoff = match.kickoff || match.datetime || new Date().toISOString();
+                            const kickoff = match.kickoff || match.datetime || '';
+                            
+                            // IMPORTANT: Only include matches within the specified date range
+                            if (!isWithinDays(kickoff, days)) continue;
                             
                             const predRes = await fetch(`/api/v3/predict?home=${encodeURIComponent(home)}&away=${encodeURIComponent(away)}&league=${league}`);
                             const pred = await predRes.json();
@@ -1317,9 +1364,16 @@
             // Build and render
             const accas = buildACCAs(allPredictions);
             renderACCAs(accas, accasGrid);
-            renderMatches(allPredictions.sort((a, b) => b.confidence - a.confidence).slice(0, 20), matchesGrid);
+            renderMatches(allPredictions.sort((a, b) => b.confidence - a.confidence).slice(0, 25), matchesGrid);
             
-            document.getElementById(`${sectionId}-count`).textContent = `${allPredictions.length} Matches`;
+            document.getElementById(`${sectionId}-count`).textContent = `${allPredictions.length} Matches (${periodLabel})`;
+            
+            if (allPredictions.length === 0) {
+                matchesGrid.innerHTML = `<div style="color: var(--text-muted); text-align: center; padding: 40px;">
+                    No matches found for ${periodLabel.toLowerCase()}.<br>
+                    Check back later for updated fixtures.
+                </div>`;
+            }
         }
         
         // SportyBet Data Loading
@@ -1342,7 +1396,7 @@
                     document.getElementById('sportybet-count').textContent = `${marketsData.count} Markets`;
                 }
                 
-                // Load predictions for today's fixtures
+                // Load predictions for TODAY's fixtures only
                 const leagues = ['premier_league', 'bundesliga', 'la_liga', 'serie_a'];
                 const sportyPicks = [];
                 
@@ -1352,9 +1406,13 @@
                         const fixturesData = await fixturesRes.json();
                         
                         if (fixturesData.success && fixturesData.fixtures) {
-                            for (const match of fixturesData.fixtures.slice(0, 3)) {
+                            for (const match of fixturesData.fixtures) {
                                 const home = match.home_team?.name || match.home_team;
                                 const away = match.away_team?.name || match.away_team;
+                                const kickoff = match.kickoff || match.datetime || '';
+                                
+                                // Only include TODAY's matches for SportyBet
+                                if (!isToday(kickoff)) continue;
                                 
                                 const predRes = await fetch(`/api/sportybet/predict?home=${encodeURIComponent(home)}&away=${encodeURIComponent(away)}&league=${league}`);
                                 const pred = await predRes.json();
@@ -1362,7 +1420,7 @@
                                 if (pred.success && pred.result) {
                                     sportyPicks.push({
                                         home, away, league,
-                                        kickoff: match.kickoff || match.datetime || '',
+                                        kickoff: kickoff,
                                         bestPicks: pred.result.best_picks || []
                                     });
                                 }
