@@ -201,6 +201,13 @@ register_advanced_api(app)
 # Phase 30: V3.0 Ultimate API (Monte Carlo, Player Props, RL)
 register_v3_api(app)
 
+# Phase 40: Ultimate API v6 - Complete Blueprint Implementation
+try:
+    from src.ultimate_api_v6 import register_ultimate_api
+    register_ultimate_api(app)
+except Exception as e:
+    print(f"⚠️ Ultimate API v6 not loaded: {e}")
+
 
 @app.route('/')
 def index():
