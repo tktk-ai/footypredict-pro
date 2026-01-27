@@ -1182,21 +1182,16 @@
             });
         });
         
-        // Load initial data - default to 'week' if no matches today
+        // Load initial data - start with Today's matches (all time slots)
         document.addEventListener('DOMContentLoaded', () => {
-            // Start with 'This Week' tab as default (more likely to have matches)
-            loadSectionData('week');
-            // Switch UI to week tab
-            document.querySelectorAll('.time-tab').forEach(t => t.classList.remove('active'));
-            document.querySelector('[data-section="week"]').classList.add('active');
-            document.querySelectorAll('.tips-section').forEach(s => s.classList.remove('active'));
-            document.getElementById('section-week').classList.add('active');
+            loadSectionData('today');
         });
         
         async function loadSectionData(section) {
             switch(section) {
                 case 'today':
-                    loadTodayData('morning');
+                    // Load ALL today's matches first, not just morning
+                    loadTodayData('all');
                     break;
                 case 'week':
                     loadPeriodData(7, 'week');
