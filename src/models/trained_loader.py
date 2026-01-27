@@ -162,33 +162,42 @@ class TrainedModelLoader:
                 return elo
         return 1500.0  # Default
     
-    def build_features(self, home_team: str, away_team: str) -> np.ndarray:
-        """Build feature vector for prediction"""
-        home_elo = self.get_elo(home_team)
-        away_elo = self.get_elo(away_team)
-        
-        # Encode teams
-        team_enc = self.encoders.get('team_enc')
-        if team_enc:
-            try:
-                home_enc = team_enc.transform([home_team])[0]
-                away_enc = team_enc.transform([away_team])[0]
-            except:
+    def build_features(self, home_team: str, away_team: str, league: str = 'premier_league') -> np.ndarray:
+        """Build comprehensive 153-feature vector for prediction."""
+        try:
+            # Use comprehensive feature builder
+            from .comprehensive_features import build_match_features
+            features = build_match_features(home_team, away_team, league)
+            logger.debug(f"Built {features.shape[1]} features for {home_team} vs {away_team}")
+            return features
+        except Exception as e:
+            logger.warning(f"Comprehensive features failed, using fallback: {e}")
+            # Fallback to basic features
+            home_elo = self.get_elo(home_team)
+            away_elo = self.get_elo(away_team)
+            
+            # Encode teams
+            team_enc = self.encoders.get('team_enc')
+            if team_enc:
+                try:
+                    home_enc = team_enc.transform([home_team])[0]
+                    away_enc = team_enc.transform([away_team])[0]
+                except:
+                    home_enc, away_enc = 0, 0
+            else:
                 home_enc, away_enc = 0, 0
-        else:
-            home_enc, away_enc = 0, 0
-        
-        # Build feature vector (matches training features)
-        import datetime
-        now = datetime.datetime.now()
-        features = np.array([
-            home_enc, away_enc,
-            home_elo, away_elo,
-            home_elo - away_elo,
-            now.year, now.month, now.weekday()
-        ], dtype=np.float32)
-        
-        return features.reshape(1, -1)
+            
+            # Build basic feature vector
+            import datetime
+            now = datetime.datetime.now()
+            features = np.array([
+                home_enc, away_enc,
+                home_elo, away_elo,
+                home_elo - away_elo,
+                now.year, now.month, now.weekday()
+            ], dtype=np.float32)
+            
+            return features.reshape(1, -1)
     
     def predict(self, home_team: str, away_team: str) -> Dict:
         """Get ensemble prediction"""
