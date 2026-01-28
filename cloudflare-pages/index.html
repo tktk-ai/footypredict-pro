@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FootyPredict Pro - AI Football Predictions</title>
+    <meta name="description" content="AI-powered football match predictions with advanced ML ensemble models">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <div class="logo">
+                <span class="logo-icon">⚽</span>
+                <span class="logo-text">FootyPredict <span class="pro">Pro</span></span>
+            </div>
+            <nav class="nav">
+                <a href="#predictions" class="nav-link">Predictions</a>
+                <a href="#features" class="nav-link">Features</a>
+                <a href="#api" class="nav-link">API</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h1 class="hero-title">
+                    <span class="gradient-text">AI-Powered</span><br>
+                    Football Predictions
+                </h1>
+                <p class="hero-subtitle">
+                    Advanced ML ensemble combining XGBoost, LightGBM & CatBoost
+                    for accurate match outcome predictions
+                </p>
+                <div class="hero-stats">
+                    <div class="stat">
+                        <span class="stat-value">72%</span>
+                        <span class="stat-label">Avg Confidence</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value">100+</span>
+                        <span class="stat-label">Leagues</span>
+                    </div>
+                    <div class="stat">
+                        <span class="stat-value">24/7</span>
+                        <span class="stat-label">Edge Hosted</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Prediction Form -->
+    <section id="predictions" class="predictions-section">
+        <div class="container">
+            <h2 class="section-title">Get Prediction</h2>
+            
+            <div class="prediction-card">
+                <form id="prediction-form" class="prediction-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="home-team">Home Team</label>
+                            <input type="text" id="home-team" placeholder="e.g. Arsenal" required>
+                        </div>
+                        <div class="vs-badge">VS</div>
+                        <div class="form-group">
+                            <label for="away-team">Away Team</label>
+                            <input type="text" id="away-team" placeholder="e.g. Chelsea" required>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group league-select">
+                        <label for="league">League (Optional)</label>
+                        <select id="league">
+                            <option value="">Auto Detect</option>
+                            <option value="Premier League">Premier League</option>
+                            <option value="La Liga">La Liga</option>
+                            <option value="Bundesliga">Bundesliga</option>
+                            <option value="Serie A">Serie A</option>
+                            <option value="Ligue 1">Ligue 1</option>
+                            <option value="Champions League">Champions League</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="btn-predict" id="predict-btn">
+                        <span class="btn-text">Get Prediction</span>
+                        <span class="btn-loader hidden">⏳</span>
+                    </button>
+                </form>
+
+                <!-- Results -->
+                <div id="results" class="results hidden">
+                    <div class="result-header">
+                        <h3 id="match-title">Arsenal vs Chelsea</h3>
+                        <span class="confidence-badge" id="confidence">72% Confidence</span>
+                    </div>
+                    
+                    <div class="predictions-grid">
+                        <!-- Match Result -->
+                        <div class="prediction-item">
+                            <h4>Match Result</h4>
+                            <div class="probability-bars">
+                                <div class="prob-row">
+                                    <span class="prob-label">Home Win</span>
+                                    <div class="prob-bar">
+                                        <div class="prob-fill home" id="prob-home" style="width: 45%"></div>
+                                    </div>
+                                    <span class="prob-value" id="prob-home-val">45%</span>
+                                </div>
+                                <div class="prob-row">
+                                    <span class="prob-label">Draw</span>
+                                    <div class="prob-bar">
+                                        <div class="prob-fill draw" id="prob-draw" style="width: 28%"></div>
+                                    </div>
+                                    <span class="prob-value" id="prob-draw-val">28%</span>
+                                </div>
+                                <div class="prob-row">
+                                    <span class="prob-label">Away Win</span>
+                                    <div class="prob-bar">
+                                        <div class="prob-fill away" id="prob-away" style="width: 27%"></div>
+                                    </div>
+                                    <span class="prob-value" id="prob-away-val">27%</span>
+                                </div>
+                            </div>
+                            <div class="recommendation" id="result-rec">
+                                <span class="rec-icon">🎯</span>
+                                <span id="result-recommendation">Home Win</span>
+                            </div>
+                        </div>
+
+                        <!-- Goals Markets -->
+                        <div class="prediction-item">
+                            <h4>Goals Markets</h4>
+                            <div class="market-cards">
+                                <div class="market-card">
+                                    <span class="market-name">Over 2.5 Goals</span>
+                                    <span class="market-prob" id="over25-prob">55%</span>
+                                    <span class="market-rec" id="over25-rec">Over 2.5</span>
+                                </div>
+                                <div class="market-card">
+                                    <span class="market-name">Both Teams Score</span>
+                                    <span class="market-prob" id="btts-prob">47%</span>
+                                    <span class="market-rec" id="btts-rec">BTTS No</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="result-footer">
+                        <span class="model-version" id="model-version">Model v1.0.0</span>
+                        <span class="timestamp" id="timestamp"></span>
+                    </div>
+                </div>
+
+                <!-- Error Message -->
+                <div id="error-message" class="error-message hidden">
+                    <span class="error-icon">⚠️</span>
+                    <span id="error-text">An error occurred</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features-section">
+        <div class="container">
+            <h2 class="section-title">Features</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🤖</div>
+                    <h3>ML Ensemble</h3>
+                    <p>XGBoost, LightGBM & CatBoost combined for optimal accuracy</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">⚡</div>
+                    <h3>Edge Hosted</h3>
+                    <p>Cloudflare's global network for ultra-low latency</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Multiple Markets</h3>
+                    <p>1X2, Over/Under, BTTS and more betting markets</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔄</div>
+                    <h3>Auto Retraining</h3>
+                    <p>Models retrained bi-weekly on Kaggle GPUs</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- API Section -->
+    <section id="api" class="api-section">
+        <div class="container">
+            <h2 class="section-title">API Access</h2>
+            <div class="api-card">
+                <div class="api-endpoint">
+                    <span class="method">POST</span>
+                    <code>https://footypredict-api.tirene857.workers.dev/predict</code>
+                </div>
+                <pre class="code-block"><code>{
+  "home_team": "Arsenal",
+  "away_team": "Chelsea",
+  "league": "Premier League"
+}</code></pre>
+                <button class="btn-copy" onclick="copyEndpoint()">Copy cURL</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>FootyPredict Pro © 2026 | Powered by Cloudflare Workers</p>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
