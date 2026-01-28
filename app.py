@@ -155,6 +155,12 @@ from src.models.scheduled_retrain import (
     start_daily_retrain, stop_scheduled_retrain, get_schedule_status
 )
 
+# Phase 33: Blueprint Integration (All 17+ Modules)
+from src.blueprint_integration import (
+    get_blueprint, get_blueprint_status, predict_with_blueprint
+)
+from src.blueprint_api import register_blueprint_api
+
 
 app = Flask(__name__)
 
@@ -207,6 +213,13 @@ try:
     register_ultimate_api(app)
 except Exception as e:
     print(f"⚠️ Ultimate API v6 not loaded: {e}")
+
+# Phase 41: Blueprint API - All modules integrated
+try:
+    register_blueprint_api(app)
+    print("✅ Blueprint API registered at /api/* (matches, markets, models, betting)")
+except Exception as e:
+    print(f"⚠️ Blueprint API not loaded: {e}")
 
 
 @app.route('/')
