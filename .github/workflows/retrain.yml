@@ -1,0 +1,200 @@
+name: Bi-Weekly Model Retraining
+
+on:
+  schedule:
+    # Run at 3 AM UTC on 1st and 15th of every month
+    - cron: "0 3 1,15 * *"
+  workflow_dispatch: # Allow manual trigger
+    inputs:
+      force_retrain:
+        description: "Force retraining even if no new data"
+        required: false
+        default: "false"
+
+env:
+  KAGGLE_USERNAME: ${{ secrets.KAGGLE_USERNAME }}
+  KAGGLE_KEY: ${{ secrets.KAGGLE_KEY }}
+
+jobs:
+  retrain:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install Kaggle CLI
+        run: |
+          pip install kaggle
+          mkdir -p ~/.kaggle
+          echo '{"username":"${{ secrets.KAGGLE_USERNAME }}","key":"${{ secrets.KAGGLE_KEY }}"}' > ~/.kaggle/kaggle.json
+          chmod 600 ~/.kaggle/kaggle.json
+
+      - name: Install dependencies for data processing
+        run: |
+          pip install pandas pyarrow
+
+      - name: Upload latest training data to Kaggle
+        run: |
+          # Create staging directory
+          mkdir -p kaggle_data
+
+          # Merge all data sources using Python
+          python3 << 'PYEOF'
+          import pandas as pd
+          from pathlib import Path
+
+          dfs = []
+
+          # Load comprehensive training data (main source ~112K matches)
+          comp_path = Path("data/comprehensive_training_data.csv")
+          if comp_path.exists():
+              df = pd.read_csv(comp_path)
+              print(f"Loaded {len(df)} from comprehensive_training_data.csv")
+              dfs.append(df)
+
+          # Load collected parquet files
+          collected_dir = Path("data/collected")
+          if collected_dir.exists():
+              for f in collected_dir.glob("*.parquet"):
+                  if "merged" not in f.name:
+                      df = pd.read_parquet(f)
+                      print(f"Loaded {len(df)} from {f.name}")
+                      dfs.append(df)
+
+          # Merge and deduplicate
+          if dfs:
+              merged = pd.concat(dfs, ignore_index=True)
+              key_cols = ["Date", "HomeTeam", "AwayTeam"]
+              if all(col in merged.columns for col in key_cols):
+                  before = len(merged)
+                  merged = merged.drop_duplicates(subset=key_cols)
+                  print(f"Deduplicated: {before} -> {len(merged)}")
+              
+              # Save both formats for Kaggle
+              merged.to_parquet("kaggle_data/merged_training_data.parquet", index=False)
+              merged.to_csv("kaggle_data/merged_training_data.csv", index=False)
+              print(f"Total: {len(merged)} matches ready for upload")
+          else:
+              print("No data found - using existing")
+          PYEOF
+
+          # Create dataset metadata
+          cat > kaggle_data/dataset-metadata.json << EOF
+          {
+            "title": "FootyPredict Training Data",
+            "id": "${{ secrets.KAGGLE_USERNAME }}/footypredict-training-data",
+            "licenses": [{"name": "CC0-1.0"}]
+          }
+          EOF
+
+          # Update dataset (create if not exists)
+          kaggle datasets version -p kaggle_data -m "Auto-update $(date +%Y-%m-%d)" || \
+          kaggle datasets create -p kaggle_data
+
+      - name: Trigger Kaggle Notebook
+        run: |
+          # Push notebook to Kaggle
+          mkdir -p kaggle_notebook
+          cp kaggle_training/footypredict_training.ipynb kaggle_notebook/
+
+          cat > kaggle_notebook/kernel-metadata.json << EOF
+          {
+            "id": "${{ secrets.KAGGLE_USERNAME }}/footypredict-training",
+            "title": "FootyPredict V4 Training",
+            "code_file": "footypredict_training.ipynb",
+            "language": "python",
+            "kernel_type": "notebook",
+            "is_private": true,
+            "enable_gpu": true,
+            "enable_tpu": false,
+            "enable_internet": true,
+            "dataset_sources": ["${{ secrets.KAGGLE_USERNAME }}/footypredict-training-data"],
+            "kernel_sources": []
+          }
+          EOF
+
+          kaggle kernels push -p kaggle_notebook
+          echo "Notebook triggered. Waiting for completion..."
+
+      - name: Wait for Training Completion
+        run: |
+          KERNEL="${{ secrets.KAGGLE_USERNAME }}/footypredict-training"
+          MAX_WAIT=3600  # 1 hour max
+          INTERVAL=60    # Check every minute
+          ELAPSED=0
+
+          while [ $ELAPSED -lt $MAX_WAIT ]; do
+            STATUS=$(kaggle kernels status $KERNEL 2>&1)
+            echo "Status: $STATUS"
+            
+            if echo "$STATUS" | grep -q "complete"; then
+              echo "Training completed successfully!"
+              break
+            elif echo "$STATUS" | grep -q "error\|failed"; then
+              echo "Training failed!"
+              exit 1
+            fi
+            
+            sleep $INTERVAL
+            ELAPSED=$((ELAPSED + INTERVAL))
+            echo "Waited ${ELAPSED}s / ${MAX_WAIT}s"
+          done
+
+          if [ $ELAPSED -ge $MAX_WAIT ]; then
+            echo "Timeout waiting for training"
+            exit 1
+          fi
+
+      - name: Download Trained Models
+        run: |
+          mkdir -p trained_models
+          kaggle kernels output ${{ secrets.KAGGLE_USERNAME }}/footypredict-training -p trained_models
+
+          echo "Downloaded models:"
+          ls -la trained_models/
+
+      - name: Deploy to VPS
+        if: success()
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+        run: |
+          # Setup SSH
+          mkdir -p ~/.ssh
+          echo "$VPS_SSH_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H $VPS_HOST >> ~/.ssh/known_hosts 2>/dev/null
+
+          # Upload models
+          scp -r trained_models/*.joblib $VPS_USER@$VPS_HOST:/app/models/v4/
+
+          # Restart application
+          ssh $VPS_USER@$VPS_HOST "cd /app && sudo systemctl restart footypredict"
+
+          echo "Models deployed and app restarted!"
+
+      - name: Send Notification
+        if: always()
+        run: |
+          if [ "${{ job.status }}" == "success" ]; then
+            echo "✅ Training completed successfully"
+            # Add Slack/Discord/Email notification here
+          else
+            echo "❌ Training failed"
+            # Add failure notification here
+          fi
+
+      - name: Cleanup
+        if: always()
+        run: |
+          rm -rf ~/.ssh/id_rsa
+          rm -rf ~/.kaggle
+          rm -rf trained_models kaggle_data kaggle_notebook
