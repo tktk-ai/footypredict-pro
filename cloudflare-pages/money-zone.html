@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Money Zone - FootyPredict Pro</title>
+    <meta name="description" content="AI-powered football predictions organized by time - Breakfast, Lunch, Dinner and weekly forecasts">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="money-zone.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <a href="index.html" class="logo">
+                <span class="logo-icon">⚽</span>
+                <span class="logo-text">FootyPredict <span class="pro">Pro</span></span>
+            </a>
+            <nav class="nav">
+                <a href="index.html" class="nav-link">Home</a>
+                <a href="money-zone.html" class="nav-link active">Money Zone</a>
+                <a href="#combos" class="nav-link">Combos</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Banner -->
+    <section class="money-hero">
+        <div class="container">
+            <h1 class="money-title">💰 <span class="gradient-text">Money Zone</span></h1>
+            <p class="money-subtitle">AI predictions organized by kickoff time - maximize your winning potential</p>
+        </div>
+    </section>
+
+    <!-- Period Selector -->
+    <section class="period-section">
+        <div class="container">
+            <div class="period-tabs">
+                <button class="period-tab active" data-period="today">Today</button>
+                <button class="period-tab" data-period="week">This Week</button>
+                <button class="period-tab" data-period="2weeks">2 Weeks</button>
+                <button class="period-tab" data-period="3weeks">3 Weeks</button>
+                <button class="period-tab" data-period="4weeks">4 Weeks</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Money Zone Section -->
+    <section id="money-zone" class="zone-section">
+        <div class="container">
+            <div class="zone-header">
+                <h2>🕐 Time-Based Predictions</h2>
+                <span class="current-date" id="current-date"></span>
+            </div>
+
+            <!-- Time Tabs -->
+            <div class="time-tabs">
+                <button class="time-tab active" data-time="breakfast">
+                    <span class="tab-icon">🌅</span>
+                    <span class="tab-name">Breakfast</span>
+                    <span class="tab-time">00:00 - 11:00</span>
+                </button>
+                <button class="time-tab" data-time="lunch">
+                    <span class="tab-icon">☀️</span>
+                    <span class="tab-name">Lunch</span>
+                    <span class="tab-time">11:00 - 16:00</span>
+                </button>
+                <button class="time-tab" data-time="dinner">
+                    <span class="tab-icon">🌙</span>
+                    <span class="tab-name">Dinner</span>
+                    <span class="tab-time">16:00 - 24:00</span>
+                </button>
+            </div>
+
+            <!-- Predictions Grid -->
+            <div class="predictions-container">
+                <div id="loading" class="loading-state">
+                    <div class="spinner"></div>
+                    <p>Loading predictions...</p>
+                </div>
+                
+                <div id="predictions-grid" class="predictions-grid"></div>
+                
+                <div id="no-matches" class="empty-state hidden">
+                    <span class="empty-icon">📭</span>
+                    <p>No matches found for this time slot</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Combo Predictions Section -->
+    <section id="combos" class="combos-section">
+        <div class="container">
+            <div class="section-header">
+                <h2>🎯 Combo Predictions</h2>
+                <p>High-confidence accumulators for maximum returns</p>
+            </div>
+
+            <div class="combo-grid">
+                <!-- Safe Combo -->
+                <div class="combo-card safe">
+                    <div class="combo-header">
+                        <span class="combo-badge safe">🛡️ Safe</span>
+                        <span class="combo-odds" id="safe-odds">@2.50</span>
+                    </div>
+                    <h3>Conservative Accumulator</h3>
+                    <p class="combo-desc">3-4 low-risk selections with 75%+ confidence</p>
+                    <div class="combo-picks" id="safe-picks">
+                        <!-- Generated dynamically -->
+                    </div>
+                    <div class="combo-footer">
+                        <span class="win-prob">Win Probability: <strong>68%</strong></span>
+                    </div>
+                </div>
+
+                <!-- Value Combo -->
+                <div class="combo-card value">
+                    <div class="combo-header">
+                        <span class="combo-badge value">💎 Value</span>
+                        <span class="combo-odds" id="value-odds">@5.00</span>
+                    </div>
+                    <h3>Value Accumulator</h3>
+                    <p class="combo-desc">4-5 selections balancing risk and reward</p>
+                    <div class="combo-picks" id="value-picks">
+                        <!-- Generated dynamically -->
+                    </div>
+                    <div class="combo-footer">
+                        <span class="win-prob">Win Probability: <strong>52%</strong></span>
+                    </div>
+                </div>
+
+                <!-- Risky Combo -->
+                <div class="combo-card risky">
+                    <div class="combo-header">
+                        <span class="combo-badge risky">🔥 Risky</span>
+                        <span class="combo-odds" id="risky-odds">@15.00</span>
+                    </div>
+                    <h3>High-Risk Accumulator</h3>
+                    <p class="combo-desc">5-6 bold picks for maximum payout</p>
+                    <div class="combo-picks" id="risky-picks">
+                        <!-- Generated dynamically -->
+                    </div>
+                    <div class="combo-footer">
+                        <span class="win-prob">Win Probability: <strong>28%</strong></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- BTTS & Goals Combos -->
+            <div class="special-combos">
+                <h3>🎲 Special Combos</h3>
+                <div class="special-grid">
+                    <div class="special-card">
+                        <span class="special-icon">⚽⚽</span>
+                        <h4>Over 2.5 Goals</h4>
+                        <div class="special-picks" id="over25-combo"></div>
+                        <span class="special-odds" id="over25-total-odds">@4.20</span>
+                    </div>
+                    <div class="special-card">
+                        <span class="special-icon">🥅🥅</span>
+                        <h4>Both Teams Score</h4>
+                        <div class="special-picks" id="btts-combo"></div>
+                        <span class="special-odds" id="btts-total-odds">@3.80</span>
+                    </div>
+                    <div class="special-card">
+                        <span class="special-icon">🏠</span>
+                        <h4>Home Wins</h4>
+                        <div class="special-picks" id="home-combo"></div>
+                        <span class="special-odds" id="home-total-odds">@6.50</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="stats-section">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <span class="stat-number" id="total-predictions">45</span>
+                    <span class="stat-label">Predictions Today</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="avg-confidence">72%</span>
+                    <span class="stat-label">Avg Confidence</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="combo-count">9</span>
+                    <span class="stat-label">Active Combos</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-number" id="leagues-count">12</span>
+                    <span class="stat-label">Leagues Covered</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <p>FootyPredict Pro © 2026 | Powered by Cloudflare Workers</p>
+        </div>
+    </footer>
+
+    <script src="money-zone.js"></script>
+</body>
+</html>
