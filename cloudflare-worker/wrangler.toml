@@ -1,0 +1,31 @@
+name = "footypredict-api"
+main = "worker.js"
+compatibility_date = "2024-01-01"
+
+# Production Route (uncomment when you have a custom domain)
+# routes = [
+#   { pattern = "api.footypredict.com/*", zone_name = "footypredict.com" }
+# ]
+
+# Environment Variables
+[vars]
+API_VERSION = "1.0.0"
+CORS_ORIGIN = "*"
+
+# KV Namespace for model storage (optional - for caching)
+# [[kv_namespaces]]
+# binding = "MODELS_KV"
+# id = "your-kv-id-here"
+
+# R2 Bucket for model files (optional - for large models)
+# [[r2_buckets]]
+# binding = "MODELS_R2"
+# bucket_name = "footypredict-models"
+
+[build]
+command = ""
+
+# Development settings
+[dev]
+port = 8787
+local_protocol = "http"
