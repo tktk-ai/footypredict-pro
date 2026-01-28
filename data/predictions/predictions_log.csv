@@ -1,2 +1,3 @@
-prediction_id,timestamp,match_date,league,home_team,away_team,market,prediction,confidence,home_prob,draw_prob,away_prob,home_odds,draw_odds,away_odds,model_version
-verify_001_1X2_20260127072221,2026-01-27T07:22:21.713541,2026-01-27,Unknown,Manchester United,Leeds United,1X2,H,0.68,0.55,0.25,0.2,0,0,0,v2.0
+version https://git-lfs.github.com/spec/v1
+oid sha256:ad7da20f60b12538151bfa5a61bcf420bce6e6d9dda15c2d90c6a6a9d85fb03c
+size 308

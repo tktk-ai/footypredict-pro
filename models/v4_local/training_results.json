@@ -1,0 +1,40 @@
+{
+  "timestamp": "2026-01-28T10:35:20.307132",
+  "config": {
+    "n_splits": 3,
+    "test_size": 100,
+    "random_state": 42,
+    "markets": [
+      "result",
+      "over25",
+      "btts"
+    ],
+    "use_gpu": false
+  },
+  "results": {
+    "result": {
+      "accuracy": 1.0,
+      "log_loss": 2.5424427390935064e-05,
+      "train_time": 22.422672033309937,
+      "train_size": 90053,
+      "test_size": 22514,
+      "n_features": 187
+    },
+    "over25": {
+      "accuracy": 1.0,
+      "log_loss": 3.0136238704806505e-05,
+      "train_time": 18.898234128952026,
+      "train_size": 90054,
+      "test_size": 22514,
+      "n_features": 187
+    },
+    "btts": {
+      "accuracy": 1.0,
+      "log_loss": 3.394081934629633e-05,
+      "train_time": 13.522624969482422,
+      "train_size": 90054,
+      "test_size": 22514,
+      "n_features": 187
+    }
+  }
+}

@@ -161,6 +161,11 @@ from src.blueprint_integration import (
 )
 from src.blueprint_api import register_blueprint_api
 
+# Phase 42: Cloudflare Worker API Client
+from src.cloudflare_client import (
+    get_cloudflare_client, cloudflare_predict, CloudflareAPIClient
+)
+
 
 app = Flask(__name__)
 
@@ -293,6 +298,106 @@ def training_page():
     """Model training center page"""
     return render_template('training.html')
 
+
+# ============================================================
+# Cloudflare Worker API (Phase 42)
+# ============================================================
+
+@app.route('/api/cloudflare/predict')
+def cloudflare_predict_endpoint():
+    """Get prediction from Cloudflare Worker API.
+    
+    Uses the deployed Cloudflare Worker for fast edge predictions.
+    Falls back to local models if Cloudflare is unavailable.
+    
+    Query params:
+        - home: Home team name (required)
+        - away: Away team name (required)
+        - league: League name (optional)
+    """
+    home = request.args.get('home')
+    away = request.args.get('away')
+    league = request.args.get('league', '')
+    
+    if not home or not away:
+        return jsonify({'success': False, 'error': 'Missing home or away team'}), 400
+    
+    try:
+        result = cloudflare_predict(home, away, league)
+        
+        if result.get('success', True) and not result.get('error'):
+            return jsonify({
+                'success': True,
+                **result
+            })
+        else:
+            # Fallback to local prediction
+            prediction = predictor.predict_match(home, away, league)
+            goals = goals_predictor.predict_goals(home, away, league)
+            
+            return jsonify({
+                'success': True,
+                'home_team': home,
+                'away_team': away,
+                'league': league,
+                'prediction': prediction.to_dict(),
+                'goals': goals.to_dict(),
+                'source': 'local_fallback',
+                'cloudflare_error': result.get('error')
+            })
+            
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/cloudflare/batch', methods=['POST'])
+def cloudflare_batch_predict():
+    """Get batch predictions from Cloudflare Worker.
+    
+    JSON body:
+        - matches: Array of {home_team, away_team, league?}
+    """
+    data = request.get_json() or {}
+    matches = data.get('matches', [])
+    
+    if not matches:
+        return jsonify({'success': False, 'error': 'No matches provided'}), 400
+    
+    try:
+        client = get_cloudflare_client()
+        result = client.batch_predict(matches)
+        return jsonify({'success': True, **result})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/cloudflare/health')
+def cloudflare_health():
+    """Check Cloudflare Worker API health status."""
+    client = get_cloudflare_client()
+    health = client.health_check()
+    models_info = client.get_models_info()
+    
+    return jsonify({
+        'success': True,
+        'cloudflare': health,
+        'models': models_info,
+        'local_fallback': True
+    })
+
+
+@app.route('/api/cloudflare/status')
+def cloudflare_status():
+    """Get Cloudflare API connection status and configuration."""
+    client = get_cloudflare_client()
+    
+    return jsonify({
+        'success': True,
+        'base_url': client.base_url,
+        'timeout': client.timeout,
+        'cache_ttl': client._cache_ttl,
+        'cached_predictions': len(client._cache)
+    })
 
 
 # ============================================================
