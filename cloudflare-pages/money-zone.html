@@ -20,6 +20,7 @@
             </a>
             <nav class="nav">
                 <a href="index.html" class="nav-link">Home</a>
+                <a href="https://huggingface.co/spaces/nananie143/footypredict-pro" class="nav-link" target="_blank">Daily Tips 🔥</a>
                 <a href="money-zone.html" class="nav-link active">Money Zone</a>
                 <a href="#combos" class="nav-link">Combos</a>
             </nav>
@@ -108,9 +109,7 @@
                     </div>
                     <h3>Conservative Accumulator</h3>
                     <p class="combo-desc">3-4 low-risk selections with 75%+ confidence</p>
-                    <div class="combo-picks" id="safe-picks">
-                        <!-- Generated dynamically -->
-                    </div>
+                    <div class="combo-picks" id="safe-picks"></div>
                     <div class="combo-footer">
                         <span class="win-prob">Win Probability: <strong>68%</strong></span>
                     </div>
@@ -124,9 +123,7 @@
                     </div>
                     <h3>Value Accumulator</h3>
                     <p class="combo-desc">4-5 selections balancing risk and reward</p>
-                    <div class="combo-picks" id="value-picks">
-                        <!-- Generated dynamically -->
-                    </div>
+                    <div class="combo-picks" id="value-picks"></div>
                     <div class="combo-footer">
                         <span class="win-prob">Win Probability: <strong>52%</strong></span>
                     </div>
@@ -140,38 +137,601 @@
                     </div>
                     <h3>High-Risk Accumulator</h3>
                     <p class="combo-desc">5-6 bold picks for maximum payout</p>
-                    <div class="combo-picks" id="risky-picks">
-                        <!-- Generated dynamically -->
-                    </div>
+                    <div class="combo-picks" id="risky-picks"></div>
                     <div class="combo-footer">
                         <span class="win-prob">Win Probability: <strong>28%</strong></span>
                     </div>
                 </div>
             </div>
 
-            <!-- BTTS & Goals Combos -->
-            <div class="special-combos">
-                <h3>🎲 Special Combos</h3>
-                <div class="special-grid">
-                    <div class="special-card">
-                        <span class="special-icon">⚽⚽</span>
-                        <h4>Over 2.5 Goals</h4>
-                        <div class="special-picks" id="over25-combo"></div>
-                        <span class="special-odds" id="over25-total-odds">@4.20</span>
+            <!-- SportyBet Market Categories -->
+            <div class="sportybet-markets">
+                <h3>🎲 SportyBet Market Combos</h3>
+                <p class="markets-subtitle">Predictions for all SportyBet betting markets</p>
+
+                <!-- Market Category Tabs -->
+                <div class="market-tabs">
+                    <button class="market-tab active" data-market="main">Main</button>
+                    <button class="market-tab" data-market="goals">Goals</button>
+                    <button class="market-tab" data-market="half">Half</button>
+                    <button class="market-tab" data-market="bookings">Bookings</button>
+                    <button class="market-tab" data-market="corners">Corners</button>
+                    <button class="market-tab" data-market="combo">Combo</button>
+                    <button class="market-tab" data-market="players">Players</button>
+                    <button class="market-tab" data-market="teams">Teams</button>
+                    <button class="market-tab" data-market="minutes">Minutes</button>
+                </div>
+
+                <!-- Main Markets -->
+                <div class="market-content active" id="main-markets">
+                    <div class="special-grid">
+                        <div class="special-card">
+                            <span class="special-icon">1️⃣❌2️⃣</span>
+                            <h4>1X2</h4>
+                            <div class="special-picks" id="1x2-combo"></div>
+                            <span class="special-odds" id="1x2-total-odds">@5.20</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">1️⃣🆙</span>
+                            <h4>1X2 - 1UP</h4>
+                            <div class="special-picks" id="1x2-1up-combo"></div>
+                            <span class="special-odds" id="1x2-1up-total-odds">@3.80</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">2️⃣🆙</span>
+                            <h4>1X2 - 2UP</h4>
+                            <div class="special-picks" id="1x2-2up-combo"></div>
+                            <span class="special-odds" id="1x2-2up-total-odds">@2.90</span>
+                        </div>
                     </div>
-                    <div class="special-card">
-                        <span class="special-icon">🥅🥅</span>
-                        <h4>Both Teams Score</h4>
-                        <div class="special-picks" id="btts-combo"></div>
-                        <span class="special-odds" id="btts-total-odds">@3.80</span>
-                    </div>
-                    <div class="special-card">
-                        <span class="special-icon">🏠</span>
-                        <h4>Home Wins</h4>
-                        <div class="special-picks" id="home-combo"></div>
-                        <span class="special-odds" id="home-total-odds">@6.50</span>
+                    <div class="special-grid" style="margin-top: 20px;">
+                        <div class="special-card">
+                            <span class="special-icon">1️⃣❌</span>
+                            <h4>Double Chance</h4>
+                            <div class="special-picks" id="dc-combo"></div>
+                            <span class="special-odds" id="dc-total-odds">@2.15</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">🥅🥅</span>
+                            <h4>GG/NG</h4>
+                            <div class="special-picks" id="ggng-combo"></div>
+                            <span class="special-odds" id="ggng-total-odds">@3.80</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">🏠</span>
+                            <h4>Draw No Bet</h4>
+                            <div class="special-picks" id="dnb-combo"></div>
+                            <span class="special-odds" id="dnb-total-odds">@3.50</span>
+                        </div>
                     </div>
                 </div>
+
+                <!-- Goals Markets -->
+                <div class="market-content" id="goals-markets">
+                    <div class="special-grid">
+                        <div class="special-card">
+                            <span class="special-icon">⚽1️⃣.5️⃣</span>
+                            <h4>Over/Under 1.5</h4>
+                            <div class="special-picks" id="ou15-combo"></div>
+                            <span class="special-odds" id="ou15-total-odds">@2.40</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">⚽2️⃣.5️⃣</span>
+                            <h4>Over/Under 2.5</h4>
+                            <div class="special-picks" id="ou25-combo"></div>
+                            <span class="special-odds" id="ou25-total-odds">@4.20</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">⚽3️⃣.5️⃣</span>
+                            <h4>Over/Under 3.5</h4>
+                            <div class="special-picks" id="ou35-combo"></div>
+                            <span class="special-odds" id="ou35-total-odds">@6.50</span>
+                        </div>
+                    </div>
+                    <div class="special-grid" style="margin-top: 20px;">
+                        <div class="special-card">
+                            <span class="special-icon">🔢</span>
+                            <h4>Correct Score</h4>
+                            <div class="special-picks" id="cs-combo"></div>
+                            <span class="special-odds" id="cs-total-odds">@45.00</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">⚽🏠</span>
+                            <h4>Home Team Goals</h4>
+                            <div class="special-picks" id="htg-combo"></div>
+                            <span class="special-odds" id="htg-total-odds">@4.20</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">⚽✈️</span>
+                            <h4>Away Team Goals</h4>
+                            <div class="special-picks" id="atg-combo"></div>
+                            <span class="special-odds" id="atg-total-odds">@5.10</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Half Markets -->
+                <div class="market-content" id="half-markets">
+                    <div class="special-grid">
+                        <div class="special-card">
+                            <span class="special-icon">1️⃣H</span>
+                            <h4>1st Half Result</h4>
+                            <div class="special-picks" id="ht1x2-combo"></div>
+                            <span class="special-odds" id="ht1x2-total-odds">@6.80</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">2️⃣H</span>
+                            <h4>2nd Half Result</h4>
+                            <div class="special-picks" id="ft1x2-combo"></div>
+                            <span class="special-odds" id="ft1x2-total-odds">@7.20</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">⚽1️⃣H</span>
+                            <h4>1st Half Over/Under</h4>
+                            <div class="special-picks" id="htou-combo"></div>
+                            <span class="special-odds" id="htou-total-odds">@4.50</span>
+                        </div>
+                    </div>
+                    <div class="special-grid" style="margin-top: 20px;">
+                        <div class="special-card">
+                            <span class="special-icon">🥅1️⃣H</span>
+                            <h4>1st Half GG/NG</h4>
+                            <div class="special-picks" id="htgg-combo"></div>
+                            <span class="special-odds" id="htgg-total-odds">@5.30</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">📊</span>
+                            <h4>Half-Time/Full-Time</h4>
+                            <div class="special-picks" id="htft-combo"></div>
+                            <span class="special-odds" id="htft-total-odds">@12.50</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">🏆</span>
+                            <h4>Highest Scoring Half</h4>
+                            <div class="special-picks" id="hsh-combo"></div>
+                            <span class="special-odds" id="hsh-total-odds">@4.80</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bookings Markets -->
+                <div class="market-content" id="bookings-markets">
+                    <div class="special-grid">
+                        <div class="special-card">
+                            <span class="special-icon">🟨</span>
+                            <h4>Total Bookings O/U</h4>
+                            <div class="special-picks" id="bookings-ou-combo"></div>
+                            <span class="special-odds" id="bookings-ou-total-odds">@3.50</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">🟨🏠</span>
+                            <h4>Home Bookings</h4>
+                            <div class="special-picks" id="home-bookings-combo"></div>
+                            <span class="special-odds" id="home-bookings-total-odds">@4.20</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">🟨✈️</span>
+                            <h4>Away Bookings</h4>
+                            <div class="special-picks" id="away-bookings-combo"></div>
+                            <span class="special-odds" id="away-bookings-total-odds">@4.50</span>
+                        </div>
+                    </div>
+                    <div class="special-grid" style="margin-top: 20px;">
+                        <div class="special-card">
+                            <span class="special-icon">🟥</span>
+                            <h4>Red Card</h4>
+                            <div class="special-picks" id="redcard-combo"></div>
+                            <span class="special-odds" id="redcard-total-odds">@8.00</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">🟨🟨</span>
+                            <h4>Both Teams Carded</h4>
+                            <div class="special-picks" id="both-carded-combo"></div>
+                            <span class="special-odds" id="both-carded-total-odds">@2.80</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">📋</span>
+                            <h4>Booking Points</h4>
+                            <div class="special-picks" id="booking-pts-combo"></div>
+                            <span class="special-odds" id="booking-pts-total-odds">@3.90</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Corners Markets -->
+                <div class="market-content" id="corners-markets">
+                    <div class="special-grid">
+                        <div class="special-card">
+                            <span class="special-icon">🚩</span>
+                            <h4>Total Corners O/U</h4>
+                            <div class="special-picks" id="corners-ou-combo"></div>
+                            <span class="special-odds" id="corners-ou-total-odds">@3.90</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">🚩🏠</span>
+                            <h4>Home Corners</h4>
+                            <div class="special-picks" id="home-corners-combo"></div>
+                            <span class="special-odds" id="home-corners-total-odds">@4.10</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">🚩✈️</span>
+                            <h4>Away Corners</h4>
+                            <div class="special-picks" id="away-corners-combo"></div>
+                            <span class="special-odds" id="away-corners-total-odds">@4.30</span>
+                        </div>
+                    </div>
+                    <div class="special-grid" style="margin-top: 20px;">
+                        <div class="special-card">
+                            <span class="special-icon">🚩1️⃣</span>
+                            <h4>First Corner</h4>
+                            <div class="special-picks" id="first-corner-combo"></div>
+                            <span class="special-odds" id="first-corner-total-odds">@3.60</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">🚩🏆</span>
+                            <h4>Corner Race</h4>
+                            <div class="special-picks" id="corner-race-combo"></div>
+                            <span class="special-odds" id="corner-race-total-odds">@4.80</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">🚩📊</span>
+                            <h4>Corners Handicap</h4>
+                            <div class="special-picks" id="corners-hc-combo"></div>
+                            <span class="special-odds" id="corners-hc-total-odds">@3.50</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Combo Markets (SportyBet Exact) -->
+                <div class="market-content" id="combo-markets">
+                    <!-- Row 1: Result + Goals/GG Combos -->
+                    <h5 class="market-row-title">📊 Result & Goals Combos</h5>
+                    <div class="special-grid">
+                        <div class="special-card">
+                            <span class="special-icon">🎰</span>
+                            <h4>1X2 & Over/Under</h4>
+                            <div class="special-picks" id="1x2-ou-combo"></div>
+                            <span class="special-odds" id="1x2-ou-total-odds">@8.50</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">🎲</span>
+                            <h4>1X2 & GG/NG</h4>
+                            <div class="special-picks" id="1x2-gg-combo"></div>
+                            <span class="special-odds" id="1x2-gg-total-odds">@9.20</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">⚽🥅</span>
+                            <h4>Over/Under & GG/NG</h4>
+                            <div class="special-picks" id="ou-gg-combo"></div>
+                            <span class="special-odds" id="ou-gg-total-odds">@6.80</span>
+                        </div>
+                    </div>
+                    <div class="special-grid" style="margin-top: 15px;">
+                        <div class="special-card">
+                            <span class="special-icon">⚡</span>
+                            <h4>Double Chance & O/U</h4>
+                            <div class="special-picks" id="dc-ou-combo"></div>
+                            <span class="special-odds" id="dc-ou-total-odds">@5.50</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">💫</span>
+                            <h4>Double Chance & GG/NG</h4>
+                            <div class="special-picks" id="dc-gg-combo"></div>
+                            <span class="special-odds" id="dc-gg-total-odds">@6.20</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">🔢</span>
+                            <h4>1X2 & Multiple Goals</h4>
+                            <div class="special-picks" id="1x2-mg-combo"></div>
+                            <span class="special-odds" id="1x2-mg-total-odds">@7.80</span>
+                        </div>
+                    </div>
+
+                    <!-- Row 2: Win to Nil Combos -->
+                    <h5 class="market-row-title" style="margin-top:30px;">🚫 Win to Nil Combos</h5>
+                    <div class="special-grid">
+                        <div class="special-card">
+                            <span class="special-icon">🏠🚫</span>
+                            <h4>Home Win to Nil</h4>
+                            <div class="special-picks" id="home-wtn-combo"></div>
+                            <span class="special-odds" id="home-wtn-total-odds">@5.80</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">✈️🚫</span>
+                            <h4>Away Win to Nil</h4>
+                            <div class="special-picks" id="away-wtn-combo"></div>
+                            <span class="special-odds" id="away-wtn-total-odds">@8.50</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">1️⃣H🏠🚫</span>
+                            <h4>HT Home Win to Nil</h4>
+                            <div class="special-picks" id="ht-home-wtn-combo"></div>
+                            <span class="special-odds" id="ht-home-wtn-total-odds">@6.20</span>
+                        </div>
+                    </div>
+                    <div class="special-grid" style="margin-top: 15px;">
+                        <div class="special-card">
+                            <span class="special-icon">1️⃣H✈️🚫</span>
+                            <h4>HT Away Win to Nil</h4>
+                            <div class="special-picks" id="ht-away-wtn-combo"></div>
+                            <span class="special-odds" id="ht-away-wtn-total-odds">@9.80</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">2️⃣H🏠🚫</span>
+                            <h4>2H Home Win to Nil</h4>
+                            <div class="special-picks" id="2h-home-wtn-combo"></div>
+                            <span class="special-odds" id="2h-home-wtn-total-odds">@7.50</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">2️⃣H✈️🚫</span>
+                            <h4>2H Away Win to Nil</h4>
+                            <div class="special-picks" id="2h-away-wtn-combo"></div>
+                            <span class="special-odds" id="2h-away-wtn-total-odds">@11.00</span>
+                        </div>
+                    </div>
+
+                    <!-- Row 3: Chance Mix (OR Combos) -->
+                    <h5 class="market-row-title" style="margin-top:30px;">🎯 Chance Mix (Either/Or)</h5>
+                    <div class="special-grid">
+                        <div class="special-card">
+                            <span class="special-icon">🏠➕⬆️</span>
+                            <h4>Home OR Over 2.5</h4>
+                            <div class="special-picks" id="home-or-o25-combo"></div>
+                            <span class="special-odds" id="home-or-o25-total-odds">@2.10</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">✈️➕⬆️</span>
+                            <h4>Away OR Over 2.5</h4>
+                            <div class="special-picks" id="away-or-o25-combo"></div>
+                            <span class="special-odds" id="away-or-o25-total-odds">@2.50</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">❌➕⬆️</span>
+                            <h4>Draw OR Over 2.5</h4>
+                            <div class="special-picks" id="draw-or-o25-combo"></div>
+                            <span class="special-odds" id="draw-or-o25-total-odds">@2.30</span>
+                        </div>
+                    </div>
+                    <div class="special-grid" style="margin-top: 15px;">
+                        <div class="special-card">
+                            <span class="special-icon">🏠➕🥅</span>
+                            <h4>Home OR GG</h4>
+                            <div class="special-picks" id="home-or-gg-combo"></div>
+                            <span class="special-odds" id="home-or-gg-total-odds">@1.85</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">✈️➕🥅</span>
+                            <h4>Away OR GG</h4>
+                            <div class="special-picks" id="away-or-gg-combo"></div>
+                            <span class="special-odds" id="away-or-gg-total-odds">@2.20</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">🏠➕🚫⚽</span>
+                            <h4>Home OR Clean Sheet</h4>
+                            <div class="special-picks" id="home-or-cs-combo"></div>
+                            <span class="special-odds" id="home-or-cs-total-odds">@1.65</span>
+                        </div>
+                    </div>
+
+                    <!-- Row 4: Half-Time/Full-Time Combos -->
+                    <h5 class="market-row-title" style="margin-top:30px;">📊 HT/FT Combos</h5>
+                    <div class="special-grid">
+                        <div class="special-card">
+                            <span class="special-icon">📊⬆️</span>
+                            <h4>HT/FT & Over/Under</h4>
+                            <div class="special-picks" id="htft-ou-combo"></div>
+                            <span class="special-odds" id="htft-ou-total-odds">@15.00</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">📊1️⃣H</span>
+                            <h4>HT/FT & 1H O/U</h4>
+                            <div class="special-picks" id="htft-1h-ou-combo"></div>
+                            <span class="special-odds" id="htft-1h-ou-total-odds">@18.00</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">📊🔢</span>
+                            <h4>HT/FT & Exact Goals</h4>
+                            <div class="special-picks" id="htft-exact-combo"></div>
+                            <span class="special-odds" id="htft-exact-total-odds">@25.00</span>
+                        </div>
+                    </div>
+                    <div class="special-grid" style="margin-top: 15px;">
+                        <div class="special-card">
+                            <span class="special-icon">1️⃣H📊</span>
+                            <h4>1H Result or FT Result</h4>
+                            <div class="special-picks" id="1h-or-ft-combo"></div>
+                            <span class="special-odds" id="1h-or-ft-total-odds">@2.80</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">1️⃣H🥅</span>
+                            <h4>1H 1X2 & 1H GG/NG</h4>
+                            <div class="special-picks" id="1h-1x2-gg-combo"></div>
+                            <span class="special-odds" id="1h-1x2-gg-total-odds">@8.50</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">2️⃣H🥅</span>
+                            <h4>2H 1X2 & 2H GG/NG</h4>
+                            <div class="special-picks" id="2h-1x2-gg-combo"></div>
+                            <span class="special-odds" id="2h-1x2-gg-total-odds">@9.20</span>
+                        </div>
+                    </div>
+
+                    <!-- Row 5: Win Halves & Score Combos -->
+                    <h5 class="market-row-title" style="margin-top:30px;">🏆 Win Halves & Scoring Combos</h5>
+                    <div class="special-grid">
+                        <div class="special-card">
+                            <span class="special-icon">🏠1️⃣+2️⃣</span>
+                            <h4>Home Win Either Half</h4>
+                            <div class="special-picks" id="home-win-either-combo"></div>
+                            <span class="special-odds" id="home-win-either-total-odds">@2.40</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">✈️1️⃣+2️⃣</span>
+                            <h4>Away Win Either Half</h4>
+                            <div class="special-picks" id="away-win-either-combo"></div>
+                            <span class="special-odds" id="away-win-either-total-odds">@3.50</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">🏠🏆🏆</span>
+                            <h4>Home Win Both Halves</h4>
+                            <div class="special-picks" id="home-win-both-combo"></div>
+                            <span class="special-odds" id="home-win-both-total-odds">@6.50</span>
+                        </div>
+                    </div>
+                    <div class="special-grid" style="margin-top: 15px;">
+                        <div class="special-card">
+                            <span class="special-icon">✈️🏆🏆</span>
+                            <h4>Away Win Both Halves</h4>
+                            <div class="special-picks" id="away-win-both-combo"></div>
+                            <span class="special-odds" id="away-win-both-total-odds">@12.00</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">⚽1️⃣+2️⃣</span>
+                            <h4>Score in Both Halves</h4>
+                            <div class="special-picks" id="score-both-halves-combo"></div>
+                            <span class="special-odds" id="score-both-halves-total-odds">@3.20</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">🏠⚽1️⃣+2️⃣</span>
+                            <h4>Home Score Both Halves</h4>
+                            <div class="special-picks" id="home-score-both-combo"></div>
+                            <span class="special-odds" id="home-score-both-total-odds">@4.80</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Players Markets -->
+                <div class="market-content" id="players-markets">
+                    <div class="special-grid">
+                        <div class="special-card">
+                            <span class="special-icon">⚽👤</span>
+                            <h4>Anytime Scorer</h4>
+                            <div class="special-picks" id="anytime-scorer-combo"></div>
+                            <span class="special-odds" id="anytime-scorer-total-odds">@12.00</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">1️⃣⚽</span>
+                            <h4>First Goalscorer</h4>
+                            <div class="special-picks" id="first-scorer-combo"></div>
+                            <span class="special-odds" id="first-scorer-total-odds">@25.00</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">⚽⚽</span>
+                            <h4>2+ Goals</h4>
+                            <div class="special-picks" id="2goals-combo"></div>
+                            <span class="special-odds" id="2goals-total-odds">@35.00</span>
+                        </div>
+                    </div>
+                    <div class="special-grid" style="margin-top: 20px;">
+                        <div class="special-card">
+                            <span class="special-icon">🎯👤</span>
+                            <h4>Player Shots</h4>
+                            <div class="special-picks" id="player-shots-combo"></div>
+                            <span class="special-odds" id="player-shots-total-odds">@8.50</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">🟨👤</span>
+                            <h4>Player Carded</h4>
+                            <div class="special-picks" id="player-carded-combo"></div>
+                            <span class="special-odds" id="player-carded-total-odds">@6.80</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">🅰️👤</span>
+                            <h4>Player Assists</h4>
+                            <div class="special-picks" id="player-assists-combo"></div>
+                            <span class="special-odds" id="player-assists-total-odds">@10.00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Teams Markets -->
+                <div class="market-content" id="teams-markets">
+                    <div class="special-grid">
+                        <div class="special-card">
+                            <span class="special-icon">🏠⚽</span>
+                            <h4>Home to Score</h4>
+                            <div class="special-picks" id="home-score-combo"></div>
+                            <span class="special-odds" id="home-score-total-odds">@2.80</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">✈️⚽</span>
+                            <h4>Away to Score</h4>
+                            <div class="special-picks" id="away-score-combo"></div>
+                            <span class="special-odds" id="away-score-total-odds">@3.20</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">🚫⚽</span>
+                            <h4>Clean Sheet</h4>
+                            <div class="special-picks" id="clean-sheet-combo"></div>
+                            <span class="special-odds" id="clean-sheet-total-odds">@4.50</span>
+                        </div>
+                    </div>
+                    <div class="special-grid" style="margin-top: 20px;">
+                        <div class="special-card">
+                            <span class="special-icon">🏆</span>
+                            <h4>Win to Nil</h4>
+                            <div class="special-picks" id="win-nil-combo"></div>
+                            <span class="special-odds" id="win-nil-total-odds">@5.80</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">📊</span>
+                            <h4>Handicap</h4>
+                            <div class="special-picks" id="handicap-combo"></div>
+                            <span class="special-odds" id="handicap-total-odds">@4.20</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">🎯</span>
+                            <h4>Winning Margin</h4>
+                            <div class="special-picks" id="margin-combo"></div>
+                            <span class="special-odds" id="margin-total-odds">@7.50</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Minutes Markets -->
+                <div class="market-content" id="minutes-markets">
+                    <div class="special-grid">
+                        <div class="special-card">
+                            <span class="special-icon">⏱️1️⃣5️⃣</span>
+                            <h4>Goal in 1-15 Min</h4>
+                            <div class="special-picks" id="goal-15-combo"></div>
+                            <span class="special-odds" id="goal-15-total-odds">@4.50</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">⏱️3️⃣0️⃣</span>
+                            <h4>Goal in 16-30 Min</h4>
+                            <div class="special-picks" id="goal-30-combo"></div>
+                            <span class="special-odds" id="goal-30-total-odds">@3.80</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">⏱️4️⃣5️⃣</span>
+                            <h4>Goal in 31-45 Min</h4>
+                            <div class="special-picks" id="goal-45-combo"></div>
+                            <span class="special-odds" id="goal-45-total-odds">@3.90</span>
+                        </div>
+                    </div>
+                    <div class="special-grid" style="margin-top: 20px;">
+                        <div class="special-card">
+                            <span class="special-icon">⏱️6️⃣0️⃣</span>
+                            <h4>Goal in 46-60 Min</h4>
+                            <div class="special-picks" id="goal-60-combo"></div>
+                            <span class="special-odds" id="goal-60-total-odds">@3.50</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">⏱️7️⃣5️⃣</span>
+                            <h4>Goal in 61-75 Min</h4>
+                            <div class="special-picks" id="goal-75-combo"></div>
+                            <span class="special-odds" id="goal-75-total-odds">@3.40</span>
+                        </div>
+                        <div class="special-card">
+                            <span class="special-icon">⏱️9️⃣0️⃣</span>
+                            <h4>Goal in 76-90 Min</h4>
+                            <div class="special-picks" id="goal-90-combo"></div>
+                            <span class="special-odds" id="goal-90-total-odds">@3.60</span>
+                        </div>
+                    </div>
+                </div>
+
             </div>
         </div>
     </section>

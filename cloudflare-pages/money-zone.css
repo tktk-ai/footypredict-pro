@@ -157,8 +157,25 @@
 .match-header {
     display: flex;
     justify-content: space-between;
-    align-items: center;
+    align-items: flex-start;
     margin-bottom: 16px;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.match-datetime {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.match-date {
+    background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--accent-primary);
 }
 
 .match-time {
@@ -175,6 +192,8 @@
     display: flex;
     align-items: center;
     gap: 6px;
+    text-align: right;
+    max-width: 140px;
 }
 
 .match-teams {
@@ -334,20 +353,69 @@
 .combo-pick {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    padding: 10px 12px;
+    align-items: flex-start;
+    padding: 12px;
     background: var(--bg-secondary);
     border-radius: 8px;
     font-size: 0.85rem;
+    gap: 10px;
+}
+
+.combo-pick .pick-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
 }
 
 .combo-pick .pick-match {
-    flex: 1;
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.combo-pick .pick-datetime,
+.pick-datetime {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+    display: flex;
+    gap: 8px;
 }
 
 .combo-pick .pick-selection {
     font-weight: 600;
     color: var(--accent-primary);
+    white-space: nowrap;
+}
+
+/* Special combo picks with full match info */
+.special-pick-full {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 10px 12px;
+    background: var(--bg-secondary);
+    border-radius: 8px;
+    margin-bottom: 8px;
+    gap: 10px;
+}
+
+.special-pick-full .pick-match-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.special-pick-full .pick-teams {
+    font-weight: 500;
+    font-size: 0.85rem;
+}
+
+.special-pick-full .pick-market {
+    font-weight: 600;
+    color: var(--accent-primary);
+    font-size: 0.85rem;
+    white-space: nowrap;
 }
 
 .combo-footer {
@@ -501,5 +569,82 @@
         flex-direction: column;
         gap: 8px;
         text-align: center;
+    }
+}
+
+/* SportyBet Markets */
+.sportybet-markets {
+    margin-top: 48px;
+    padding-top: 48px;
+    border-top: 1px solid var(--border);
+}
+
+.sportybet-markets h3 {
+    text-align: center;
+    font-size: 1.75rem;
+    margin-bottom: 8px;
+}
+
+.markets-subtitle {
+    text-align: center;
+    color: var(--text-secondary);
+    margin-bottom: 32px;
+}
+
+.market-tabs {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-bottom: 32px;
+}
+
+.market-tab {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 18px;
+    color: var(--text-secondary);
+    font-weight: 500;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.market-tab:hover {
+    border-color: var(--accent-primary);
+    color: var(--text-primary);
+}
+
+.market-tab.active {
+    background: var(--accent-gradient);
+    border-color: transparent;
+    color: white;
+}
+
+.market-content {
+    display: none;
+}
+
+.market-content.active {
+    display: block;
+}
+
+.market-row-title {
+    color: var(--accent-primary);
+    font-size: 1.1rem;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+}
+
+@media (max-width: 768px) {
+    .market-tabs {
+        gap: 5px;
+    }
+    
+    .market-tab {
+        padding: 8px 12px;
+        font-size: 0.8rem;
     }
 }
