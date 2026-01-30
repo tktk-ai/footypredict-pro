@@ -2069,37 +2069,117 @@ async function fetchSportyBetMatches(country = 'gh') {
     return cached.data;
   }
   
+  const matches = [];
+  const headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+    'Accept': 'application/json'
+  };
+  
   try {
-    // Fetch popular matches from SportyBet
-    const url = `${SPORTYBET_API_BASE}/${country}/factsCenter/popularAndSportList?sportId=sr:sport:1`;
-    const response = await fetch(url, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-        'Accept': 'application/json'
-      },
+    // 1. Fetch popular matches
+    const popularUrl = `${SPORTYBET_API_BASE}/${country}/factsCenter/popularAndSportList?sportId=sr:sport:1`;
+    const popularResponse = await fetch(popularUrl, {
+      headers,
       signal: AbortSignal.timeout(10000)
     });
     
-    if (!response.ok) return [];
+    if (popularResponse.ok) {
+      const data = await popularResponse.json();
+      if (data.data?.eventList) {
+        for (const event of data.data.eventList) {
+          if (event.eventId && event.homeTeamName) {
+            matches.push({
+              eventId: event.eventId,
+              homeTeam: event.homeTeamName,
+              awayTeam: event.awayTeamName,
+              league: event.leagueName,
+              startTime: event.estimateStartTime
+            });
+          }
+        }
+      }
+    }
     
-    const data = await response.json();
-    const matches = [];
-    
-    // Parse the response to extract match data
-    if (data.data && data.data.eventList) {
-      for (const event of data.data.eventList) {
-        matches.push({
-          eventId: event.eventId,
-          homeTeam: event.homeTeamName,
-          awayTeam: event.awayTeamName,
-          league: event.leagueName,
-          startTime: event.estimateStartTime,
-          markets: event.markets || []
+    // 2. Fetch scheduled matches for today and next 2 days
+    const now = new Date();
+    for (let dayOffset = 0; dayOffset < 3; dayOffset++) {
+      const date = new Date(now);
+      date.setDate(date.getDate() + dayOffset);
+      const dateStr = date.toISOString().split('T')[0].replace(/-/g, '');
+      
+      try {
+        const scheduleUrl = `${SPORTYBET_API_BASE}/${country}/factsCenter/pcEvents?sportId=sr:sport:1&marketId=1&date=${dateStr}&pageSize=100`;
+        const scheduleResponse = await fetch(scheduleUrl, {
+          headers,
+          signal: AbortSignal.timeout(8000)
         });
+        
+        if (scheduleResponse.ok) {
+          const scheduleData = await scheduleResponse.json();
+          if (scheduleData.data?.eventList) {
+            for (const event of scheduleData.data.eventList) {
+              if (event.eventId && event.homeTeamName) {
+                // Avoid duplicates
+                if (!matches.some(m => m.eventId === event.eventId)) {
+                  matches.push({
+                    eventId: event.eventId,
+                    homeTeam: event.homeTeamName,
+                    awayTeam: event.awayTeamName,
+                    league: event.leagueName,
+                    startTime: event.estimateStartTime
+                  });
+                }
+              }
+            }
+          }
+        }
+      } catch (err) {
+        console.log(`SportyBet schedule fetch error for ${dateStr}:`, err.message);
+      }
+    }
+    
+    // 3. Also try fetching from league-specific endpoints for major leagues
+    const majorLeagueSportIds = [
+      'sr:tournament:8', // Premier League
+      'sr:tournament:35', // Bundesliga
+      'sr:tournament:87', // La Liga
+      'sr:tournament:23', // Serie A
+      'sr:tournament:34', // Ligue 1
+    ];
+    
+    for (const tournamentId of majorLeagueSportIds) {
+      try {
+        const leagueUrl = `${SPORTYBET_API_BASE}/${country}/factsCenter/pcEvents?sportId=sr:sport:1&tournamentId=${tournamentId}&marketId=1&pageSize=50`;
+        const leagueResponse = await fetch(leagueUrl, {
+          headers,
+          signal: AbortSignal.timeout(5000)
+        });
+        
+        if (leagueResponse.ok) {
+          const leagueData = await leagueResponse.json();
+          if (leagueData.data?.eventList) {
+            for (const event of leagueData.data.eventList) {
+              if (event.eventId && event.homeTeamName) {
+                if (!matches.some(m => m.eventId === event.eventId)) {
+                  matches.push({
+                    eventId: event.eventId,
+                    homeTeam: event.homeTeamName,
+                    awayTeam: event.awayTeamName,
+                    league: event.leagueName,
+                    startTime: event.estimateStartTime
+                  });
+                }
+              }
+            }
+          }
+        }
+      } catch (err) {
+        // Silently continue on league fetch errors
       }
     }
     
     sportyBetMatchCache.set(cacheKey, { data: matches, timestamp: Date.now() });
+    console.log(`SportyBet: fetched ${matches.length} matches for ${country}`);
     return matches;
   } catch (error) {
     console.log('SportyBet match fetch error:', error.message);
@@ -2107,24 +2187,120 @@ async function fetchSportyBetMatches(country = 'gh') {
   }
 }
 
+// Team name aliases for matching (covering different naming conventions)
+const TEAM_ALIASES = {
+  // Premier League
+  'manchester united': ['man united', 'man utd', 'united', 'mufc'],
+  'manchester city': ['man city', 'city', 'mcfc'],
+  'chelsea': ['chelsea fc'],
+  'liverpool': ['liverpool fc', 'lfc'],
+  'arsenal': ['arsenal fc', 'the gunners'],
+  'tottenham': ['tottenham hotspur', 'spurs', 'thfc'],
+  'west ham': ['west ham united', 'hammers'],
+  'newcastle': ['newcastle united', 'newcastle utd', 'nufc'],
+  'aston villa': ['villa'],
+  'brighton': ['brighton & hove albion', 'brighton hove albion'],
+  'everton': ['everton fc'],
+  'wolverhampton': ['wolves', 'wolverhampton wanderers'],
+  'crystal palace': ['palace'],
+  'nottingham forest': ["nott'm forest", 'forest'],
+  
+  // Bundesliga
+  '1. fc köln': ['fc cologne', 'cologne', 'köln', 'koln', 'fc koln'],
+  'vfl wolfsburg': ['wolfsburg'],
+  'rb leipzig': ['leipzig', 'rbl'],
+  'fsv mainz 05': ['mainz', 'mainz 05'],
+  'bayern munich': ['bayern münchen', 'bayern', 'fcb'],
+  'borussia dortmund': ['dortmund', 'bvb'],
+  'bayer leverkusen': ['leverkusen', 'bayer 04'],
+  'eintracht frankfurt': ['frankfurt', 'sge'],
+  'borussia mönchengladbach': ['gladbach', "m'gladbach", 'mönchengladbach', 'monchengladbach'],
+  'sc freiburg': ['freiburg'],
+  'vfb stuttgart': ['stuttgart'],
+  'union berlin': ['fc union berlin', 'berlin'],
+  
+  // La Liga
+  'athletic bilbao': ['athletic club', 'bilbao', 'athletic'],
+  'real sociedad': ['sociedad', 'la real'],
+  'real madrid': ['madrid', 'real'],
+  'barcelona': ['fc barcelona', 'barca'],
+  'atletico madrid': ['atlético madrid', 'atletico', 'atleti'],
+  'sevilla': ['sevilla fc'],
+  'real betis': ['betis'],
+  'villarreal': ['villarreal cf', 'yellow submarine'],
+  'valencia': ['valencia cf'],
+  'celta vigo': ['celta', 'rc celta'],
+  
+  // Serie A
+  'inter milan': ['inter', 'internazionale', 'inter milano'],
+  'ac milan': ['milan', 'rossoneri'],
+  'juventus': ['juve'],
+  'napoli': ['ssc napoli'],
+  'roma': ['as roma'],
+  'lazio': ['ss lazio'],
+  'atalanta': ['atalanta bc', 'atalanta bergamo'],
+  'fiorentina': ['acf fiorentina'],
+  
+  // Ligue 1
+  'paris saint-germain': ['psg', 'paris', 'paris sg'],
+  'olympique marseille': ['marseille', 'om'],
+  'olympique lyon': ['lyon', 'ol'],
+  'as monaco': ['monaco'],
+  'lille': ['losc', 'losc lille'],
+};
+
 // Find SportyBet event ID for a match
 function findSportyBetEventId(matches, homeTeam, awayTeam) {
-  const normalizeTeam = (name) => name.toLowerCase()
-    .replace(/\s+fc$/i, '')
-    .replace(/^fc\s+/i, '')
-    .replace(/[^a-z0-9]/g, '')
-    .trim();
+  // Enhanced normalization
+  const normalizeTeam = (name) => {
+    return name.toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // Remove accents
+      .replace(/\s+fc$/i, '')
+      .replace(/^fc\s+/i, '')
+      .replace(/[^a-z0-9\s]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
+  };
   
-  const normalizedHome = normalizeTeam(homeTeam);
-  const normalizedAway = normalizeTeam(awayTeam);
+  // Get all possible names for a team
+  const getTeamVariants = (name) => {
+    const normalized = normalizeTeam(name);
+    const variants = [normalized];
+    
+    // Check aliases
+    for (const [key, aliases] of Object.entries(TEAM_ALIASES)) {
+      const normalizedKey = normalizeTeam(key);
+      if (normalized.includes(normalizedKey) || normalizedKey.includes(normalized)) {
+        variants.push(...aliases.map(a => normalizeTeam(a)));
+      }
+      for (const alias of aliases) {
+        const normalizedAlias = normalizeTeam(alias);
+        if (normalized.includes(normalizedAlias) || normalizedAlias.includes(normalized)) {
+          variants.push(normalizedKey);
+          variants.push(...aliases.map(a => normalizeTeam(a)));
+        }
+      }
+    }
+    
+    return [...new Set(variants)]; // Remove duplicates
+  };
+  
+  const homeVariants = getTeamVariants(homeTeam);
+  const awayVariants = getTeamVariants(awayTeam);
   
   for (const match of matches) {
     const matchHome = normalizeTeam(match.homeTeam || '');
     const matchAway = normalizeTeam(match.awayTeam || '');
     
-    // Check if teams match (fuzzy matching)
-    const homeMatch = matchHome.includes(normalizedHome) || normalizedHome.includes(matchHome);
-    const awayMatch = matchAway.includes(normalizedAway) || normalizedAway.includes(matchAway);
+    // Check if any variant matches
+    const homeMatch = homeVariants.some(v => 
+      matchHome.includes(v) || v.includes(matchHome) ||
+      matchHome.split(' ').some(word => v.includes(word) && word.length > 3)
+    );
+    const awayMatch = awayVariants.some(v => 
+      matchAway.includes(v) || v.includes(matchAway) ||
+      matchAway.split(' ').some(word => v.includes(word) && word.length > 3)
+    );
     
     if (homeMatch && awayMatch) {
       return match.eventId;
