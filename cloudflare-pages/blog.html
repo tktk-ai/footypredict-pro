@@ -14,7 +14,7 @@
     <meta property="og:url" content="https://footypredict-ui.pages.dev/blog">
     
     <!-- Canonical -->
-    <link rel="canonical" href="https://footypredict-ui.pages.dev/blog">
+    <link rel="canonical" href="https://footypredict-ui.pages.dev/blog.html">
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -391,9 +391,11 @@
         <div class="nav-container">
             <a href="/" class="logo">⚽ FootyPredict Pro</a>
             <ul class="nav-links">
-                <li><a href="/">Home</a></li>
-                <li><a href="/accumulators">ACCAs</a></li>
-                <li><a href="/blog" class="active">Blog</a></li>
+                <li><a href="index.html">🏠 Home</a></li>
+                <li><a href="daily-tips.html">📊 Daily Tips</a></li>
+                <li><a href="money-zone.html">💰 Money Zone</a></li>
+                <li><a href="accumulators.html">🎰 ACCAs</a></li>
+                <li><a href="blog.html" class="active">📝 Blog</a></li>
             </ul>
         </div>
     </nav>
@@ -446,7 +448,9 @@
             emptyState.style.display = 'none';
             
             try {
-                let url = `${API_BASE}/blog/posts?page=${page}&limit=12`;
+                // Add cache-busting to prevent stale responses
+                const cacheBust = Date.now();
+                let url = `${API_BASE}/blog/posts?page=${page}&limit=12&v=${cacheBust}`;
                 if (category) {
                     url += `&category=${category}`;
                 }
@@ -491,10 +495,17 @@
             const gradientColors = getLeagueGradient(post.league);
             
             return `
-                <a href="/blog-post?slug=${post.slug}" class="blog-card">
-                    <div class="card-thumbnail" style="background: ${gradientColors};">
+                <a href="/blog-post.html?slug=${post.slug}" class="blog-card">
+                    <div class="card-thumbnail" style="background: ${post.thumbnail ? `url('${post.thumbnail}') center/cover, ` : ''}${gradientColors};">
                         <span class="card-badge">${getCategoryLabel(post.category)}</span>
                         <span class="confidence-badge">${Math.round(post.confidence)}% Confidence</span>
+                        ${post.homeTeamLogo && post.awayTeamLogo ? `
+                        <div class="team-logos-row" style="position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 15px;">
+                            <img src="${post.homeTeamLogo}" alt="${post.homeTeam}" style="width: 50px; height: 50px; object-fit: contain; ${post.predictedWinner === 'home' ? 'filter: drop-shadow(0 0 8px #10b981); transform: scale(1.15);' : 'opacity: 0.8;'}">
+                            <span style="color: white; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.5);">VS</span>
+                            <img src="${post.awayTeamLogo}" alt="${post.awayTeam}" style="width: 50px; height: 50px; object-fit: contain; ${post.predictedWinner === 'away' ? 'filter: drop-shadow(0 0 8px #10b981); transform: scale(1.15);' : 'opacity: 0.8;'}">
+                        </div>
+                        ` : ''}
                     </div>
                     <div class="card-body">
                         <div class="card-league">
