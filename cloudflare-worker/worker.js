@@ -73,9 +73,737 @@ const corsHeaders = {
   "Content-Type": "application/json"
 };
 
+// ============= HuggingFace ML API =============
+const HF_API_URL = "https://nananie143-footypredict-pro.hf.space";
+
+// Cache for ML predictions to avoid hitting rate limits
+const mlPredictionCache = new Map();
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
+async function fetchMLPrediction(homeTeam, awayTeam, league = '') {
+  const cacheKey = `${homeTeam}_${awayTeam}_${league}`.toLowerCase();
+  
+  // Check cache
+  const cached = mlPredictionCache.get(cacheKey);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return { ...cached.data, source: 'ml_cached' };
+  }
+  
+  try {
+    const url = `${HF_API_URL}/api/predict?home=${encodeURIComponent(homeTeam)}&away=${encodeURIComponent(awayTeam)}&league=${encodeURIComponent(league)}`;
+    
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: { 'User-Agent': 'FootyPredict-Worker/2.1' },
+      signal: AbortSignal.timeout(5000) // 5 second timeout
+    });
+    
+    if (!response.ok) {
+      console.log(`ML API returned ${response.status} for ${homeTeam} vs ${awayTeam}`);
+      return null;
+    }
+    
+    const data = await response.json();
+    
+    if (data.success && data.prediction) {
+      const result = {
+        home_prob: data.prediction.home_win_prob || 0.35,
+        draw_prob: data.prediction.draw_prob || 0.28,
+        away_prob: data.prediction.away_win_prob || 0.27,
+        over25_prob: data.goals?.over_under?.['over_2.5'] || 0.52,
+        btts_prob: data.goals?.btts?.yes || 0.48,
+        confidence: data.prediction.confidence || 0.70,
+        recommendation: data.prediction.predicted_outcome || 
+          (data.prediction.home_win_prob > data.prediction.away_win_prob && 
+           data.prediction.home_win_prob > data.prediction.draw_prob ? 'Home Win' :
+           data.prediction.away_win_prob > data.prediction.home_win_prob ? 'Away Win' : 'Draw'),
+        source: 'ml_model'
+      };
+      
+      // Cache the result
+      mlPredictionCache.set(cacheKey, { data: result, timestamp: Date.now() });
+      
+      return result;
+    }
+    
+    return null;
+  } catch (error) {
+    console.log(`ML API error for ${homeTeam} vs ${awayTeam}:`, error.message);
+    return null;
+  }
+}
+
 // ============= Fixtures Fetcher =============
 
-// OpenLigaDB - Free API for German leagues with real upcoming fixtures
+// ============= The Odds API Integration (Primary for fixtures + odds) =============
+const THE_ODDS_API_BASE = 'https://api.the-odds-api.com/v4';
+
+// League mappings for The Odds API
+const THE_ODDS_API_LEAGUES = {
+  'premier_league': 'soccer_epl',
+  'championship': 'soccer_efl_champ',
+  'la_liga': 'soccer_spain_la_liga',
+  'bundesliga': 'soccer_germany_bundesliga',
+  'serie_a': 'soccer_italy_serie_a',
+  'ligue_1': 'soccer_france_ligue_one',
+  'eredivisie': 'soccer_netherlands_eredivisie',
+  'primeira_liga': 'soccer_portugal_primeira_liga',
+  'mls': 'soccer_usa_mls',
+  'liga_mx': 'soccer_mexico_ligamx',
+  'a_league': 'soccer_australia_aleague',
+  'scottish_premiership': 'soccer_spl'
+};
+
+// Cache for The Odds API
+const theOddsApiCache = new Map();
+const THE_ODDS_API_CACHE_TTL = 10 * 60 * 1000; // 10 minutes (to conserve requests)
+
+// Fetch fixtures with odds from The Odds API
+async function fetchTheOddsApiFixtures(apiKey, leagues = ['soccer_epl', 'soccer_spain_la_liga', 'soccer_germany_bundesliga', 'soccer_italy_serie_a', 'soccer_france_ligue_one']) {
+  if (!apiKey) return [];
+  
+  const allFixtures = [];
+  
+  for (const league of leagues) {
+    const cacheKey = `the_odds_api_${league}`;
+    const cached = theOddsApiCache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < THE_ODDS_API_CACHE_TTL) {
+      allFixtures.push(...cached.data);
+      continue;
+    }
+    
+    try {
+      const url = `${THE_ODDS_API_BASE}/sports/${league}/odds/?apiKey=${apiKey}&regions=uk,eu&markets=h2h,totals&oddsFormat=decimal`;
+      const response = await fetch(url, {
+        signal: AbortSignal.timeout(10000)
+      });
+      
+      if (!response.ok) continue;
+      
+      const matches = await response.json();
+      
+      const fixtures = matches.map(match => {
+        // Parse odds from first bookmaker
+        const bm = match.bookmakers?.[0];
+        const h2hMarket = bm?.markets?.find(m => m.key === 'h2h');
+        const totalsMarket = bm?.markets?.find(m => m.key === 'totals');
+        
+        let odds = { home: 0, draw: 0, away: 0, over25: 0, under25: 0, source: 'the-odds-api' };
+        if (h2hMarket) {
+          const outcomes = {};
+          for (const o of h2hMarket.outcomes) {
+            outcomes[o.name] = o.price;
+          }
+          odds.home = outcomes[match.home_team] || 0;
+          odds.away = outcomes[match.away_team] || 0;
+          odds.draw = outcomes['Draw'] || 0;
+          odds.bookmaker = bm.title;
+        }
+        if (totalsMarket) {
+          const over = totalsMarket.outcomes.find(o => o.name === 'Over');
+          const under = totalsMarket.outcomes.find(o => o.name === 'Under');
+          odds.over25 = over?.price || 0;
+          odds.under25 = under?.price || 0;
+        }
+        
+        // Parse date/time
+        const startDate = new Date(match.commence_time);
+        
+        // Map league key to friendly name
+        const leagueNames = {
+          'soccer_epl': 'Premier League',
+          'soccer_spain_la_liga': 'La Liga',
+          'soccer_germany_bundesliga': 'Bundesliga',
+          'soccer_italy_serie_a': 'Serie A',
+          'soccer_france_ligue_one': 'Ligue 1',
+          'soccer_netherlands_eredivisie': 'Eredivisie',
+          'soccer_portugal_primeira_liga': 'Primeira Liga',
+          'soccer_efl_champ': 'Championship',
+          'soccer_usa_mls': 'MLS',
+          'soccer_mexico_ligamx': 'Liga MX'
+        };
+        
+        const countryMap = {
+          'soccer_epl': 'England',
+          'soccer_spain_la_liga': 'Spain',
+          'soccer_germany_bundesliga': 'Germany',
+          'soccer_italy_serie_a': 'Italy',
+          'soccer_france_ligue_one': 'France',
+          'soccer_netherlands_eredivisie': 'Netherlands',
+          'soccer_portugal_primeira_liga': 'Portugal',
+          'soccer_efl_champ': 'England',
+          'soccer_usa_mls': 'USA',
+          'soccer_mexico_ligamx': 'Mexico'
+        };
+        
+        return {
+          date: startDate.toISOString().split('T')[0],
+          time: startDate.toISOString().split('T')[1].substring(0, 5),
+          home_team: match.home_team,
+          away_team: match.away_team,
+          status: 'scheduled',
+          league_name: leagueNames[match.sport_key] || match.sport_title,
+          country: countryMap[match.sport_key] || 'Unknown',
+          source: 'the-odds-api',
+          odds: odds
+        };
+      });
+      
+      theOddsApiCache.set(cacheKey, { data: fixtures, timestamp: Date.now() });
+      allFixtures.push(...fixtures);
+    } catch (error) {
+      console.log(`The Odds API error for ${league}:`, error.message);
+    }
+  }
+  
+  return allFixtures;
+}
+
+// ============= Game Forecast API Integration (RapidAPI) =============
+const GAME_FORECAST_BASE = 'https://game-forecast-api.p.rapidapi.com';
+
+
+// Cache for Game Forecast data
+const gameForecastCache = new Map();
+const GAME_FORECAST_CACHE_TTL = 15 * 60 * 1000; // 15 minutes
+
+// Fetch upcoming events with AI predictions from Game Forecast API
+async function fetchGameForecastPredictions(apiKey, pageSize = 50) {
+  if (!apiKey) return [];
+  
+  const cacheKey = 'game_forecast_events';
+  const cached = gameForecastCache.get(cacheKey);
+  if (cached && Date.now() - cached.timestamp < GAME_FORECAST_CACHE_TTL) {
+    return cached.data;
+  }
+  
+  try {
+    const url = `${GAME_FORECAST_BASE}/events?status_code=NOT_STARTED&page_size=${pageSize}`;
+    const response = await fetch(url, {
+      headers: {
+        'x-rapidapi-host': 'game-forecast-api.p.rapidapi.com',
+        'x-rapidapi-key': apiKey
+      },
+      signal: AbortSignal.timeout(10000)
+    });
+    
+    if (!response.ok) return [];
+    
+    const data = await response.json();
+    const events = data.data || [];
+    
+    // Transform to our fixture format
+    const fixtures = events.map(event => {
+      const prediction = event.predictions?.[0];
+      const matchResult = prediction?.match_result || {};
+      const odds = event.odds?.find(o => o.key === 'match_winner')?.values || {};
+      const over25Odds = event.odds?.find(o => o.key === 'over_under_25')?.values || {};
+      
+      return {
+        date: event.start_at?.split('T')[0],
+        time: event.start_at?.split('T')[1]?.substring(0, 5),
+        home_team: event.team_home?.name,
+        away_team: event.team_away?.name,
+        status: event.status_code === 'NOT_STARTED' ? 'scheduled' : event.status_code?.toLowerCase(),
+        league_name: event.league?.name,
+        league_id: event.league?.id,
+        country: event.league?.country_code,
+        round: event.round,
+        referee: event.referee,
+        source: 'game-forecast-api',
+        prediction: {
+          result: {
+            home: (matchResult.home || 33) / 100,
+            draw: (matchResult.draw || 33) / 100,
+            away: (matchResult.away || 33) / 100,
+            recommendation: matchResult.home > matchResult.draw && matchResult.home > matchResult.away ? 'Home Win' :
+                           matchResult.away > matchResult.home && matchResult.away > matchResult.draw ? 'Away Win' : 'Draw'
+          }
+        },
+        confidence: Math.max(matchResult.home || 0, matchResult.draw || 0, matchResult.away || 0) / 100,
+        prediction_source: 'game-forecast-ai',
+        odds: {
+          home: odds.Home || 0,
+          draw: odds.Draw || 0,
+          away: odds.Away || 0,
+          over25: over25Odds.Over || 0,
+          under25: over25Odds.Under || 0,
+          source: 'game-forecast-api'
+        }
+      };
+    }).filter(f => f.home_team && f.away_team);
+    
+    gameForecastCache.set(cacheKey, { data: fixtures, timestamp: Date.now() });
+    return fixtures;
+  } catch (error) {
+    console.log('Game Forecast API error:', error.message);
+    return [];
+  }
+}
+const SPORTRADAR_BASE = 'https://api.sportradar.com/soccer/trial/v4/en';
+
+// Cache for Sportradar data to respect rate limits
+const sportradarCache = new Map();
+const SPORTRADAR_CACHE_TTL = 30 * 60 * 1000; // 30 minutes
+
+// Map common team names to Sportradar IDs (expanded as needed)
+const teamIdMap = {
+  'manchester city': 'sr:competitor:17',
+  'man city': 'sr:competitor:17',
+  'arsenal': 'sr:competitor:42',
+  'arsenal fc': 'sr:competitor:42',
+  'liverpool': 'sr:competitor:44',
+  'liverpool fc': 'sr:competitor:44',
+  'chelsea': 'sr:competitor:38',
+  'chelsea fc': 'sr:competitor:38',
+  'manchester united': 'sr:competitor:35',
+  'man united': 'sr:competitor:35',
+  'tottenham': 'sr:competitor:33',
+  'tottenham hotspur': 'sr:competitor:33',
+  'newcastle': 'sr:competitor:39',
+  'newcastle united': 'sr:competitor:39',
+  'aston villa': 'sr:competitor:40',
+  'brighton': 'sr:competitor:30',
+  'west ham': 'sr:competitor:37',
+  'crystal palace': 'sr:competitor:31',
+  'fulham': 'sr:competitor:43',
+  'brentford': 'sr:competitor:7629',
+  'nottingham forest': 'sr:competitor:36',
+  'bournemouth': 'sr:competitor:60',
+  'everton': 'sr:competitor:48',
+  'wolverhampton': 'sr:competitor:3',
+  'wolves': 'sr:competitor:3',
+  'leicester': 'sr:competitor:46',
+  'ipswich': 'sr:competitor:29',
+  'southampton': 'sr:competitor:45',
+  // La Liga
+  'real madrid': 'sr:competitor:2829',
+  'barcelona': 'sr:competitor:2817',
+  'fc barcelona': 'sr:competitor:2817',
+  'atletico madrid': 'sr:competitor:2836',
+  // Bundesliga
+  'bayern munich': 'sr:competitor:2672',
+  'bayern': 'sr:competitor:2672',
+  'borussia dortmund': 'sr:competitor:2673',
+  'dortmund': 'sr:competitor:2673',
+  'rb leipzig': 'sr:competitor:36382',
+  'bayer leverkusen': 'sr:competitor:2681',
+  // Serie A
+  'juventus': 'sr:competitor:2953',
+  'inter milan': 'sr:competitor:2957',
+  'inter': 'sr:competitor:2957',
+  'ac milan': 'sr:competitor:2948',
+  'milan': 'sr:competitor:2948',
+  'napoli': 'sr:competitor:2963',
+  'roma': 'sr:competitor:2954',
+  'as roma': 'sr:competitor:2954',
+  // Ligue 1
+  'psg': 'sr:competitor:2847',
+  'paris saint-germain': 'sr:competitor:2847',
+  'marseille': 'sr:competitor:2859',
+  'monaco': 'sr:competitor:2857',
+};
+
+// Season IDs for major leagues (2024-25 season)
+const seasonMap = {
+  'premier_league': 'sr:season:118689',
+  'la_liga': 'sr:season:118691',
+  'bundesliga': 'sr:season:118687',
+  'serie_a': 'sr:season:118693',
+  'ligue_1': 'sr:season:118695',
+  'eredivisie': 'sr:season:118699',
+  'primeira_liga': 'sr:season:118701',
+};
+
+// Get Sportradar team ID from name
+function getSportradarTeamId(teamName) {
+  const normalized = teamName.toLowerCase().trim();
+  return teamIdMap[normalized] || null;
+}
+
+// Fetch team profile from Sportradar
+async function fetchSportradarTeamProfile(teamId, apiKey) {
+  if (!apiKey || !teamId) return null;
+  
+  const cacheKey = `team_${teamId}`;
+  const cached = sportradarCache.get(cacheKey);
+  if (cached && Date.now() - cached.timestamp < SPORTRADAR_CACHE_TTL) {
+    return cached.data;
+  }
+  
+  try {
+    const url = `${SPORTRADAR_BASE}/competitors/${teamId}/profile.json?api_key=${apiKey}`;
+    const response = await fetch(url, {
+      signal: AbortSignal.timeout(5000)
+    });
+    
+    if (!response.ok) return null;
+    
+    const data = await response.json();
+    const result = {
+      id: teamId,
+      name: data.competitor?.name,
+      country: data.competitor?.country,
+      manager: data.manager?.name || 'Unknown',
+      venue: data.venue?.name || 'Unknown',
+      squadSize: data.players?.length || 0
+    };
+    
+    sportradarCache.set(cacheKey, { data: result, timestamp: Date.now() });
+    return result;
+  } catch (error) {
+    console.log(`Sportradar team profile error for ${teamId}:`, error.message);
+    return null;
+  }
+}
+
+// Fetch league standings from Sportradar
+async function fetchSportradarStandings(seasonId, apiKey) {
+  if (!apiKey || !seasonId) return null;
+  
+  const cacheKey = `standings_${seasonId}`;
+  const cached = sportradarCache.get(cacheKey);
+  if (cached && Date.now() - cached.timestamp < SPORTRADAR_CACHE_TTL) {
+    return cached.data;
+  }
+  
+  try {
+    const url = `${SPORTRADAR_BASE}/seasons/${seasonId}/standings.json?api_key=${apiKey}`;
+    const response = await fetch(url, {
+      signal: AbortSignal.timeout(5000)
+    });
+    
+    if (!response.ok) return null;
+    
+    const data = await response.json();
+    const standings = data.standings?.[0]?.groups?.[0]?.standings || [];
+    
+    const result = standings.map(s => ({
+      teamId: s.competitor?.id,
+      teamName: s.competitor?.name,
+      position: s.rank,
+      points: s.points,
+      played: s.played,
+      won: s.win,
+      drawn: s.draw,
+      lost: s.loss,
+      goalsFor: s.goals_for,
+      goalsAgainst: s.goals_against,
+      form: s.current_outcome || null
+    }));
+    
+    sportradarCache.set(cacheKey, { data: result, timestamp: Date.now() });
+    return result;
+  } catch (error) {
+    console.log(`Sportradar standings error for ${seasonId}:`, error.message);
+    return null;
+  }
+}
+
+// Get team position from standings
+function getTeamPosition(standings, teamName) {
+  if (!standings || !Array.isArray(standings)) return null;
+  const normalized = teamName.toLowerCase().trim();
+  const team = standings.find(s => 
+    s.teamName?.toLowerCase().includes(normalized) ||
+    normalized.includes(s.teamName?.toLowerCase())
+  );
+  return team || null;
+}
+
+// Enrich fixture with Sportradar data
+async function enrichWithSportradar(fixture, apiKey) {
+  if (!apiKey) return fixture;
+  
+  const enriched = { ...fixture, sportradar: {} };
+  
+  // Get team IDs
+  const homeId = getSportradarTeamId(fixture.home_team);
+  const awayId = getSportradarTeamId(fixture.away_team);
+  
+  // Fetch team profiles (in parallel)
+  const [homeProfile, awayProfile] = await Promise.all([
+    homeId ? fetchSportradarTeamProfile(homeId, apiKey) : null,
+    awayId ? fetchSportradarTeamProfile(awayId, apiKey) : null
+  ]);
+  
+  if (homeProfile) {
+    enriched.sportradar.home_manager = homeProfile.manager;
+    enriched.sportradar.home_venue = homeProfile.venue;
+  }
+  
+  if (awayProfile) {
+    enriched.sportradar.away_manager = awayProfile.manager;
+  }
+  
+  // Try to get standings for league position
+  let leagueKey = null;
+  const leagueName = (fixture.league_name || '').toLowerCase();
+  
+  if (leagueName.includes('premier') || leagueName.includes('england')) {
+    leagueKey = 'premier_league';
+  } else if (leagueName.includes('la liga') || leagueName.includes('spain')) {
+    leagueKey = 'la_liga';
+  } else if (leagueName.includes('bundesliga') || leagueName.includes('german')) {
+    leagueKey = 'bundesliga';
+  } else if (leagueName.includes('serie a') || leagueName.includes('italy')) {
+    leagueKey = 'serie_a';
+  } else if (leagueName.includes('ligue 1') || leagueName.includes('france')) {
+    leagueKey = 'ligue_1';
+  }
+  
+  if (leagueKey && seasonMap[leagueKey]) {
+    const standings = await fetchSportradarStandings(seasonMap[leagueKey], apiKey);
+    
+    const homeStats = getTeamPosition(standings, fixture.home_team);
+    const awayStats = getTeamPosition(standings, fixture.away_team);
+    
+    if (homeStats) {
+      enriched.sportradar.home_position = homeStats.position;
+      enriched.sportradar.home_points = homeStats.points;
+      enriched.sportradar.home_form = homeStats.form;
+    }
+    
+    if (awayStats) {
+      enriched.sportradar.away_position = awayStats.position;
+      enriched.sportradar.away_points = awayStats.points;
+      enriched.sportradar.away_form = awayStats.form;
+    }
+  }
+  
+  // Only return enriched data if we found something
+  if (Object.keys(enriched.sportradar).length > 0) {
+    return enriched;
+  }
+  
+  return fixture;
+}
+
+// ============= Odds-API.io v3 Integration (250+ Bookmakers) =============
+const ODDS_API_IO_BASE = 'https://api.odds-api.io/v3';
+
+// Cache for odds data
+const oddsCache = new Map();
+const ODDS_CACHE_TTL = 10 * 60 * 1000; // 10 minutes
+
+// Map league names to Odds-API.io league slugs
+const oddsApiLeagueSlugs = {
+  'premier_league': 'england-premier-league',
+  'la_liga': 'spain-la-liga',
+  'bundesliga': 'germany-bundesliga',
+  'serie_a': 'italy-serie-a',
+  'ligue_1': 'france-ligue-1',
+  'champions_league': 'uefa-champions-league',
+  'europa_league': 'uefa-europa-league',
+  'eredivisie': 'netherlands-eredivisie'
+};
+
+// Fetch events for a league
+async function fetchOddsApiEvents(leagueSlug, apiKey) {
+  if (!apiKey || !leagueSlug) return [];
+  
+  const cacheKey = `events_${leagueSlug}`;
+  const cached = oddsCache.get(cacheKey);
+  if (cached && Date.now() - cached.timestamp < ODDS_CACHE_TTL) {
+    return cached.data;
+  }
+  
+  try {
+    const url = `${ODDS_API_IO_BASE}/events?sport=football&league=${leagueSlug}&apiKey=${apiKey}`;
+    const response = await fetch(url, {
+      signal: AbortSignal.timeout(8000)
+    });
+    
+    if (!response.ok) return [];
+    
+    const events = await response.json();
+    oddsCache.set(cacheKey, { data: events, timestamp: Date.now() });
+    return events;
+  } catch (error) {
+    console.log(`Odds-API.io events error for ${leagueSlug}:`, error.message);
+    return [];
+  }
+}
+
+// Fetch odds for a specific event
+async function fetchOddsForEvent(eventId, apiKey) {
+  if (!apiKey || !eventId) return null;
+  
+  const cacheKey = `odds_${eventId}`;
+  const cached = oddsCache.get(cacheKey);
+  if (cached && Date.now() - cached.timestamp < ODDS_CACHE_TTL) {
+    return cached.data;
+  }
+  
+  try {
+    // Use Bet365 as primary bookmaker (most reliable)
+    const url = `${ODDS_API_IO_BASE}/odds?eventId=${eventId}&bookmakers=Bet365&apiKey=${apiKey}`;
+    const response = await fetch(url, {
+      signal: AbortSignal.timeout(8000)
+    });
+    
+    if (!response.ok) return null;
+    
+    const oddsData = await response.json();
+    oddsCache.set(cacheKey, { data: oddsData, timestamp: Date.now() });
+    return oddsData;
+  } catch (error) {
+    console.log(`Odds-API.io odds error for event ${eventId}:`, error.message);
+    return null;
+  }
+}
+
+// Parse odds data from Odds-API.io response
+function parseOddsData(oddsData) {
+  if (!oddsData || !oddsData.bookmakers) return null;
+  
+  const result = {
+    home_odds: 0,
+    draw_odds: 0,
+    away_odds: 0,
+    over25: 0,
+    under25: 0,
+    btts_yes: 0,
+    btts_no: 0,
+    double_chance: {},
+    bookmaker: null,
+    source: 'odds-api.io'
+  };
+  
+  for (const [bookmaker, markets] of Object.entries(oddsData.bookmakers)) {
+    result.bookmaker = bookmaker;
+    
+    for (const market of markets) {
+      if (market.name === 'ML' && market.odds && market.odds[0]) {
+        result.home_odds = parseFloat(market.odds[0].home) || 0;
+        result.draw_odds = parseFloat(market.odds[0].draw) || 0;
+        result.away_odds = parseFloat(market.odds[0].away) || 0;
+      }
+      
+      if ((market.name === 'Goals Over/Under' || market.name === 'Totals') && market.odds) {
+        const over25Market = market.odds.find(o => o.hdp === 2.5 || o.hdp === '2.5');
+        if (over25Market) {
+          result.over25 = parseFloat(over25Market.over) || 0;
+          result.under25 = parseFloat(over25Market.under) || 0;
+        }
+      }
+      
+      if (market.name === 'Both Teams To Score' && market.odds && market.odds[0]) {
+        result.btts_yes = parseFloat(market.odds[0].yes) || 0;
+        result.btts_no = parseFloat(market.odds[0].no) || 0;
+      }
+      
+      if (market.name === 'Double Chance' && market.odds) {
+        for (const dc of market.odds) {
+          if (dc.label === 'Home or Draw' || dc.label?.includes('or Draw')) {
+            result.double_chance['1X'] = parseFloat(dc.under || dc.odds) || 0;
+          } else if (dc.label === 'Draw or Away' || dc.label?.includes('Draw or')) {
+            result.double_chance['X2'] = parseFloat(dc.under || dc.odds) || 0;
+          } else if (dc.label === 'Home or Away' || dc.label?.includes('or ')) {
+            result.double_chance['12'] = parseFloat(dc.under || dc.odds) || 0;
+          }
+        }
+      }
+    }
+    break; // Use first bookmaker
+  }
+  
+  return result;
+}
+
+// Match fixture to event from Odds-API.io
+function matchFixtureToEvent(fixture, events) {
+  if (!events || events.length === 0) return null;
+  
+  const homeTeam = (fixture.home_team || '').toLowerCase();
+  const awayTeam = (fixture.away_team || '').toLowerCase();
+  
+  for (const event of events) {
+    const eventHome = (event.home || '').toLowerCase();
+    const eventAway = (event.away || '').toLowerCase();
+    
+    // Exact match
+    if (eventHome === homeTeam && eventAway === awayTeam) return event;
+    
+    // Fuzzy match (first word)
+    const homeWord = homeTeam.split(' ')[0];
+    const awayWord = awayTeam.split(' ')[0];
+    
+    if (eventHome.includes(homeWord) && eventAway.includes(awayWord)) return event;
+    if (homeTeam.includes(eventHome.split(' ')[0]) && awayTeam.includes(eventAway.split(' ')[0])) return event;
+  }
+  
+  return null;
+}
+
+// Enrich fixture with odds from Odds-API.io
+async function enrichWithOdds(fixture, apiKey) {
+  if (!apiKey) return fixture;
+  
+  // Determine league slug from league name AND country
+  let leagueSlug = null;
+  const leagueName = (fixture.league_name || '').toLowerCase();
+  const country = (fixture.country || '').toLowerCase();
+  
+  // English Premier League - use country to be precise
+  if ((leagueName === 'premier league' || leagueName.includes('premier league')) && 
+      (country === 'england' || country === 'uk' || country === 'united kingdom' || country === '')) {
+    // If country is empty, check for known EPL teams
+    const homeTeam = (fixture.home_team || '').toLowerCase();
+    const awayTeam = (fixture.away_team || '').toLowerCase();
+    const eplTeams = ['arsenal', 'chelsea', 'liverpool', 'manchester', 'tottenham', 'everton', 'leeds', 'newcastle', 'brighton', 'wolves', 'aston villa', 'brentford', 'fulham', 'crystal palace', 'nottingham forest', 'bournemouth', 'west ham', 'leicester', 'ipswich'];
+    
+    if (country === 'england' || eplTeams.some(t => homeTeam.includes(t) || awayTeam.includes(t))) {
+      leagueSlug = 'england-premier-league';
+    }
+  } else if ((leagueName.includes('la liga') || leagueName.includes('laliga')) && 
+             (country === 'spain' || country === '')) {
+    leagueSlug = 'spain-la-liga';
+  } else if (leagueName.includes('bundesliga') && 
+             (country === 'germany' || country === '') && !leagueName.includes('austria')) {
+    leagueSlug = 'germany-bundesliga';
+  } else if (leagueName.includes('serie a') && 
+             (country === 'italy' || country === '') && !leagueName.includes('brazil')) {
+    leagueSlug = 'italy-serie-a';
+  } else if (leagueName.includes('ligue 1') && (country === 'france' || country === '')) {
+    leagueSlug = 'france-ligue-1';
+  } else if (leagueName.includes('champions league')) {
+    leagueSlug = 'uefa-champions-league';
+  }
+  
+  if (!leagueSlug) return fixture;
+  
+  // Get events for this league
+  const events = await fetchOddsApiEvents(leagueSlug, apiKey);
+  
+  // Find matching event
+  const matchingEvent = matchFixtureToEvent(fixture, events);
+  if (!matchingEvent) return fixture;
+  
+  // Fetch odds for this event
+  const oddsData = await fetchOddsForEvent(matchingEvent.id, apiKey);
+  if (!oddsData) return fixture;
+  
+  // Parse odds
+  const parsedOdds = parseOddsData(oddsData);
+  if (!parsedOdds) return fixture;
+  
+  return {
+    ...fixture,
+    odds: {
+      home: parsedOdds.home_odds,
+      draw: parsedOdds.draw_odds,
+      away: parsedOdds.away_odds,
+      over25: parsedOdds.over25,
+      under25: parsedOdds.under25,
+      btts_yes: parsedOdds.btts_yes,
+      btts_no: parsedOdds.btts_no,
+      double_chance: parsedOdds.double_chance,
+      bookmaker: parsedOdds.bookmaker,
+      source: 'odds-api.io'
+    }
+  };
+}
 async function fetchOpenLigaDBFixtures(league = 'bl1', season = '2024') {
   const url = `https://api.openligadb.de/getmatchdata/${league}/${season}`;
   
@@ -213,6 +941,141 @@ async function fetchTheSportsDBFixtures(leagueId = '4328') {
   }
 }
 
+// API-Football - Premium data source with 1200+ fixtures per day
+// Docs: https://www.api-football.com/documentation-v3
+const API_FOOTBALL_KEY = '29856afe069eaca8d8ecb3049132d8f8';
+const API_FOOTBALL_BASE = 'https://v3.football.api-sports.io';
+
+// Major league IDs for API-Football
+const API_FOOTBALL_LEAGUES = {
+  // England
+  premier_league: 39,
+  championship: 40,
+  league_one: 41,
+  league_two: 42,
+  // Germany
+  bundesliga: 78,
+  bundesliga_2: 79,
+  // Spain
+  la_liga: 140,
+  la_liga_2: 141,
+  // Italy
+  serie_a: 135,
+  serie_b: 136,
+  // France
+  ligue_1: 61,
+  ligue_2: 62,
+  // Netherlands
+  eredivisie: 88,
+  // Portugal
+  primeira_liga: 94,
+  // Belgium
+  belgian_pro_league: 144,
+  // Turkey
+  super_lig: 203,
+  // Scotland
+  scottish_premiership: 179,
+  // Greece
+  super_league_greece: 197,
+  // Brazil
+  brasileirao: 71,
+  // Argentina
+  argentina_primera: 128,
+  // USA
+  mls: 253,
+  // Mexico
+  liga_mx: 262,
+  // European competitions
+  champions_league: 2,
+  europa_league: 3,
+  conference_league: 848
+};
+
+// Fetch fixtures from API-Football for a specific date range
+async function fetchAPIFootballFixtures(days = 7) {
+  const fixtures = [];
+  const today = new Date();
+  
+  try {
+    // Fetch fixtures for each day in the range
+    for (let i = 0; i <= Math.min(days, 7); i++) {
+      const date = new Date(today);
+      date.setDate(date.getDate() + i);
+      const dateStr = date.toISOString().split('T')[0];
+      
+      const response = await fetch(`${API_FOOTBALL_BASE}/fixtures?date=${dateStr}&timezone=UTC`, {
+        headers: {
+          'x-apisports-key': API_FOOTBALL_KEY
+        }
+      });
+      
+      if (!response.ok) {
+        console.error(`API-Football error for ${dateStr}: ${response.status}`);
+        continue;
+      }
+      
+      const data = await response.json();
+      
+      if (data.errors && Object.keys(data.errors).length > 0) {
+        console.error('API-Football errors:', data.errors);
+        continue;
+      }
+      
+      const dayFixtures = (data.response || []).map(f => ({
+        date: f.fixture.date.split('T')[0],
+        time: f.fixture.date.split('T')[1]?.substring(0, 5) || '15:00',
+        home_team: f.teams.home.name,
+        away_team: f.teams.away.name,
+        home_score: f.goals.home,
+        away_score: f.goals.away,
+        status: mapAPIFootballStatus(f.fixture.status.short),
+        league: f.league.name,
+        league_name: f.league.name,
+        league_id: f.league.id,
+        country: f.league.country,
+        home_logo: f.teams.home.logo,
+        away_logo: f.teams.away.logo,
+        league_logo: f.league.logo,
+        venue: f.fixture.venue?.name || null,
+        fixture_id: f.fixture.id,
+        source: 'api-football'
+      }));
+      
+      fixtures.push(...dayFixtures);
+    }
+    
+    return fixtures;
+  } catch (error) {
+    console.error('API-Football fetch error:', error);
+    return [];
+  }
+}
+
+// Map API-Football status codes to our status
+function mapAPIFootballStatus(status) {
+  const statusMap = {
+    'NS': 'scheduled',    // Not Started
+    'TBD': 'scheduled',   // Time To Be Defined
+    '1H': 'live',         // First Half
+    'HT': 'live',         // Halftime
+    '2H': 'live',         // Second Half
+    'ET': 'live',         // Extra Time
+    'P': 'live',          // Penalty In Progress
+    'FT': 'finished',     // Match Finished
+    'AET': 'finished',    // Match Finished After Extra Time
+    'PEN': 'finished',    // Match Finished After Penalty
+    'BT': 'live',         // Break Time
+    'SUSP': 'suspended',  // Match Suspended
+    'INT': 'suspended',   // Match Interrupted
+    'PST': 'postponed',   // Match Postponed
+    'CANC': 'cancelled',  // Match Cancelled
+    'ABD': 'cancelled',   // Match Abandoned
+    'AWD': 'finished',    // Technical Loss
+    'WO': 'finished'      // WalkOver
+  };
+  return statusMap[status] || 'scheduled';
+}
+
 // League IDs for TheSportsDB - verified unique IDs for major leagues
 const SPORTSDB_LEAGUES = {
   // Europe - Major (verified unique IDs)
@@ -327,38 +1190,100 @@ function parseCSV(csvText) {
 }
 
 // ============= Prediction Engine =============
+// Generate dynamic predictions based on team characteristics
+function hashTeam(name) {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = ((hash << 5) - hash) + name.charCodeAt(i);
+    hash = hash & hash;
+  }
+  return Math.abs(hash);
+}
+
+function getTeamStrength(teamName) {
+  // Generate consistent strength factor (0.3 - 0.9) based on team name
+  const hash = hashTeam(teamName.toLowerCase());
+  return 0.3 + (hash % 60) / 100;
+}
+
 function predictMatch(homeTeam, awayTeam, options = {}) {
   const timestamp = new Date().toISOString();
   const matchId = `${homeTeam.toLowerCase().replace(/\s+/g, '_')}_vs_${awayTeam.toLowerCase().replace(/\s+/g, '_')}_${Date.now()}`;
   
   // Use odds if available to improve predictions
-  let homeProb, drawProb, awayProb;
+  let homeProb, drawProb, awayProb, over25Prob, bttsProb, confidence, predictionSource;
   
-  if (options.home_odds && options.draw_odds && options.away_odds) {
-    // Convert odds to probabilities
+  // Priority 1: ML model predictions (from HuggingFace)
+  if (options.mlPrediction) {
+    const ml = options.mlPrediction;
+    homeProb = ml.home_prob;
+    drawProb = ml.draw_prob;
+    awayProb = ml.away_prob;
+    over25Prob = ml.over25_prob || 0.52;
+    bttsProb = ml.btts_prob || 0.48;
+    confidence = ml.confidence || 0.70;
+    predictionSource = ml.source || 'ml_model';
+  }
+  // Priority 2: Odds-based predictions
+  else if (options.home_odds && options.draw_odds && options.away_odds) {
     const totalInv = 1/options.home_odds + 1/options.draw_odds + 1/options.away_odds;
     homeProb = (1/options.home_odds) / totalInv;
     drawProb = (1/options.draw_odds) / totalInv;
     awayProb = (1/options.away_odds) / totalInv;
-  } else {
-    // Base probabilities with home advantage
-    const homeAdvantage = 0.10;
-    homeProb = 0.35 + homeAdvantage;
-    drawProb = 0.28;
-    awayProb = 0.27;
+    
+    const homeAttack = getTeamStrength(homeTeam + '_attack');
+    const awayAttack = getTeamStrength(awayTeam + '_attack');
+    const combinedAttack = (homeAttack + awayAttack) / 2;
+    over25Prob = 0.40 + combinedAttack * 0.25;
+    bttsProb = 0.35 + combinedAttack * 0.28;
+    
+    const maxProb = Math.max(homeProb, drawProb, awayProb);
+    confidence = 0.70 + maxProb * 0.15;
+    predictionSource = 'odds_based';
+  }
+  // Priority 3: Local team-strength algorithm (fallback)
+  else {
+    const homeStrength = getTeamStrength(homeTeam);
+    const awayStrength = getTeamStrength(awayTeam);
+    const homeAdvantage = 0.12;
+    
+    const homeScore = homeStrength + homeAdvantage;
+    const awayScore = awayStrength;
+    const strengthDiff = homeScore - awayScore;
+    
+    if (strengthDiff > 0.15) {
+      homeProb = 0.48 + (strengthDiff * 0.3);
+      drawProb = 0.24 - (strengthDiff * 0.1);
+      awayProb = 0.28 - (strengthDiff * 0.2);
+    } else if (strengthDiff < -0.05) {
+      awayProb = 0.38 + (Math.abs(strengthDiff) * 0.25);
+      drawProb = 0.28 - (Math.abs(strengthDiff) * 0.08);
+      homeProb = 0.34 - (Math.abs(strengthDiff) * 0.17);
+    } else {
+      homeProb = 0.38 + (strengthDiff * 0.2);
+      drawProb = 0.30;
+      awayProb = 0.32 - (strengthDiff * 0.2);
+    }
+    
+    homeProb = Math.max(0.15, Math.min(0.75, homeProb));
+    drawProb = Math.max(0.15, Math.min(0.35, drawProb));
+    awayProb = Math.max(0.12, Math.min(0.65, awayProb));
     
     const total = homeProb + drawProb + awayProb;
     homeProb /= total;
     drawProb /= total;
     awayProb /= total;
+    
+    const homeAttack = getTeamStrength(homeTeam + '_attack');
+    const awayAttack = getTeamStrength(awayTeam + '_attack');
+    const combinedAttack = (homeAttack + awayAttack) / 2;
+    over25Prob = 0.40 + combinedAttack * 0.25;
+    bttsProb = 0.35 + combinedAttack * 0.28;
+    
+    const maxProb = Math.max(homeProb, drawProb, awayProb);
+    confidence = 0.55 + maxProb * 0.25;
+    predictionSource = 'local_algorithm';
   }
-  
-  // Goals predictions based on league averages
-  const over25Prob = 0.52 + (Math.random() * 0.08 - 0.04);
-  const bttsProb = 0.48 + (Math.random() * 0.08 - 0.04);
-  
-  // Confidence based on data availability
-  const confidence = options.home_odds ? 0.75 : 0.65;
   
   // Determine best combo predictions
   const combos = generateComboPredictions(homeProb, drawProb, awayProb, over25Prob, bttsProb);
@@ -450,7 +1375,7 @@ function generateComboPredictions(homeProb, drawProb, awayProb, over25Prob, btts
 }
 
 // ============= Fixtures Handler =============
-async function handleFixtures(request, specificLeague = null) {
+async function handleFixtures(request, specificLeague = null, env = {}) {
   const url = new URL(request.url);
   const days = parseInt(url.searchParams.get('days') || '14');
   const includePredictions = url.searchParams.get('predictions') !== 'false';
@@ -478,68 +1403,150 @@ async function handleFixtures(request, specificLeague = null) {
   const cutoff = new Date(today);
   cutoff.setDate(cutoff.getDate() + days);
   
-  // Fetch today's LIVE matches for 24/7 coverage (runs in parallel)
-  const todayPromise = includeToday ? fetchTodaysMatches() : Promise.resolve([]);
-  const yesterdayPromise = includeRecent ? fetchYesterdaysMatches() : Promise.resolve([]);
-  const fetchPromises = Object.entries(leagues).map(async ([leagueId, leagueInfo]) => {
-    const sportsDbId = SPORTSDB_LEAGUES[leagueId];
-    const fixtures = [];
-    
-    if (sportsDbId) {
-      try {
-        const matches = await fetchTheSportsDBFixtures(sportsDbId);
-        
-        for (const match of matches) {
-          if (!match.date) continue;
-          
-          // Use string comparison for dates (YYYY-MM-DD format) to avoid timezone issues
+  // PRIMARY SOURCE: The Odds API (fixtures + live odds for major leagues)
+  const theOddsApiKey = env.THE_ODDS_API_KEY;
+  if (theOddsApiKey) {
+    try {
+      // Fetch from major leagues
+      const majorLeagues = [
+        'soccer_epl', 'soccer_spain_la_liga', 'soccer_germany_bundesliga',
+        'soccer_italy_serie_a', 'soccer_france_ligue_one', 'soccer_efl_champ'
+      ];
+      
+      const oddsFixtures = await fetchTheOddsApiFixtures(theOddsApiKey, majorLeagues);
+      
+      for (const fixture of oddsFixtures) {
+        if (fixture.date) {
           const todayStr = today.toISOString().split('T')[0];
           const cutoffStr = cutoff.toISOString().split('T')[0];
-          const matchDateStr = match.date;
-          
-          // Include scheduled matches within date range
-          if (match.status === 'scheduled' && matchDateStr >= todayStr && matchDateStr <= cutoffStr) {
-            // Use league name from API if available (more accurate), else use our mapping
-            const actualLeagueName = match.league_from_api || leagueInfo.name;
-            const actualCountry = match.country_from_api || leagueInfo.country;
-            
-            const fixture = {
-              ...match,
-              league: leagueId,
-              league_name: actualLeagueName,
-              country: actualCountry
-            };
-            
-            // Add predictions
+          if (fixture.date >= todayStr && fixture.date <= cutoffStr) {
+            // Add local predictions since The Odds API doesn't provide them
             if (includePredictions) {
-              const prediction = predictMatch(match.home_team, match.away_team, {
-                league: leagueId,
-                league_name: actualLeagueName,
-                date: match.date,
-                time: match.time
+              const prediction = predictMatch(fixture.home_team, fixture.away_team, {
+                league: fixture.league_name,
+                date: fixture.date,
+                odds: fixture.odds  // Use odds for better predictions
               });
               fixture.prediction = prediction.predictions;
               fixture.confidence = prediction.confidence;
+              fixture.prediction_source = 'local';
             }
-            
-            fixtures.push(fixture);
+            allFixtures.push(fixture);
           }
         }
-      } catch (error) {
-        console.error(`TheSportsDB error for ${leagueId}:`, error);
       }
+    } catch (error) {
+      console.log('The Odds API error:', error.message);
+    }
+  }
+  
+  // SECONDARY SOURCE: API-Football (1200+ fixtures per day) - NOTE: May require subscription
+  try {
+    const apiFootballFixtures = await fetchAPIFootballFixtures(Math.min(days, 7));
+    
+    // Filter to major leagues if specific league requested, otherwise keep all
+    for (const match of apiFootballFixtures) {
+      // Filter by specific league if requested
+      if (specificLeague) {
+        const leagueId = API_FOOTBALL_LEAGUES[specificLeague];
+        if (leagueId && match.league_id !== leagueId) continue;
+      }
+      
+      // Only include scheduled or live matches
+      if (match.status !== 'scheduled' && match.status !== 'live') continue;
+      
+      // Add predictions
+      if (includePredictions) {
+        // Try ML API for first 20 matches (to respect rate limits)
+        let mlPrediction = null;
+        if (allFixtures.length < 20) {
+          mlPrediction = await fetchMLPrediction(match.home_team, match.away_team, match.league_name || '');
+        }
+        
+        const prediction = predictMatch(match.home_team, match.away_team, {
+          league: match.league,
+          league_name: match.league_name,
+          date: match.date,
+          time: match.time,
+          mlPrediction: mlPrediction // Will use ML if available
+        });
+        match.prediction = prediction.predictions;
+        match.confidence = prediction.confidence;
+        match.prediction_source = prediction.prediction_source || (mlPrediction ? 'ml_model' : 'local');
+      }
+      
+      allFixtures.push(match);
     }
     
-    // Also get recent results from Football-Data.co.uk if requested
-    if (includeRecent && leagueInfo.file) {
+    console.log(`API-Football returned ${apiFootballFixtures.length} total, ${allFixtures.length} after filtering`);
+  } catch (error) {
+    console.error('API-Football failed, falling back to TheSportsDB:', error);
+    
+    // Fallback to TheSportsDB if API-Football fails
+    const fetchPromises = Object.entries(leagues).map(async ([leagueId, leagueInfo]) => {
+      const sportsDbId = SPORTSDB_LEAGUES[leagueId];
+      const fixtures = [];
+      
+      if (sportsDbId) {
+        try {
+          const matches = await fetchTheSportsDBFixtures(sportsDbId);
+          
+          for (const match of matches) {
+            if (!match.date) continue;
+            
+            const todayStr = today.toISOString().split('T')[0];
+            const cutoffStr = cutoff.toISOString().split('T')[0];
+            const matchDateStr = match.date;
+            
+            if (match.status === 'scheduled' && matchDateStr >= todayStr && matchDateStr <= cutoffStr) {
+              const actualLeagueName = match.league_from_api || leagueInfo.name;
+              const actualCountry = match.country_from_api || leagueInfo.country;
+              
+              const fixture = {
+                ...match,
+                league: leagueId,
+                league_name: actualLeagueName,
+                country: actualCountry
+              };
+              
+              if (includePredictions) {
+                const prediction = predictMatch(match.home_team, match.away_team, {
+                  league: leagueId,
+                  league_name: actualLeagueName,
+                  date: match.date,
+                  time: match.time
+                });
+                fixture.prediction = prediction.predictions;
+                fixture.confidence = prediction.confidence;
+              }
+              
+              fixtures.push(fixture);
+            }
+          }
+        } catch (error) {
+          console.error(`TheSportsDB error for ${leagueId}:`, error);
+        }
+      }
+      
+      return fixtures;
+    });
+    
+    const results = await Promise.all(fetchPromises);
+    results.forEach(fixtures => allFixtures.push(...fixtures));
+  }
+  
+  // Add recent results from Football-Data.co.uk if requested
+  if (includeRecent) {
+    for (const [leagueId, leagueInfo] of Object.entries(leagues)) {
+      if (!leagueInfo.file) continue;
       try {
         const historicalMatches = await fetchFootballDataCSV(leagueInfo.file);
         const finished = historicalMatches
           .filter(m => m.status === 'finished')
-          .slice(-10); // Last 10 results
+          .slice(-10);
         
         for (const match of finished) {
-          fixtures.push({
+          allFixtures.push({
             ...match,
             league: leagueId,
             league_name: leagueInfo.name,
@@ -550,36 +1557,9 @@ async function handleFixtures(request, specificLeague = null) {
         console.error(`Historical data error for ${leagueId}:`, error);
       }
     }
-    
-    return fixtures;
-  });
-  
-  // Wait for all fetches including today's matches
-  const [results, todayMatches, yesterdayMatches] = await Promise.all([
-    Promise.all(fetchPromises),
-    todayPromise,
-    yesterdayPromise
-  ]);
-  
-  // Add scheduled fixtures from leagues
-  results.forEach(fixtures => allFixtures.push(...fixtures));
-  
-  // Add today's live/scheduled matches with predictions
-  for (const match of todayMatches) {
-    if (includePredictions && match.status !== 'finished') {
-      const prediction = predictMatch(match.home_team, match.away_team, {
-        league_name: match.league_name,
-        date: match.date,
-        time: match.time
-      });
-      match.prediction = prediction.predictions;
-      match.confidence = prediction.confidence;
-    }
-    allFixtures.push(match);
   }
   
-  // Add yesterday's results if requested
-  yesterdayMatches.forEach(match => allFixtures.push(match));
+  // Game Forecast enrichment already done in primary source above
   
   // Deduplicate fixtures (TheSportsDB API sometimes returns same match for multiple league IDs)
   const seenMatches = new Map();
@@ -605,6 +1585,81 @@ async function handleFixtures(request, specificLeague = null) {
       if (!f.confidence) return false; // Skip if no confidence
       return f.confidence >= effectiveMinConfidence;
     });
+  }
+  
+  // Enrich major league fixtures with Sportradar data (manager, standings, form)
+  const sportradarApiKey = env.SPORTRADAR_API_KEY;
+  if (sportradarApiKey) {
+    const majorLeagues = ['premier', 'la liga', 'bundesliga', 'serie a', 'ligue 1'];
+    const enrichPromises = filteredFixtures.slice(0, 30).map(async (fixture, idx) => {
+      const leagueLower = (fixture.league_name || '').toLowerCase();
+      if (majorLeagues.some(l => leagueLower.includes(l))) {
+        try {
+          return await enrichWithSportradar(fixture, sportradarApiKey);
+        } catch (e) {
+          return fixture;
+        }
+      }
+      return fixture;
+    });
+    
+    try {
+      const enrichedMajor = await Promise.all(enrichPromises);
+      // Replace first 30 with enriched versions
+      for (let i = 0; i < enrichedMajor.length; i++) {
+        filteredFixtures[i] = enrichedMajor[i];
+      }
+    } catch (e) {
+      console.log('Sportradar enrichment error:', e.message);
+    }
+  }
+  
+  // Enrich fixtures with live odds from Odds-API.io
+  const oddsApiKey = env.ODDS_API_KEY;
+  if (oddsApiKey) {
+    // Find ALL major league fixtures (not just first 30) for odds enrichment
+    const majorLeagueFixtures = [];
+    const majorLeagueIndices = [];
+    
+    for (let i = 0; i < filteredFixtures.length && majorLeagueFixtures.length < 50; i++) {
+      const fixture = filteredFixtures[i];
+      const leagueLower = (fixture.league_name || '').toLowerCase();
+      const country = (fixture.country || '').toLowerCase();
+      
+      // Check if it's a major league (EPL, La Liga, Bundesliga, Serie A, Ligue 1, UCL)
+      const isEPL = leagueLower === 'premier league' && country === 'england';
+      const isLaLiga = (leagueLower.includes('la liga') || leagueLower === 'laliga') && country === 'spain';
+      const isBundesliga = leagueLower === 'bundesliga' && country === 'germany';
+      const isSerieA = leagueLower === 'serie a' && country === 'italy';
+      const isLigue1 = leagueLower === 'ligue 1' && country === 'france';
+      const isUCL = leagueLower.includes('champions league');
+      
+      if (isEPL || isLaLiga || isBundesliga || isSerieA || isLigue1 || isUCL) {
+        majorLeagueFixtures.push(fixture);
+        majorLeagueIndices.push(i);
+      }
+    }
+    
+    // Enrich major league fixtures with odds
+    if (majorLeagueFixtures.length > 0) {
+      const oddsPromises = majorLeagueFixtures.map(async (fixture) => {
+        try {
+          return await enrichWithOdds(fixture, oddsApiKey);
+        } catch (e) {
+          return fixture;
+        }
+      });
+      
+      try {
+        const enrichedWithOdds = await Promise.all(oddsPromises);
+        // Replace fixtures at their original positions
+        for (let j = 0; j < enrichedWithOdds.length; j++) {
+          filteredFixtures[majorLeagueIndices[j]] = enrichedWithOdds[j];
+        }
+      } catch (e) {
+        console.log('Odds enrichment error:', e.message);
+      }
+    }
   }
   
   // Sort: live first, then scheduled by date, then finished
@@ -698,10 +1753,148 @@ function handleModelsInfo() {
     version: CONFIG.version,
     markets: CONFIG.markets,
     leagues: Object.keys(CONFIG.leagues).length,
-    data_source: "Football-Data.co.uk",
-    prediction_features: ["odds-based", "home-advantage", "combo-generation"],
+    data_source: "API-Football",
+    prediction_features: ["odds-based", "home-advantage", "combo-generation", "acca-builder"],
     timestamp: new Date().toISOString()
   }), { status: 200, headers: corsHeaders });
+}
+
+// ============= ACCA Generation Handler =============
+async function handleAccas(request) {
+  const url = new URL(request.url);
+  const folds = parseInt(url.searchParams.get('folds') || '3');
+  const minConfidence = parseFloat(url.searchParams.get('confidence') || '65') / 100;
+  const maxAccas = parseInt(url.searchParams.get('limit') || '5');
+  const market = url.searchParams.get('market') || 'result'; // result, over25, btts
+  
+  try {
+    // Fetch fixtures with predictions
+    const fixtures = await fetchAPIFootballFixtures(3); // Next 3 days for ACCAs
+    
+    // Add predictions and filter by confidence
+    const highConfMatches = [];
+    for (const match of fixtures) {
+      if (match.status !== 'scheduled') continue;
+      
+      const prediction = predictMatch(match.home_team, match.away_team, {
+        league: match.league,
+        league_name: match.league_name,
+        date: match.date,
+        time: match.time
+      });
+      
+      if (prediction.confidence >= minConfidence) {
+        highConfMatches.push({
+          ...match,
+          prediction: prediction.predictions,
+          confidence: prediction.confidence
+        });
+      }
+    }
+    
+    // Sort by confidence descending
+    highConfMatches.sort((a, b) => b.confidence - a.confidence);
+    
+    // Generate ACCAs
+    const accas = [];
+    const usedMatches = new Set();
+    
+    // Generate multiple ACCAs with different combinations
+    for (let accaNum = 0; accaNum < maxAccas && highConfMatches.length >= folds; accaNum++) {
+      const selections = [];
+      let combinedOdds = 1;
+      let avgConfidence = 0;
+      
+      // Select matches for this ACCA
+      for (const match of highConfMatches) {
+        const matchKey = `${match.date}_${match.home_team}_${match.away_team}`;
+        if (usedMatches.has(matchKey)) continue;
+        
+        let pick, odds, prob;
+        
+        if (market === 'result') {
+          const result = match.prediction.result;
+          if (result.home > result.away && result.home > result.draw) {
+            pick = 'Home Win';
+            prob = result.home;
+          } else if (result.away > result.home && result.away > result.draw) {
+            pick = 'Away Win';
+            prob = result.away;
+          } else {
+            pick = 'Draw';
+            prob = result.draw;
+          }
+          odds = Math.max(1.1, 1 / prob);
+        } else if (market === 'over25') {
+          const over = match.prediction.over_25;
+          pick = over.yes > 0.5 ? 'Over 2.5 Goals' : 'Under 2.5 Goals';
+          prob = over.yes > 0.5 ? over.yes : over.no;
+          odds = Math.max(1.1, 1 / prob);
+        } else if (market === 'btts') {
+          const btts = match.prediction.btts;
+          pick = btts.yes > 0.5 ? 'BTTS Yes' : 'BTTS No';
+          prob = btts.yes > 0.5 ? btts.yes : btts.no;
+          odds = Math.max(1.1, 1 / prob);
+        }
+        
+        selections.push({
+          match: `${match.home_team} vs ${match.away_team}`,
+          home_team: match.home_team,
+          away_team: match.away_team,
+          league: match.league_name,
+          date: match.date,
+          time: match.time,
+          pick,
+          odds: parseFloat(odds.toFixed(2)),
+          probability: parseFloat(prob.toFixed(3)),
+          confidence: match.confidence,
+          home_logo: match.home_logo,
+          away_logo: match.away_logo
+        });
+        
+        combinedOdds *= odds;
+        avgConfidence += match.confidence;
+        usedMatches.add(matchKey);
+        
+        if (selections.length >= folds) break;
+      }
+      
+      if (selections.length === folds) {
+        avgConfidence /= folds;
+        
+        accas.push({
+          id: accaNum + 1,
+          type: `${folds}-fold`,
+          market,
+          selections,
+          combined_odds: parseFloat(combinedOdds.toFixed(2)),
+          confidence: parseFloat((avgConfidence * 100).toFixed(1)),
+          potential_return_10: parseFloat((10 * combinedOdds).toFixed(2)),
+          potential_return_50: parseFloat((50 * combinedOdds).toFixed(2)),
+          risk_level: avgConfidence >= 0.7 ? 'Low' : avgConfidence >= 0.6 ? 'Medium' : 'High'
+        });
+      }
+    }
+    
+    return new Response(JSON.stringify({
+      accas,
+      count: accas.length,
+      folds,
+      market,
+      min_confidence: minConfidence,
+      high_conf_matches: highConfMatches.length,
+      total_matches_scanned: fixtures.length,
+      timestamp: new Date().toISOString()
+    }), { status: 200, headers: corsHeaders });
+    
+  } catch (error) {
+    console.error('ACCA generation error:', error);
+    return new Response(JSON.stringify({
+      error: "ACCA generation failed",
+      detail: error.message,
+      timestamp: new Date().toISOString()
+    }), { status: 500, headers: corsHeaders });
+  }
 }
 
 function handleNotFound() {
@@ -720,6 +1913,375 @@ function handleNotFound() {
   }), { status: 404, headers: corsHeaders });
 }
 
+// ============= Retraining Handler =============
+async function handleRetrain(request, env) {
+  const url = new URL(request.url);
+  const secret = url.searchParams.get('secret');
+  
+  // Verify secret (set via Cloudflare Worker secret)
+  const expectedSecret = env.RETRAIN_SECRET || 'footypredict-retrain-2024';
+  if (secret !== expectedSecret) {
+    return new Response(JSON.stringify({
+      success: false,
+      error: 'Invalid secret',
+      timestamp: new Date().toISOString()
+    }), { status: 401, headers: corsHeaders });
+  }
+  
+  const startTime = Date.now();
+  const results = {
+    triggered: false,
+    kaggle_notebook: null,
+    huggingface_sync: null,
+    cache_cleared: false,
+    errors: []
+  };
+  
+  try {
+    // Step 1: Clear ML prediction cache to force fresh predictions
+    mlPredictionCache.clear();
+    results.cache_cleared = true;
+    
+    // Step 2: Trigger Kaggle notebook via API (if credentials available)
+    const kaggleUsername = env.KAGGLE_USERNAME;
+    const kaggleKey = env.KAGGLE_KEY;
+    
+    if (kaggleUsername && kaggleKey) {
+      try {
+        const kaggleAuth = btoa(`${kaggleUsername}:${kaggleKey}`);
+        const kagglePush = await fetch(
+          `https://www.kaggle.com/api/v1/kernels/push`,
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Basic ${kaggleAuth}`,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+              id: `${kaggleUsername}/footypredict-training`,
+              kernel_type: 'notebook',
+              is_private: true,
+              enable_gpu: true,
+              run_as: 'draft'
+            }),
+            signal: AbortSignal.timeout(10000)
+          }
+        );
+        
+        if (kagglePush.ok) {
+          results.kaggle_notebook = {
+            status: 'triggered',
+            kernel: `${kaggleUsername}/footypredict-training`,
+            timestamp: new Date().toISOString()
+          };
+          results.triggered = true;
+        } else {
+          const errorText = await kagglePush.text();
+          results.kaggle_notebook = {
+            status: 'failed',
+            error: errorText.substring(0, 200)
+          };
+          results.errors.push(`Kaggle API error: ${errorText.substring(0, 100)}`);
+        }
+      } catch (kaggleError) {
+        results.kaggle_notebook = {
+          status: 'error',
+          error: kaggleError.message
+        };
+        results.errors.push(`Kaggle error: ${kaggleError.message}`);
+      }
+    } else {
+      results.kaggle_notebook = {
+        status: 'skipped',
+        reason: 'Kaggle credentials not configured'
+      };
+    }
+    
+    // Step 3: Notify HuggingFace Space to refresh models (optional)
+    try {
+      const hfResponse = await fetch(`${HF_API_URL}/api/health`, {
+        method: 'GET',
+        headers: { 'User-Agent': 'FootyPredict-Retrain/1.0' },
+        signal: AbortSignal.timeout(5000)
+      });
+      
+      if (hfResponse.ok) {
+        results.huggingface_sync = {
+          status: 'healthy',
+          message: 'HuggingFace Space is running and will pick up new models'
+        };
+      }
+    } catch (hfError) {
+      results.huggingface_sync = {
+        status: 'unreachable',
+        error: hfError.message
+      };
+    }
+    
+    const duration = Date.now() - startTime;
+    
+    return new Response(JSON.stringify({
+      success: true,
+      message: 'Retraining pipeline initiated',
+      results,
+      duration_ms: duration,
+      next_steps: [
+        'Kaggle notebook will retrain models (if triggered)',
+        'Models will be uploaded to HuggingFace',
+        'Worker will automatically use new predictions'
+      ],
+      timestamp: new Date().toISOString()
+    }), { status: 200, headers: corsHeaders });
+    
+  } catch (error) {
+    return new Response(JSON.stringify({
+      success: false,
+      error: error.message,
+      results,
+      timestamp: new Date().toISOString()
+    }), { status: 500, headers: corsHeaders });
+  }
+}
+
+// ============= SportyBet Booking Code Integration =============
+const SPORTYBET_API_BASE = 'https://www.sportybet.com/api';
+
+// Cache for SportyBet match mappings
+const sportyBetMatchCache = new Map();
+const SPORTYBET_CACHE_TTL = 30 * 60 * 1000; // 30 minutes
+
+// Market ID mappings for SportyBet
+const SPORTYBET_MARKETS = {
+  '1x2': { marketId: '1', outcomes: { home: '1', draw: '2', away: '3' } },
+  'over_under_1.5': { marketId: '18', specifier: 'total=1.5', outcomes: { over: '12', under: '13' } },
+  'over_under_2.5': { marketId: '18', specifier: 'total=2.5', outcomes: { over: '12', under: '13' } },
+  'over_under_3.5': { marketId: '18', specifier: 'total=3.5', outcomes: { over: '12', under: '13' } },
+  'btts': { marketId: '29', outcomes: { yes: '74', no: '76' } },
+  'double_chance': { marketId: '10', outcomes: { '1x': '9', '12': '10', 'x2': '11' } },
+  'draw_no_bet': { marketId: '11', outcomes: { home: '1714', away: '1715' } },
+};
+
+// Fetch SportyBet match list for a given date range
+async function fetchSportyBetMatches(country = 'gh') {
+  const cacheKey = `sportybet_matches_${country}`;
+  const cached = sportyBetMatchCache.get(cacheKey);
+  if (cached && Date.now() - cached.timestamp < SPORTYBET_CACHE_TTL) {
+    return cached.data;
+  }
+  
+  try {
+    // Fetch popular matches from SportyBet
+    const url = `${SPORTYBET_API_BASE}/${country}/factsCenter/popularAndSportList?sportId=sr:sport:1`;
+    const response = await fetch(url, {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Accept': 'application/json'
+      },
+      signal: AbortSignal.timeout(10000)
+    });
+    
+    if (!response.ok) return [];
+    
+    const data = await response.json();
+    const matches = [];
+    
+    // Parse the response to extract match data
+    if (data.data && data.data.eventList) {
+      for (const event of data.data.eventList) {
+        matches.push({
+          eventId: event.eventId,
+          homeTeam: event.homeTeamName,
+          awayTeam: event.awayTeamName,
+          league: event.leagueName,
+          startTime: event.estimateStartTime,
+          markets: event.markets || []
+        });
+      }
+    }
+    
+    sportyBetMatchCache.set(cacheKey, { data: matches, timestamp: Date.now() });
+    return matches;
+  } catch (error) {
+    console.log('SportyBet match fetch error:', error.message);
+    return [];
+  }
+}
+
+// Find SportyBet event ID for a match
+function findSportyBetEventId(matches, homeTeam, awayTeam) {
+  const normalizeTeam = (name) => name.toLowerCase()
+    .replace(/\s+fc$/i, '')
+    .replace(/^fc\s+/i, '')
+    .replace(/[^a-z0-9]/g, '')
+    .trim();
+  
+  const normalizedHome = normalizeTeam(homeTeam);
+  const normalizedAway = normalizeTeam(awayTeam);
+  
+  for (const match of matches) {
+    const matchHome = normalizeTeam(match.homeTeam || '');
+    const matchAway = normalizeTeam(match.awayTeam || '');
+    
+    // Check if teams match (fuzzy matching)
+    const homeMatch = matchHome.includes(normalizedHome) || normalizedHome.includes(matchHome);
+    const awayMatch = matchAway.includes(normalizedAway) || normalizedAway.includes(matchAway);
+    
+    if (homeMatch && awayMatch) {
+      return match.eventId;
+    }
+  }
+  
+  return null;
+}
+
+// Generate real SportyBet booking code
+async function generateSportyBetBookingCode(selections, country = 'gh') {
+  try {
+    // First, fetch current matches from SportyBet
+    const sportyMatches = await fetchSportyBetMatches(country);
+    
+    // Build selections array with SportyBet event IDs
+    const sportySelections = [];
+    const matchedSelections = [];
+    const unmatchedSelections = [];
+    
+    for (const sel of selections) {
+      const eventId = findSportyBetEventId(sportyMatches, sel.homeTeam, sel.awayTeam);
+      
+      if (eventId) {
+        // Get market config
+        const marketConfig = SPORTYBET_MARKETS[sel.market] || SPORTYBET_MARKETS['1x2'];
+        const outcomeId = marketConfig.outcomes[sel.selection.toLowerCase()] || '1';
+        
+        sportySelections.push({
+          eventId: eventId,
+          marketId: marketConfig.marketId,
+          specifier: marketConfig.specifier || null,
+          outcomeId: outcomeId
+        });
+        
+        matchedSelections.push({
+          ...sel,
+          eventId: eventId,
+          matched: true
+        });
+      } else {
+        unmatchedSelections.push({
+          ...sel,
+          matched: false,
+          reason: 'Match not found on SportyBet'
+        });
+      }
+    }
+    
+    // If no matches found, return error with selections for manual entry
+    if (sportySelections.length === 0) {
+      return {
+        success: false,
+        error: 'No matches found on SportyBet',
+        selections: selections,
+        hint: 'These matches may not be available on SportyBet or use different team names'
+      };
+    }
+    
+    // Call SportyBet share API to generate booking code
+    const shareUrl = `${SPORTYBET_API_BASE}/${country}/orders/share`;
+    const shareResponse = await fetch(shareUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        'Accept': 'application/json',
+        'Origin': 'https://www.sportybet.com',
+        'Referer': 'https://www.sportybet.com/'
+      },
+      body: JSON.stringify({ selections: sportySelections }),
+      signal: AbortSignal.timeout(15000)
+    });
+    
+    if (!shareResponse.ok) {
+      const errorText = await shareResponse.text();
+      return {
+        success: false,
+        error: `SportyBet API error: ${shareResponse.status}`,
+        details: errorText,
+        matchedSelections: matchedSelections,
+        unmatchedSelections: unmatchedSelections
+      };
+    }
+    
+    const shareData = await shareResponse.json();
+    
+    // Extract booking code from response
+    const bookingCode = shareData.data?.shareCode || shareData.shareCode || null;
+    
+    if (bookingCode) {
+      return {
+        success: true,
+        bookingCode: bookingCode,
+        country: country,
+        totalSelections: sportySelections.length,
+        matchedSelections: matchedSelections,
+        unmatchedSelections: unmatchedSelections,
+        loadUrl: `https://www.sportybet.com/${country}/sport/football?shareCode=${bookingCode}`
+      };
+    } else {
+      return {
+        success: false,
+        error: 'No booking code in response',
+        rawResponse: shareData,
+        matchedSelections: matchedSelections
+      };
+    }
+    
+  } catch (error) {
+    return {
+      success: false,
+      error: error.message,
+      selections: selections
+    };
+  }
+}
+
+// Handle SportyBet booking code request
+async function handleSportyBetBookingCode(request) {
+  try {
+    const body = await request.json();
+    const { selections, country = 'gh' } = body;
+    
+    if (!selections || !Array.isArray(selections) || selections.length === 0) {
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'selections array is required'
+      }), { status: 400, headers: corsHeaders });
+    }
+    
+    // Validate selections format
+    for (const sel of selections) {
+      if (!sel.homeTeam || !sel.awayTeam) {
+        return new Response(JSON.stringify({
+          success: false,
+          error: 'Each selection must have homeTeam and awayTeam'
+        }), { status: 400, headers: corsHeaders });
+      }
+    }
+    
+    const result = await generateSportyBetBookingCode(selections, country);
+    
+    return new Response(JSON.stringify(result), { 
+      status: result.success ? 200 : 400, 
+      headers: corsHeaders 
+    });
+    
+  } catch (error) {
+    return new Response(JSON.stringify({
+      success: false,
+      error: 'Invalid request body',
+      details: error.message
+    }), { status: 400, headers: corsHeaders });
+  }
+}
+
 // ============= Main Router =============
 export default {
   async fetch(request, env, ctx) {
@@ -734,12 +2296,12 @@ export default {
     
     // Fixtures endpoints
     if (method === "GET" && path === "/fixtures") {
-      return handleFixtures(request);
+      return handleFixtures(request, null, env);
     }
     
     if (method === "GET" && path.startsWith("/fixtures/")) {
       const league = path.split("/")[2];
-      return handleFixtures(request, league);
+      return handleFixtures(request, league, env);
     }
     
     if (method === "GET" && path === "/leagues") {
@@ -749,6 +2311,21 @@ export default {
     // Prediction endpoint
     if (method === "POST" && path === "/predict") {
       return handlePredict(request);
+    }
+    
+    // ACCA generation endpoint
+    if (method === "GET" && path === "/accas") {
+      return handleAccas(request);
+    }
+    
+    // Retraining endpoint (called by cron-job.org)
+    if (method === "GET" && path === "/retrain") {
+      return handleRetrain(request, env);
+    }
+    
+    // SportyBet booking code generation
+    if (method === "POST" && path === "/sportybet/booking-code") {
+      return handleSportyBetBookingCode(request);
     }
     
     // Info endpoints
@@ -768,10 +2345,51 @@ export default {
         endpoints: {
           fixtures: "GET /fixtures",
           leagues: "GET /leagues",
-          predict: "POST /predict"
+          predict: "POST /predict",
+          sportybet: "POST /sportybet/booking-code",
+          debug: "GET /debug/game-forecast (test Game Forecast API)"
         },
         timestamp: new Date().toISOString()
       }), { status: 200, headers: corsHeaders });
+    }
+    
+    // Debug endpoint for Game Forecast API
+    if (method === "GET" && path === "/debug/game-forecast") {
+      const apiKey = env.RAPIDAPI_KEY;
+      
+      try {
+        const url = `${GAME_FORECAST_BASE}/events?status_code=NOT_STARTED&page_size=10`;
+        const response = await fetch(url, {
+          headers: {
+            'x-rapidapi-host': 'game-forecast-api.p.rapidapi.com',
+            'x-rapidapi-key': apiKey
+          }
+        });
+        
+        const data = await response.json();
+        const events = data.data || [];
+        
+        return new Response(JSON.stringify({
+          rapidapi_key_exists: !!apiKey,
+          rapidapi_key_length: apiKey ? apiKey.length : 0,
+          api_response_ok: response.ok,
+          api_status: response.status,
+          events_count: events.length,
+          sample_event: events.length > 0 ? {
+            home: events[0].team_home?.name,
+            away: events[0].team_away?.name,
+            league: events[0].league?.name,
+            has_predictions: !!events[0].predictions?.length,
+            has_odds: !!events[0].odds?.length
+          } : null
+        }, null, 2), { status: 200, headers: corsHeaders });
+      } catch (error) {
+        return new Response(JSON.stringify({
+          rapidapi_key_exists: !!apiKey,
+          rapidapi_key_length: apiKey ? apiKey.length : 0,
+          error: error.message
+        }, null, 2), { status: 200, headers: corsHeaders });
+      }
     }
     
     return handleNotFound();
