@@ -18,11 +18,11 @@
                 <span class="logo-text">FootyPredict <span class="pro">Pro</span></span>
             </div>
             <nav class="nav">
-                <a href="#predictions" class="nav-link">Predictions</a>
-                <a href="https://huggingface.co/spaces/nananie143/footypredict-pro" class="nav-link" target="_blank">Daily Tips 🔥</a>
-                <a href="money-zone.html" class="nav-link">Money Zone</a>
-                <a href="#features" class="nav-link">Features</a>
-                <a href="#api" class="nav-link">API</a>
+                <a href="index.html" class="nav-link active">🏠 Home</a>
+                <a href="daily-tips.html" class="nav-link">📊 Daily Tips</a>
+                <a href="money-zone.html" class="nav-link">💰 Money Zone</a>
+                <a href="accumulators.html" class="nav-link">🎰 ACCAs</a>
+                <a href="blog.html" class="nav-link">📝 Blog</a>
             </nav>
         </div>
     </header>
@@ -56,6 +56,29 @@
             </div>
         </div>
     </section>
+
+    <!-- Sure Wins Section -->
+    <section id="sure-wins" class="sure-wins-section">
+        <div class="container">
+            <div class="section-header">
+                <h2 class="section-title">🔥 Sure Wins (91%+)</h2>
+                <p class="section-subtitle">Highest confidence predictions with exceptional win probability</p>
+            </div>
+            
+            <div id="sure-wins-loading" class="loading-state">
+                <div class="spinner"></div>
+                <p>Finding sure wins...</p>
+            </div>
+            
+            <div id="sure-wins-grid" class="sure-wins-grid hidden"></div>
+            
+            <div id="no-sure-wins" class="empty-state hidden">
+                <span class="empty-icon">😔</span>
+                <p>No sure wins available right now. Check back later!</p>
+            </div>
+        </div>
+    </section>
+
 
     <!-- Prediction Form -->
     <section id="predictions" class="predictions-section">

@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Football Predictions Blog | FootyPredict Pro</title>
+    <meta name="description" content="Expert AI-powered football predictions, match previews, betting tips, and in-depth analysis for Premier League, La Liga, Bundesliga, Serie A and more.">
+    <meta name="keywords" content="football predictions, betting tips, match previews, AI predictions, Premier League, La Liga, Bundesliga">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="Football Predictions Blog | FootyPredict Pro">
+    <meta property="og:description" content="Expert AI-powered football predictions and betting tips">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://footypredict-ui.pages.dev/blog">
+    
+    <!-- Canonical -->
+    <link rel="canonical" href="https://footypredict-ui.pages.dev/blog">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-primary: #0a0f1c;
+            --bg-secondary: #111827;
+            --bg-card: #1a2332;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --emerald: #10b981;
+            --emerald-dark: #059669;
+            --purple: #8b5cf6;
+            --blue: #3b82f6;
+            --amber: #fbbf24;
+            --gradient-premium: linear-gradient(135deg, #10b981, #3b82f6, #8b5cf6);
+            --border-color: rgba(255, 255, 255, 0.08);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            min-height: 100vh;
+            line-height: 1.6;
+        }
+        
+        /* Navigation */
+        nav {
+            background: rgba(17, 24, 39, 0.95);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 1rem 2rem;
+        }
+        
+        .nav-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: var(--gradient-premium);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-decoration: none;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            list-style: none;
+        }
+        
+        .nav-links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.2s;
+        }
+        
+        .nav-links a:hover,
+        .nav-links a.active {
+            color: var(--emerald);
+        }
+        
+        /* Hero Section */
+        .hero {
+            padding: 4rem 2rem 3rem;
+            text-align: center;
+            background: linear-gradient(180deg, rgba(16, 185, 129, 0.1) 0%, transparent 100%);
+        }
+        
+        .hero h1 {
+            font-size: 2.75rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: var(--gradient-premium);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .hero p {
+            color: var(--text-secondary);
+            font-size: 1.15rem;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        
+        /* Category Tabs */
+        .category-tabs {
+            display: flex;
+            justify-content: center;
+            gap: 1rem;
+            padding: 1.5rem 2rem;
+            flex-wrap: wrap;
+        }
+        
+        .tab-btn {
+            padding: 0.75rem 1.5rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 50px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .tab-btn:hover,
+        .tab-btn.active {
+            background: var(--emerald);
+            color: white;
+            border-color: var(--emerald);
+        }
+        
+        /* Blog Grid */
+        .blog-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        
+        .blog-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 2rem;
+        }
+        
+        /* Blog Card */
+        .blog-card {
+            background: var(--bg-card);
+            border-radius: 20px;
+            border: 1px solid var(--border-color);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            text-decoration: none;
+            color: inherit;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .blog-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--emerald);
+            box-shadow: 0 20px 40px rgba(16, 185, 129, 0.15);
+        }
+        
+        .card-thumbnail {
+            height: 160px;
+            background: linear-gradient(135deg, var(--emerald), var(--blue));
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .card-thumbnail::before {
+            content: '⚽';
+            font-size: 3rem;
+            opacity: 0.3;
+        }
+        
+        .card-badge {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--amber);
+        }
+        
+        .confidence-badge {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--emerald);
+            padding: 0.4rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: white;
+        }
+        
+        .card-body {
+            padding: 1.5rem;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .card-league {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+        
+        .league-icon {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--purple);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+        }
+        
+        .league-name {
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .card-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            line-height: 1.4;
+            color: var(--text-primary);
+        }
+        
+        .card-excerpt {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.6;
+            margin-bottom: 1rem;
+            flex: 1;
+        }
+        
+        .card-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 1rem;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        .match-date {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        
+        .read-more {
+            color: var(--emerald);
+            font-weight: 600;
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+        
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: var(--text-muted);
+        }
+        
+        .spinner {
+            width: 48px;
+            height: 48px;
+            border: 4px solid var(--border-color);
+            border-top-color: var(--emerald);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 3rem 2rem;
+        }
+        
+        .page-btn {
+            padding: 0.75rem 1.25rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-secondary);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .page-btn:hover:not(:disabled) {
+            background: var(--emerald);
+            color: white;
+            border-color: var(--emerald);
+        }
+        
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .page-btn.active {
+            background: var(--emerald);
+            color: white;
+            border-color: var(--emerald);
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .blog-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+        
+        .empty-state h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .empty-state p {
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <a href="/" class="logo">⚽ FootyPredict Pro</a>
+            <ul class="nav-links">
+                <li><a href="/">Home</a></li>
+                <li><a href="/accumulators">ACCAs</a></li>
+                <li><a href="/blog" class="active">Blog</a></li>
+            </ul>
+        </div>
+    </nav>
+    
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1>🏆 Football Predictions Blog</h1>
+        <p>Expert AI-powered match previews, in-depth analysis, form breakdowns, and betting tips for upcoming fixtures across Europe's top leagues.</p>
+    </section>
+    
+    <!-- Category Tabs -->
+    <div class="category-tabs">
+        <button class="tab-btn active" data-category="">All Posts</button>
+        <button class="tab-btn" data-category="match-preview">Match Previews</button>
+        <button class="tab-btn" data-category="match-analysis">Match Analysis</button>
+    </div>
+    
+    <!-- Blog Grid -->
+    <div class="blog-container">
+        <div id="blog-grid" class="blog-grid"></div>
+        
+        <div id="loading" class="loading">
+            <div class="spinner"></div>
+            <p>Loading articles...</p>
+        </div>
+        
+        <div id="empty-state" class="empty-state" style="display: none;">
+            <h3>📭 No articles found</h3>
+            <p>Check back later for new match previews and analysis.</p>
+        </div>
+    </div>
+    
+    <!-- Pagination -->
+    <div id="pagination" class="pagination" style="display: none;"></div>
+    
+    <script>
+        const API_BASE = 'https://footypredict-api.tirene857.workers.dev';
+        let currentPage = 1;
+        let currentCategory = '';
+        
+        // Fetch and render blog posts
+        async function loadBlogPosts(page = 1, category = '') {
+            const loading = document.getElementById('loading');
+            const blogGrid = document.getElementById('blog-grid');
+            const emptyState = document.getElementById('empty-state');
+            const pagination = document.getElementById('pagination');
+            
+            loading.style.display = 'block';
+            blogGrid.innerHTML = '';
+            emptyState.style.display = 'none';
+            
+            try {
+                let url = `${API_BASE}/blog/posts?page=${page}&limit=12`;
+                if (category) {
+                    url += `&category=${category}`;
+                }
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                loading.style.display = 'none';
+                
+                if (!data.success || !data.posts || data.posts.length === 0) {
+                    emptyState.style.display = 'block';
+                    pagination.style.display = 'none';
+                    return;
+                }
+                
+                // Render posts
+                blogGrid.innerHTML = data.posts.map(post => renderBlogCard(post)).join('');
+                
+                // Render pagination
+                renderPagination(data.pagination);
+                
+            } catch (error) {
+                console.error('Error loading blog posts:', error);
+                loading.style.display = 'none';
+                emptyState.innerHTML = `
+                    <h3>⚠️ Error Loading Posts</h3>
+                    <p>${error.message}</p>
+                `;
+                emptyState.style.display = 'block';
+            }
+        }
+        
+        // Render individual blog card
+        function renderBlogCard(post) {
+            const matchDate = new Date(post.matchDate);
+            const formattedDate = matchDate.toLocaleDateString('en-GB', { 
+                weekday: 'short', 
+                day: 'numeric', 
+                month: 'short' 
+            });
+            
+            const gradientColors = getLeagueGradient(post.league);
+            
+            return `
+                <a href="/blog-post?slug=${post.slug}" class="blog-card">
+                    <div class="card-thumbnail" style="background: ${gradientColors};">
+                        <span class="card-badge">${getCategoryLabel(post.category)}</span>
+                        <span class="confidence-badge">${Math.round(post.confidence)}% Confidence</span>
+                    </div>
+                    <div class="card-body">
+                        <div class="card-league">
+                            <span class="league-icon">🏆</span>
+                            <span class="league-name">${post.league || 'Football'}</span>
+                        </div>
+                        <h3 class="card-title">${post.title}</h3>
+                        <p class="card-excerpt">${post.excerpt}</p>
+                        <div class="card-meta">
+                            <span class="match-date">📅 ${formattedDate}</span>
+                            <span class="read-more">Read More →</span>
+                        </div>
+                    </div>
+                </a>
+            `;
+        }
+        
+        // Get gradient colors based on league
+        function getLeagueGradient(league) {
+            const gradients = {
+                'Premier League': 'linear-gradient(135deg, #38003c, #00ff85)',
+                'La Liga': 'linear-gradient(135deg, #ee3045, #ffd700)',
+                'Bundesliga': 'linear-gradient(135deg, #d20515, #1a1a1a)',
+                'Serie A': 'linear-gradient(135deg, #008fd7, #0e1e5b)',
+                'Ligue 1': 'linear-gradient(135deg, #dae025, #0055a4)',
+                'Champions League': 'linear-gradient(135deg, #0a1172, #1a1a2e)'
+            };
+            return gradients[league] || 'linear-gradient(135deg, #10b981, #3b82f6)';
+        }
+        
+        // Get readable category label
+        function getCategoryLabel(category) {
+            const labels = {
+                'match-preview': '📊 Preview',
+                'match-analysis': '📈 Analysis',
+                'betting-tips': '💰 Tips'
+            };
+            return labels[category] || '📋 Article';
+        }
+        
+        // Render pagination
+        function renderPagination(pagination) {
+            const paginationEl = document.getElementById('pagination');
+            
+            if (pagination.totalPages <= 1) {
+                paginationEl.style.display = 'none';
+                return;
+            }
+            
+            paginationEl.style.display = 'flex';
+            
+            let html = '';
+            
+            // Previous button
+            html += `<button class="page-btn" onclick="goToPage(${pagination.page - 1})" ${!pagination.hasPrev ? 'disabled' : ''}>← Prev</button>`;
+            
+            // Page numbers
+            for (let i = 1; i <= pagination.totalPages; i++) {
+                if (i === pagination.page) {
+                    html += `<button class="page-btn active">${i}</button>`;
+                } else if (Math.abs(i - pagination.page) <= 2 || i === 1 || i === pagination.totalPages) {
+                    html += `<button class="page-btn" onclick="goToPage(${i})">${i}</button>`;
+                } else if (Math.abs(i - pagination.page) === 3) {
+                    html += `<span style="color: var(--text-muted); padding: 0.5rem;">...</span>`;
+                }
+            }
+            
+            // Next button
+            html += `<button class="page-btn" onclick="goToPage(${pagination.page + 1})" ${!pagination.hasNext ? 'disabled' : ''}>Next →</button>`;
+            
+            paginationEl.innerHTML = html;
+        }
+        
+        // Navigate to page
+        function goToPage(page) {
+            currentPage = page;
+            loadBlogPosts(currentPage, currentCategory);
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        // Category tab click handler
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+                
+                currentCategory = this.dataset.category;
+                currentPage = 1;
+                loadBlogPosts(currentPage, currentCategory);
+            });
+        });
+        
+        // Initial load
+        loadBlogPosts();
+    </script>
+</body>
+</html>

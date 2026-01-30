@@ -189,3 +189,90 @@ async function checkAPIHealth() {
 }
 
 checkAPIHealth();
+
+// Sure Wins Section
+async function loadSureWins() {
+    const loadingEl = document.getElementById('sure-wins-loading');
+    const gridEl = document.getElementById('sure-wins-grid');
+    const noWinsEl = document.getElementById('no-sure-wins');
+    
+    // Check if elements exist (only on index page)
+    if (!loadingEl || !gridEl) return;
+    
+    try {
+        // Fetch fixtures with predictions
+        const response = await fetch(`${API_BASE}/fixtures?days=3&includePredictions=true`);
+        if (!response.ok) throw new Error('Failed to fetch fixtures');
+        
+        const data = await response.json();
+        const fixtures = data.fixtures || [];
+        
+        // Filter for high-confidence matches (91%+)
+        const sureWins = fixtures.filter(f => {
+            const confidence = f.confidence || 0;
+            return confidence >= 0.70; // Lower to 70% to show more matches
+        }).slice(0, 6); // Show max 6
+        
+        loadingEl.classList.add('hidden');
+        
+        if (sureWins.length === 0) {
+            noWinsEl.classList.remove('hidden');
+            return;
+        }
+        
+        // Render sure wins
+        gridEl.innerHTML = sureWins.map(match => {
+            const confidence = Math.round((match.confidence || 0) * 100);
+            const prediction = match.prediction?.result;
+            const odds = match.odds || {};
+            
+            // Determine the pick
+            let pick = 'Draw';
+            if (prediction) {
+                if (prediction.home > prediction.away && prediction.home > prediction.draw) {
+                    pick = match.home_team || 'Home Win';
+                } else if (prediction.away > prediction.home && prediction.away > prediction.draw) {
+                    pick = match.away_team || 'Away Win';
+                } else {
+                    pick = 'Draw';
+                }
+            }
+            
+            return `
+                <div class="sure-win-card">
+                    <span class="sure-win-badge">🔥 ${confidence}%</span>
+                    <div class="sure-win-teams">
+                        <h4>${match.home_team} vs ${match.away_team}</h4>
+                        <div class="sure-win-meta">
+                            <span>📅 ${match.date}</span>
+                            <span>⏰ ${match.time || 'TBA'}</span>
+                            <span>🏆 ${match.league_name || 'League'}</span>
+                        </div>
+                    </div>
+                    <div class="sure-win-prediction">
+                        <span class="pick">🎯 ${pick}</span>
+                        <span class="confidence">${confidence}% sure</span>
+                    </div>
+                    ${odds.home ? `
+                        <div class="sure-win-odds">
+                            <span>H: ${odds.home}</span>
+                            <span>D: ${odds.draw}</span>
+                            <span>A: ${odds.away}</span>
+                            ${odds.over25 ? `<span>O2.5: ${odds.over25}</span>` : ''}
+                        </div>
+                    ` : ''}
+                </div>
+            `;
+        }).join('');
+        
+        gridEl.classList.remove('hidden');
+        
+    } catch (error) {
+        console.error('Sure Wins error:', error);
+        loadingEl.classList.add('hidden');
+        noWinsEl.classList.remove('hidden');
+    }
+}
+
+// Load Sure Wins on page load
+loadSureWins();

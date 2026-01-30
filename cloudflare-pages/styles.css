@@ -562,3 +562,146 @@ body {
         text-align: center;
     }
 }
+
+/* Sure Wins Section */
+.sure-wins-section {
+    padding: 60px 0;
+    background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+}
+
+.sure-wins-section .section-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.sure-wins-section .section-subtitle {
+    color: var(--text-secondary);
+    margin-top: 8px;
+    font-size: 1rem;
+}
+
+.sure-wins-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 20px;
+}
+
+.sure-win-card {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(251, 191, 36, 0.1) 100%);
+    border: 1px solid rgba(251, 191, 36, 0.3);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    position: relative;
+    overflow: hidden;
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.sure-win-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, #ef4444, #f59e0b, #22c55e);
+}
+
+.sure-win-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px rgba(251, 191, 36, 0.2);
+}
+
+.sure-win-badge {
+    position: absolute;
+    top: 16px;
+    right: 16px;
+    background: linear-gradient(135deg, #ef4444, #f59e0b);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 4px 10px;
+    border-radius: 20px;
+    text-transform: uppercase;
+}
+
+.sure-win-teams {
+    margin-bottom: 16px;
+}
+
+.sure-win-teams h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.sure-win-meta {
+    display: flex;
+    gap: 16px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+}
+
+.sure-win-prediction {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    background: rgba(34, 197, 94, 0.15);
+    border-radius: var(--radius);
+    margin-top: 12px;
+}
+
+.sure-win-prediction .pick {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #22c55e;
+}
+
+.sure-win-prediction .confidence {
+    font-weight: 700;
+    color: #fbbf24;
+}
+
+.sure-win-odds {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+    flex-wrap: wrap;
+}
+
+.sure-win-odds span {
+    background: var(--bg-card);
+    padding: 6px 12px;
+    border-radius: var(--radius);
+    font-size: 0.8rem;
+}
+
+.loading-state {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.spinner {
+    width: 48px;
+    height: 48px;
+    border: 3px solid var(--border);
+    border-top-color: var(--accent-primary);
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin: 0 auto 16px;
+}
+
+@keyframes spin {
+    to { transform: rotate(360deg); }
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.empty-icon {
+    font-size: 4rem;
+    margin-bottom: 16px;
+    display: block;
+}
