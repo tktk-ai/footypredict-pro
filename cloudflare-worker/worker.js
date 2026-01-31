@@ -3932,6 +3932,191 @@ async function handleBlogPost(request, slug, env) {
 }
 
 
+// ============= Sure Bets Handler =============
+/**
+ * Generate curated betting lists for safe accumulators:
+ * 1. Top 5 Most Likely Winners (highest confidence)
+ * 2. Top 15 Over 0.5 from O2.5+ games (near-certain)
+ * 3. Top 7 Over 1.5 predictions
+ * 4. Top 10 Double Chance 1X (Home or Draw - safest)
+ * 5. Top 10 HT Over 0.5 (First half goal)
+ */
+async function handleSureBets(request, env) {
+  try {
+    // Get today's fixtures with predictions
+    const fixturesResponse = await handleFixtures(request, null, env);
+    const fixturesData = await fixturesResponse.json();
+    const fixtures = fixturesData.fixtures || [];
+    
+    if (fixtures.length === 0) {
+      return new Response(JSON.stringify({
+        success: true,
+        generated_at: new Date().toISOString(),
+        total_matches_analyzed: 0,
+        message: 'No fixtures available for today',
+        lists: {}
+      }), { status: 200, headers: corsHeaders });
+    }
+    
+    // Collect all predictions
+    const allPicks = [];
+    
+    for (const fixture of fixtures) {
+      const pred = fixture.prediction || {};
+      const home = fixture.home_team;
+      const away = fixture.away_team;
+      const league = fixture.league_name || '';
+      const kickoff = fixture.time || '';
+      
+      // Extract probabilities from prediction
+      const homeProb = (pred.home_prob || pred.result?.home || 0.33) * 100;
+      const drawProb = (pred.draw_prob || pred.result?.draw || 0.33) * 100;
+      const awayProb = (pred.away_prob || pred.result?.away || 0.33) * 100;
+      const over25Prob = (pred.over25_prob || 0.50) * 100;
+      const over15Prob = Math.min(over25Prob + 15, 95); // Derived
+      const dc1xProb = homeProb + drawProb;
+      const dcX2Prob = drawProb + awayProb;
+      const htOver05Prob = Math.min(over25Prob * 0.9, 85); // Derived from O2.5
+      
+      allPicks.push({
+        match: `${home} vs ${away}`,
+        home_team: home,
+        away_team: away,
+        league,
+        kickoff,
+        homeProb,
+        drawProb,
+        awayProb,
+        over25Prob,
+        over15Prob,
+        dc1xProb,
+        dcX2Prob,
+        htOver05Prob,
+        confidence: pred.confidence || 0.7
+      });
+    }
+    
+    // Category 1: Top 5 Most Likely Winners
+    const top5Winners = allPicks
+      .map(p => {
+        // Find best market for this match
+        const markets = [
+          { market: 'Double Chance 1X', prediction: `${p.home_team} or Draw`, probability: p.dc1xProb },
+          { market: 'Over 1.5 Goals', prediction: 'Yes', probability: p.over15Prob },
+          { market: 'Over 2.5 Goals', prediction: 'Yes', probability: p.over25Prob },
+          { market: 'Home Win', prediction: p.home_team, probability: p.homeProb },
+        ];
+        const best = markets.sort((a, b) => b.probability - a.probability)[0];
+        return { ...p, ...best };
+      })
+      .filter(p => p.probability >= 75)
+      .sort((a, b) => b.probability - a.probability)
+      .slice(0, 5);
+    
+    // Category 2: Top 15 Over 0.5 from O2.5+ games
+    const over05FromHigh = allPicks
+      .filter(p => p.over25Prob >= 60)
+      .map(p => ({
+        match: p.match,
+        league: p.league,
+        kickoff: p.kickoff,
+        market: 'Over 0.5 Goals',
+        prediction: 'Yes',
+        probability: Math.min(p.over25Prob + 25, 98),
+        base_prediction: `O2.5 at ${p.over25Prob.toFixed(0)}%`,
+        confidence: 'VERY HIGH'
+      }))
+      .sort((a, b) => b.probability - a.probability)
+      .slice(0, 15);
+    
+    // Category 3: Top 7 Over 1.5
+    const over15Picks = allPicks
+      .filter(p => p.over15Prob >= 70)
+      .map(p => ({
+        match: p.match,
+        league: p.league,
+        kickoff: p.kickoff,
+        market: 'Over 1.5 Goals',
+        prediction: 'Yes',
+        probability: p.over15Prob,
+        confidence: p.over15Prob >= 80 ? 'HIGH' : 'MEDIUM'
+      }))
+      .sort((a, b) => b.probability - a.probability)
+      .slice(0, 7);
+    
+    // Category 4: Top 10 Double Chance 1X
+    const dc1xPicks = allPicks
+      .filter(p => p.dc1xProb >= 70)
+      .map(p => ({
+        match: p.match,
+        league: p.league,
+        kickoff: p.kickoff,
+        market: 'Double Chance 1X',
+        prediction: `${p.home_team} or Draw`,
+        probability: p.dc1xProb,
+        confidence: p.dc1xProb >= 80 ? 'HIGH' : 'MEDIUM'
+      }))
+      .sort((a, b) => b.probability - a.probability)
+      .slice(0, 10);
+    
+    // Category 5: Top 10 HT Over 0.5
+    const htOver05Picks = allPicks
+      .filter(p => p.htOver05Prob >= 55)
+      .map(p => ({
+        match: p.match,
+        league: p.league,
+        kickoff: p.kickoff,
+        market: 'HT Over 0.5 Goals',
+        prediction: 'Yes',
+        probability: p.htOver05Prob,
+        confidence: p.htOver05Prob >= 70 ? 'HIGH' : 'MEDIUM'
+      }))
+      .sort((a, b) => b.probability - a.probability)
+      .slice(0, 10);
+    
+    return new Response(JSON.stringify({
+      success: true,
+      generated_at: new Date().toISOString(),
+      total_matches_analyzed: fixtures.length,
+      lists: {
+        top_5_winners: {
+          title: '🏆 Top 5 Most Likely Winners',
+          description: 'Highest confidence picks - Build your safe accumulator here',
+          picks: top5Winners
+        },
+        over_05_from_high_scoring: {
+          title: '⚽ Top 15 Over 0.5 Goals (From O2.5+ Games)',
+          description: 'Near-certain goal picks from high-scoring game predictions',
+          picks: over05FromHigh
+        },
+        over_15: {
+          title: '🎯 Top 7 Over 1.5 Goals',
+          description: 'Best over 1.5 predictions for the day',
+          picks: over15Picks
+        },
+        double_chance_1x: {
+          title: '🛡️ Top 10 Double Chance 1X (Home or Draw)',
+          description: 'Safest result market - covers 2 outcomes for home advantage',
+          picks: dc1xPicks
+        },
+        ht_over_05: {
+          title: '⏱️ Top 10 First Half Goal (HT O0.5)',
+          description: 'First half goal predictions - perfect for early cashout',
+          picks: htOver05Picks
+        }
+      }
+    }), { status: 200, headers: corsHeaders });
+    
+  } catch (error) {
+    console.error('Sure Bets error:', error);
+    return new Response(JSON.stringify({
+      success: false,
+      error: error.message
+    }), { status: 500, headers: corsHeaders });
+  }
+}
+
+
 // ============= Main Router =============
 export default {
   async fetch(request, env, ctx) {
@@ -3966,6 +4151,11 @@ export default {
     // ACCA generation endpoint
     if (method === "GET" && path === "/accas") {
       return handleAccas(request);
+    }
+    
+    // Sure Bets curated lists endpoint
+    if (method === "GET" && path === "/sure-bets") {
+      return handleSureBets(request, env);
     }
     
     // Retraining endpoint (called by cron-job.org)

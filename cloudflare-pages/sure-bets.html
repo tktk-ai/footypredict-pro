@@ -249,34 +249,35 @@
     </main>
 
     <script>
-        const API_BASE = 'https://footypredict-api.tktk-ai.workers.dev';
+        const API_BASE = 'https://footypredict-api.tirene857.workers.dev';
         
         async function loadSureBets() {
             const container = document.getElementById('sure-bets-content');
             
             try {
-                // Try API first
-                let data = null;
+                // Fetch from live API
+                const response = await fetch(`${API_BASE}/sure-bets`);
                 
-                try {
-                    const response = await fetch(`${API_BASE}/api/v6/sure-bets`);
-                    if (response.ok) {
-                        data = await response.json();
-                    }
-                } catch (e) {
-                    console.log('API not available, using demo data');
+                if (!response.ok) {
+                    throw new Error('API request failed');
                 }
                 
-                // Use demo data if API fails
-                if (!data) {
-                    data = getDemoData();
-                }
+                const data = await response.json();
                 
-                renderSureBets(data);
+                if (data.success) {
+                    renderSureBets(data);
+                } else {
+                    throw new Error(data.error || 'Failed to load predictions');
+                }
                 
             } catch (error) {
                 console.error('Error:', error);
-                container.innerHTML = '<p style="text-align:center;color:rgba(255,255,255,0.5);">Error loading predictions. Please refresh.</p>';
+                container.innerHTML = `
+                    <div style="text-align:center;padding:2rem;color:rgba(255,255,255,0.5);">
+                        <p>Error loading predictions. Please refresh the page.</p>
+                        <p style="font-size:0.8rem;margin-top:0.5rem;">Error: ${error.message}</p>
+                    </div>
+                `;
             }
         }
         
