@@ -3,6 +3,68 @@
  * Connects to Cloudflare Worker API
  */
 
+// ============= Service Worker Registration =============
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+            .then((registration) => {
+                console.log('✅ SW registered:', registration.scope);
+                
+                // Check for updates
+                registration.addEventListener('updatefound', () => {
+                    const newWorker = registration.installing;
+                    newWorker.addEventListener('statechange', () => {
+                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            // New content available, show refresh prompt
+                            if (confirm('New version available! Reload to update?')) {
+                                window.location.reload();
+                            }
+                        }
+                    });
+                });
+            })
+            .catch((error) => {
+                console.log('❌ SW registration failed:', error);
+            });
+    });
+}
+
+// ============= Mobile Menu Toggle =============
+(function() {
+    const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+    const nav = document.querySelector('.nav');
+    const overlay = document.querySelector('.mobile-menu-overlay');
+    
+    if (mobileMenuToggle && nav) {
+        mobileMenuToggle.addEventListener('click', function() {
+            mobileMenuToggle.classList.toggle('active');
+            nav.classList.toggle('active');
+            if (overlay) overlay.classList.toggle('active');
+            document.body.style.overflow = nav.classList.contains('active') ? 'hidden' : '';
+        });
+        
+        // Close menu when clicking overlay
+        if (overlay) {
+            overlay.addEventListener('click', function() {
+                mobileMenuToggle.classList.remove('active');
+                nav.classList.remove('active');
+                overlay.classList.remove('active');
+                document.body.style.overflow = '';
+            });
+        }
+        
+        // Close menu when clicking a nav link
+        nav.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function() {
+                mobileMenuToggle.classList.remove('active');
+                nav.classList.remove('active');
+                if (overlay) overlay.classList.remove('active');
+                document.body.style.overflow = '';
+            });
+        });
+    }
+})();
+
 const API_BASE = 'https://footypredict-api.tirene857.workers.dev';
 
 // DOM Elements
@@ -207,11 +269,11 @@ async function loadSureWins() {
         const data = await response.json();
         const fixtures = data.fixtures || [];
         
-        // Filter for high-confidence matches (91%+)
+        // Filter for high-confidence matches (80%+)
         const sureWins = fixtures.filter(f => {
             const confidence = f.confidence || 0;
-            return confidence >= 0.70; // Lower to 70% to show more matches
-        }).slice(0, 6); // Show max 6
+            return confidence >= 0.80; // 80% threshold for Sure Wins
+        }).slice(0, 12); // Show max 12
         
         loadingEl.classList.add('hidden');
         
@@ -276,3 +338,157 @@ async function loadSureWins() {
 
 // Load Sure Wins on page load
 loadSureWins();
+
+// ============= Social Sharing Functions =============
+let lastPrediction = null;
+
+// Store prediction data for sharing
+function storePredictionForSharing(data) {
+    lastPrediction = data;
+}
+
+function shareOnTwitter() {
+    const matchTitle = document.getElementById('match-title')?.textContent || 'Football Match';
+    const confidence = document.getElementById('confidence')?.textContent || '';
+    const text = `⚽ ${matchTitle}\n${confidence}\n\nGet AI predictions at FootyPredict Pro! 🎯\n\n`;
+    const url = window.location.href;
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
+}
+
+function shareOnFacebook() {
+    const url = window.location.href;
+    window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
+}
+
+function shareOnWhatsApp() {
+    const matchTitle = document.getElementById('match-title')?.textContent || 'Football Match';
+    const confidence = document.getElementById('confidence')?.textContent || '';
+    const text = `⚽ *${matchTitle}*\n${confidence}\n\nGet AI predictions at: ${window.location.href}`;
+    window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+}
+
+function copyPredictionLink() {
+    const matchTitle = document.getElementById('match-title')?.textContent || '';
+    const confidence = document.getElementById('confidence')?.textContent || '';
+    const text = `⚽ ${matchTitle} - ${confidence}\n${window.location.href}`;
+    
+    navigator.clipboard.writeText(text).then(() => {
+        const btn = document.querySelector('.share-btn.copy');
+        const originalContent = btn.innerHTML;
+        btn.innerHTML = '<span>✅</span>';
+        setTimeout(() => btn.innerHTML = originalContent, 2000);
+    });
+}
+
+// ============= Newsletter Subscription =============
+async function subscribeNewsletter(event) {
+    event.preventDefault();
+    
+    const emailInput = document.getElementById('newsletter-email');
+    const submitBtn = document.getElementById('subscribe-btn');
+    const successDiv = document.getElementById('newsletter-success');
+    const form = document.getElementById('newsletter-form');
+    const email = emailInput.value.trim();
+    
+    if (!email) return;
+    
+    // Show loading
+    submitBtn.disabled = true;
+    submitBtn.querySelector('.btn-text').textContent = 'Subscribing...';
+    
+    try {
+        // Store email (you can replace this with your actual API endpoint)
+        // For now, we'll store in localStorage as a demo
+        const subscribers = JSON.parse(localStorage.getItem('footypredict_subscribers') || '[]');
+        if (!subscribers.includes(email)) {
+            subscribers.push(email);
+            localStorage.setItem('footypredict_subscribers', JSON.stringify(subscribers));
+        }
+        
+        // Show success
+        form.classList.add('hidden');
+        successDiv.classList.remove('hidden');
+        
+        console.log('📧 New subscriber:', email);
+        
+    } catch (error) {
+        console.error('Newsletter subscription error:', error);
+        alert('Subscription failed. Please try again.');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.querySelector('.btn-text').textContent = 'Subscribe Free';
+    }
+}
+
+// ============= Push Notifications =============
+async function enablePushNotifications() {
+    const pushBtn = document.getElementById('push-btn');
+    const pushBtnText = document.getElementById('push-btn-text');
+    
+    if (!('Notification' in window)) {
+        alert('Your browser does not support push notifications.');
+        return;
+    }
+    
+    if (!('serviceWorker' in navigator)) {
+        alert('Service Worker is not supported in your browser.');
+        return;
+    }
+    
+    pushBtn.disabled = true;
+    pushBtnText.textContent = 'Enabling...';
+    
+    try {
+        const permission = await Notification.requestPermission();
+        
+        if (permission === 'granted') {
+            // Get service worker registration
+            const registration = await navigator.serviceWorker.ready;
+            
+            // Subscribe to push (for demo, we're just enabling notifications)
+            pushBtnText.textContent = '✅ Notifications Enabled';
+            pushBtn.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
+            
+            // Store subscription status
+            localStorage.setItem('footypredict_push_enabled', 'true');
+            
+            // Show a test notification
+            new Notification('⚽ FootyPredict Pro', {
+                body: 'You will now receive alerts for high-confidence predictions!',
+                icon: '/icons/icon.svg'
+            });
+            
+            console.log('🔔 Push notifications enabled');
+            
+        } else if (permission === 'denied') {
+            pushBtnText.textContent = 'Notifications Blocked';
+            pushBtn.style.background = '#ef4444';
+            alert('Notifications were blocked. Please enable them in your browser settings.');
+        } else {
+            pushBtnText.textContent = 'Enable Notifications';
+            pushBtn.disabled = false;
+        }
+        
+    } catch (error) {
+        console.error('Push notification error:', error);
+        pushBtnText.textContent = 'Enable Notifications';
+        pushBtn.disabled = false;
+    }
+}
+
+// Check if push is already enabled
+function checkPushStatus() {
+    const pushBtn = document.getElementById('push-btn');
+    const pushBtnText = document.getElementById('push-btn-text');
+    
+    if (!pushBtn || !pushBtnText) return;
+    
+    if (localStorage.getItem('footypredict_push_enabled') === 'true' && Notification.permission === 'granted') {
+        pushBtnText.textContent = '✅ Notifications Enabled';
+        pushBtn.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
+        pushBtn.disabled = true;
+    }
+}
+
+// Run on page load
+document.addEventListener('DOMContentLoaded', checkPushStatus);

@@ -1,0 +1,47 @@
+/*
+  Purpose: Cloudflare Pages custom headers for performance optimization
+*/
+
+# Cache static assets for 1 year
+/styles.css
+  Cache-Control: public, max-age=31536000, immutable
+
+/app.js
+  Cache-Control: public, max-age=31536000, immutable
+
+/money-zone.js
+  Cache-Control: public, max-age=31536000, immutable
+
+/money-zone.css
+  Cache-Control: public, max-age=31536000, immutable
+
+/manifest.json
+  Cache-Control: public, max-age=86400
+
+/sw.js
+  Cache-Control: public, max-age=0, must-revalidate
+
+# Cache images for 1 year
+/*.png
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.ico
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.svg
+  Cache-Control: public, max-age=31536000, immutable
+
+/*.webp
+  Cache-Control: public, max-age=31536000, immutable
+
+# HTML pages - short cache with revalidation
+/*.html
+  Cache-Control: public, max-age=3600, must-revalidate
+
+# Security headers for all pages
+/*
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  X-XSS-Protection: 1; mode=block
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), microphone=(), camera=()

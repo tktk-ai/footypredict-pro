@@ -11,9 +11,9 @@
  */
 
 // ============= Configuration =============
-const CACHE_VERSION = 'v3'; // Increment to force player cache invalidation
+const CACHE_VERSION = 'v4'; // Increment to force player cache invalidation
 const CONFIG = {
-  version: "2.1.0",
+  version: "2.1.1",
   markets: ["result", "over25", "btts", "combo"],
   leagues: {
     // Europe - Major
@@ -3892,8 +3892,10 @@ async function handleBlogPosts(request, env) {
 // Handle individual blog post
 async function handleBlogPost(request, slug, env) {
   try {
-    // Fetch fixtures to find matching post
-    const fixturesResponse = await handleFixtures({ url: request.url + '?days=14&includePredictions=true' }, null, env);
+    // Fetch fixtures to find matching post - construct clean URL
+    const baseUrl = new URL(request.url).origin;
+    const fixturesUrl = `${baseUrl}/fixtures?days=14&includePredictions=true`;
+    const fixturesResponse = await handleFixtures({ url: fixturesUrl }, null, env);
     const fixturesData = await fixturesResponse.json();
     const fixtures = fixturesData.fixtures || [];
     

@@ -1,0 +1,841 @@
+{
+  "timestamp": "2026-01-31T02:56:17.317953",
+  "model": "SportyBet V3 XGBoost",
+  "source": "OpenLigaDB Bundesliga",
+  "period": "Last 7 days",
+  "summary": {
+    "total": 99,
+    "correct": 72,
+    "accuracy": 72.7
+  },
+  "by_market": {
+    "ht_btts": {
+      "total": 11,
+      "correct": 11,
+      "accuracy": 100.0
+    },
+    "dc_x2": {
+      "total": 11,
+      "correct": 7,
+      "accuracy": 63.6
+    },
+    "dc_1x": {
+      "total": 11,
+      "correct": 5,
+      "accuracy": 45.5
+    },
+    "home_over_25": {
+      "total": 11,
+      "correct": 9,
+      "accuracy": 81.8
+    },
+    "over_15": {
+      "total": 11,
+      "correct": 9,
+      "accuracy": 81.8
+    },
+    "ht_over_05": {
+      "total": 11,
+      "correct": 11,
+      "accuracy": 100.0
+    },
+    "over_25": {
+      "total": 11,
+      "correct": 5,
+      "accuracy": 45.5
+    },
+    "btts": {
+      "total": 11,
+      "correct": 5,
+      "accuracy": 45.5
+    },
+    "dc_12": {
+      "total": 11,
+      "correct": 10,
+      "accuracy": 90.9
+    }
+  },
+  "matches": [
+    {
+      "home": "FC Bayern M\u00fcnchen",
+      "away": "FC Augsburg",
+      "score": "1-2",
+      "date": "2026-01-24",
+      "predictions": [
+        {
+          "market": "ht_btts",
+          "predicted": "No",
+          "probability": 16.2,
+          "actual": "No",
+          "correct": true
+        },
+        {
+          "market": "dc_x2",
+          "predicted": "No",
+          "probability": 46.6,
+          "actual": "Yes",
+          "correct": false
+        },
+        {
+          "market": "dc_1x",
+          "predicted": "Yes",
+          "probability": 82.3,
+          "actual": "No",
+          "correct": false
+        },
+        {
+          "market": "home_over_25",
+          "predicted": "No",
+          "probability": 21.9,
+          "actual": "No",
+          "correct": true
+        },
+        {
+          "market": "over_15",
+          "predicted": "Yes",
+          "probability": 68.3,
+          "actual": "Yes",
+          "correct": true
+        },
+        {
+          "market": "ht_over_05",
+          "predicted": "Yes",
+          "probability": 65.4,
+          "actual": "Yes",
+          "correct": true
+        },
+        {
+          "market": "over_25",
+          "predicted": "No",
+          "probability": 36.0,
+          "actual": "Yes",
+          "correct": false
+        },
+        {
+          "market": "btts",
+          "predicted": "Yes",
+          "probability": 52.8,
+          "actual": "Yes",
+          "correct": true
+        },
+        {
+          "market": "dc_12",
+          "predicted": "Yes",
+          "probability": 68.7,
+          "actual": "Yes",
+          "correct": true
+        }
+      ]
+    },
+    {
+      "home": "Bayer 04 Leverkusen",
+      "away": "SV Werder Bremen",
+      "score": "1-0",
+      "date": "2026-01-24",
+      "predictions": [
+        {
+          "market": "ht_btts",
+          "predicted": "No",
+          "probability": 24.5,
+          "actual": "No",
+          "correct": true
+        },
+        {
+          "market": "dc_x2",
+          "predicted": "Yes",
+          "probability": 53.6,
+          "actual": "No",
+          "correct": false
+        },
+        {
+          "market": "dc_1x",
+          "predicted": "Yes",
+          "probability": 85.3,
+          "actual": "Yes",
+          "correct": true
+        },
+        {
+          "market": "home_over_25",
+          "predicted": "No",
+          "probability": 38.1,
+          "actual": "No",
+          "correct": true
+        },
+        {
+          "market": "over_15",
+          "predicted": "Yes",
+          "probability": 81.5,
+          "actual": "No",
+          "correct": false
+        },
+        {
+          "market": "ht_over_05",
+          "predicted": "Yes",
+          "probability": 67.4,
+          "actual": "Yes",
+          "correct": true
+        },
+        {
+          "market": "over_25",
+          "predicted": "No",
+          "probability": 45.4,
+          "actual": "No",
+          "correct": true
+        },
+        {
+          "market": "btts",
+          "predicted": "Yes",
+          "probability": 61.9,
+          "actual": "No",
+          "correct": false
+        },
+        {
+          "market": "dc_12",
+          "predicted": "Yes",
+          "probability": 74.7,
+          "actual": "Yes",
+          "correct": true
+        }
+      ]
+    },
+    {
+      "home": "Eintracht Frankfurt",
+      "away": "TSG Hoffenheim",
+      "score": "1-3",
+      "date": "2026-01-24",
+      "predictions": [
+        {
+          "market": "ht_btts",
+          "predicted": "No",
+          "probability": 16.0,
+          "actual": "No",
+          "correct": true
+        },
+        {
+          "market": "dc_x2",
+          "predicted": "Yes",
+          "probability": 52.7,
+          "actual": "Yes",
+          "correct": true
+        },
+        {
+          "market": "dc_1x",
+          "predicted": "Yes",
+          "probability": 79.6,
+          "actual": "No",
+          "correct": false
+        },
+        {
+          "market": "home_over_25",
+          "predicted": "No",
+          "probability": 31.6,
+          "actual": "No",
+          "correct": true
+        },
+        {
+          "market": "over_15",
+          "predicted": "Yes",
+          "probability": 74.8,
+          "actual": "Yes",
+          "correct": true
+        },
+        {
+          "market": "ht_over_05",
+          "predicted": "Yes",
+          "probability": 64.9,
+          "actual": "Yes",
+          "correct": true
+        },
+        {
+          "market": "over_25",
+          "predicted": "Yes",
+          "probability": 55.0,
+          "actual": "Yes",
+          "correct": true
+        },
+        {
+          "market": "btts",
+          "predicted": "Yes",
+          "probability": 60.1,
+          "actual": "Yes",
+          "correct": true
+        },
+        {
+          "market": "dc_12",
+          "predicted": "Yes",
+          "probability": 68.6,
+          "actual": "Yes",
+          "correct": true
+        }
+      ]
+    },
+    {
+      "home": "1. FSV Mainz 05",
+      "away": "VfL Wolfsburg",
+      "score": "3-1",
+      "date": "2026-01-24",
+      "predictions": [
+        {
+          "market": "ht_btts",
+          "predicted": "No",
+          "probability": 18.8,
+          "actual": "No",
+          "correct": true
+        },
+        {
+          "market": "dc_x2",
+          "predicted": "Yes",
+          "probability": 58.0,
+          "actual": "No",
+          "correct": false
+        },
+        {
+          "market": "dc_1x",
+          "predicted": "Yes",
+          "probability": 72.1,
+          "actual": "Yes",
+          "correct": true
+        },
+        {
+          "market": "home_over_25",
+          "predicted": "No",
+          "probability": 24.5,
+          "actual": "Yes",
+          "correct": false
+        },
+        {
+          "market": "over_15",
+          "predicted": "Yes",
+          "probability": 76.4,
+          "actual": "Yes",
+          "correct": true
+        },
+        {
+          "market": "ht_over_05",
+          "predicted": "Yes",
+          "probability": 67.8,
+          "actual": "Yes",
+          "correct": true
+        },
+        {
+          "market": "over_25",
+          "predicted": "No",
+          "probability": 44.6,
+          "actual": "Yes",
+          "correct": false
+        },
+        {
+          "market": "btts",
+          "predicted": "Yes",
+          "probability": 60.7,
+          "actual": "Yes",
+          "correct": true
+        },
+        {
+          "market": "dc_12",
+          "predicted": "Yes",
+          "probability": 69.7,
+          "actual": "Yes",
+          "correct": true
+        }
+      ]
+    },
+    {
+      "home": "1. FC Heidenheim 1846",
+      "away": "RB Leipzig",
+      "score": "0-3",
+      "date": "2026-01-24",
+      "predictions": [
+        {
+          "market": "ht_btts",
+          "predicted": "No",
+          "probability": 20.6,
+          "actual": "No",
+          "correct": true
+        },
+        {
+          "market": "dc_x2",
+          "predicted": "Yes",
+          "probability": 69.0,
+          "actual": "Yes",
+          "correct": true
+        },
+        {
+          "market": "dc_1x",
+          "predicted": "Yes",
+          "probability": 57.2,
+          "actual": "No",
+          "correct": false
+        },
+        {
+          "market": "home_over_25",
+          "predicted": "No",
+          "probability": 22.3,
+          "actual": "No",
+          "correct": true
+        },
+        {
+          "market": "over_15",
+          "predicted": "Yes",
+          "probability": 79.3,
+          "actual": "Yes",
+          "correct": true
+        },
+        {
+          "market": "ht_over_05",
+          "predicted": "Yes",
+          "probability": 68.8,
+          "actual": "Yes",
+          "correct": true
+        },
+        {
+          "market": "over_25",
+          "predicted": "Yes",
+          "probability": 52.0,
+          "actual": "Yes",
+          "correct": true
+        },
+        {
+          "market": "btts",
+          "predicted": "Yes",
+          "probability": 65.2,
+          "actual": "No",
+          "correct": false
+        },
+        {
+          "market": "dc_12",
+          "predicted": "Yes",
+          "probability": 68.2,
+          "actual": "Yes",
+          "correct": true
+        }
+      ]
+    },
+    {
+      "home": "1. FC Union Berlin",
+      "away": "Borussia Dortmund",
+      "score": "0-3",
+      "date": "2026-01-24",
+      "predictions": [
+        {
+          "market": "ht_btts",
+          "predicted": "No",
+          "probability": 20.3,
+          "actual": "No",
+          "correct": true
+        },
+        {
+          "market": "dc_x2",
+          "predicted": "Yes",
+          "probability": 62.4,
+          "actual": "Yes",
+          "correct": true
+        },
+        {
+          "market": "dc_1x",
+          "predicted": "Yes",
+          "probability": 68.5,
+          "actual": "No",
+          "correct": false
+        },
+        {
+          "market": "home_over_25",
+          "predicted": "No",
+          "probability": 23.0,
+          "actual": "No",
+          "correct": true
+        },
+        {
+          "market": "over_15",
+          "predicted": "Yes",
+          "probability": 81.7,
+          "actual": "Yes",
+          "correct": true
+        },
+        {
+          "market": "ht_over_05",
+          "predicted": "Yes",
+          "probability": 70.8,
+          "actual": "Yes",
+          "correct": true
+        },
+        {
+          "market": "over_25",
+          "predicted": "No",
+          "probability": 49.6,
+          "actual": "Yes",
+          "correct": false
+        },
+        {
+          "market": "btts",
+          "predicted": "Yes",
+          "probability": 67.0,
+          "actual": "No",
+          "correct": false
+        },
+        {
+          "market": "dc_12",
+          "predicted": "Yes",
+          "probability": 69.2,
+          "actual": "Yes",
+          "correct": true
+        }
+      ]
+    },
+    {
+      "home": "Borussia M\u00f6nchengladbach",
+      "away": "VfB Stuttgart",
+      "score": "0-3",
+      "date": "2026-01-25",
+      "predictions": [
+        {
+          "market": "ht_btts",
+          "predicted": "No",
+          "probability": 18.4,
+          "actual": "No",
+          "correct": true
+        },
+        {
+          "market": "dc_x2",
+          "predicted": "Yes",
+          "probability": 56.9,
+          "actual": "Yes",
+          "correct": true
+        },
+        {
+          "market": "dc_1x",
+          "predicted": "Yes",
+          "probability": 78.8,
+          "actual": "No",
+          "correct": false
+        },
+        {
+          "market": "home_over_25",
+          "predicted": "No",
+          "probability": 28.5,
+          "actual": "No",
+          "correct": true
+        },
+        {
+          "market": "over_15",
+          "predicted": "Yes",
+          "probability": 76.1,
+          "actual": "Yes",
+          "correct": true
+        },
+        {
+          "market": "ht_over_05",
+          "predicted": "Yes",
+          "probability": 65.5,
+          "actual": "Yes",
+          "correct": true
+        },
+        {
+          "market": "over_25",
+          "predicted": "Yes",
+          "probability": 54.3,
+          "actual": "Yes",
+          "correct": true
+        },
+        {
+          "market": "btts",
+          "predicted": "Yes",
+          "probability": 59.8,
+          "actual": "No",
+          "correct": false
+        },
+        {
+          "market": "dc_12",
+          "predicted": "Yes",
+          "probability": 68.4,
+          "actual": "Yes",
+          "correct": true
+        }
+      ]
+    },
+    {
+      "home": "SC Freiburg",
+      "away": "1. FC K\u00f6ln",
+      "score": "2-1",
+      "date": "2026-01-25",
+      "predictions": [
+        {
+          "market": "ht_btts",
+          "predicted": "No",
+          "probability": 20.8,
+          "actual": "No",
+          "correct": true
+        },
+        {
+          "market": "dc_x2",
+          "predicted": "No",
+          "probability": 40.0,
+          "actual": "No",
+          "correct": true
+        },
+        {
+          "market": "dc_1x",
+          "predicted": "Yes",
+          "probability": 80.8,
+          "actual": "Yes",
+          "correct": true
+        },
+        {
+          "market": "home_over_25",
+          "predicted": "No",
+          "probability": 35.8,
+          "actual": "Yes",
+          "correct": false
+        },
+        {
+          "market": "over_15",
+          "predicted": "Yes",
+          "probability": 76.9,
+          "actual": "Yes",
+          "correct": true
+        },
+        {
+          "market": "ht_over_05",
+          "predicted": "Yes",
+          "probability": 66.4,
+          "actual": "Yes",
+          "correct": true
+        },
+        {
+          "market": "over_25",
+          "predicted": "No",
+          "probability": 43.8,
+          "actual": "Yes",
+          "correct": false
+        },
+        {
+          "market": "btts",
+          "predicted": "Yes",
+          "probability": 57.7,
+          "actual": "Yes",
+          "correct": true
+        },
+        {
+          "market": "dc_12",
+          "predicted": "Yes",
+          "probability": 70.9,
+          "actual": "Yes",
+          "correct": true
+        }
+      ]
+    },
+    {
+      "home": "SV Werder Bremen",
+      "away": "TSG Hoffenheim",
+      "score": "0-2",
+      "date": "2026-01-27",
+      "predictions": [
+        {
+          "market": "ht_btts",
+          "predicted": "No",
+          "probability": 19.1,
+          "actual": "No",
+          "correct": true
+        },
+        {
+          "market": "dc_x2",
+          "predicted": "Yes",
+          "probability": 51.2,
+          "actual": "Yes",
+          "correct": true
+        },
+        {
+          "market": "dc_1x",
+          "predicted": "Yes",
+          "probability": 75.3,
+          "actual": "No",
+          "correct": false
+        },
+        {
+          "market": "home_over_25",
+          "predicted": "No",
+          "probability": 34.0,
+          "actual": "No",
+          "correct": true
+        },
+        {
+          "market": "over_15",
+          "predicted": "Yes",
+          "probability": 78.2,
+          "actual": "Yes",
+          "correct": true
+        },
+        {
+          "market": "ht_over_05",
+          "predicted": "Yes",
+          "probability": 71.6,
+          "actual": "Yes",
+          "correct": true
+        },
+        {
+          "market": "over_25",
+          "predicted": "No",
+          "probability": 46.7,
+          "actual": "No",
+          "correct": true
+        },
+        {
+          "market": "btts",
+          "predicted": "Yes",
+          "probability": 65.7,
+          "actual": "No",
+          "correct": false
+        },
+        {
+          "market": "dc_12",
+          "predicted": "Yes",
+          "probability": 73.2,
+          "actual": "Yes",
+          "correct": true
+        }
+      ]
+    },
+    {
+      "home": "FC St. Pauli",
+      "away": "RB Leipzig",
+      "score": "1-1",
+      "date": "2026-01-27",
+      "predictions": [
+        {
+          "market": "ht_btts",
+          "predicted": "No",
+          "probability": 19.8,
+          "actual": "No",
+          "correct": true
+        },
+        {
+          "market": "dc_x2",
+          "predicted": "Yes",
+          "probability": 62.4,
+          "actual": "Yes",
+          "correct": true
+        },
+        {
+          "market": "dc_1x",
+          "predicted": "Yes",
+          "probability": 69.3,
+          "actual": "Yes",
+          "correct": true
+        },
+        {
+          "market": "home_over_25",
+          "predicted": "No",
+          "probability": 29.7,
+          "actual": "No",
+          "correct": true
+        },
+        {
+          "market": "over_15",
+          "predicted": "Yes",
+          "probability": 81.0,
+          "actual": "Yes",
+          "correct": true
+        },
+        {
+          "market": "ht_over_05",
+          "predicted": "Yes",
+          "probability": 69.1,
+          "actual": "Yes",
+          "correct": true
+        },
+        {
+          "market": "over_25",
+          "predicted": "Yes",
+          "probability": 59.3,
+          "actual": "No",
+          "correct": false
+        },
+        {
+          "market": "btts",
+          "predicted": "Yes",
+          "probability": 64.0,
+          "actual": "Yes",
+          "correct": true
+        },
+        {
+          "market": "dc_12",
+          "predicted": "Yes",
+          "probability": 69.7,
+          "actual": "No",
+          "correct": false
+        }
+      ]
+    },
+    {
+      "home": "1. FC K\u00f6ln",
+      "away": "VfL Wolfsburg",
+      "score": "1-0",
+      "date": "2026-01-30",
+      "predictions": [
+        {
+          "market": "ht_btts",
+          "predicted": "No",
+          "probability": 18.7,
+          "actual": "No",
+          "correct": true
+        },
+        {
+          "market": "dc_x2",
+          "predicted": "Yes",
+          "probability": 55.1,
+          "actual": "No",
+          "correct": false
+        },
+        {
+          "market": "dc_1x",
+          "predicted": "Yes",
+          "probability": 77.8,
+          "actual": "Yes",
+          "correct": true
+        },
+        {
+          "market": "home_over_25",
+          "predicted": "No",
+          "probability": 26.9,
+          "actual": "No",
+          "correct": true
+        },
+        {
+          "market": "over_15",
+          "predicted": "Yes",
+          "probability": 75.2,
+          "actual": "No",
+          "correct": false
+        },
+        {
+          "market": "ht_over_05",
+          "predicted": "Yes",
+          "probability": 64.5,
+          "actual": "Yes",
+          "correct": true
+        },
+        {
+          "market": "over_25",
+          "predicted": "Yes",
+          "probability": 51.0,
+          "actual": "No",
+          "correct": false
+        },
+        {
+          "market": "btts",
+          "predicted": "Yes",
+          "probability": 59.6,
+          "actual": "No",
+          "correct": false
+        },
+        {
+          "market": "dc_12",
+          "predicted": "Yes",
+          "probability": 68.7,
+          "actual": "Yes",
+          "correct": true
+        }
+      ]
+    }
+  ]
+}

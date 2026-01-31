@@ -140,6 +140,14 @@ from src.scheduler import (
 # Phase 30: V3.0 Ultimate Enhancement (Monte Carlo, Player Props, RL)
 from src.v3_api import register_v3_api
 
+# Phase 31: Analytics Dashboard API (Real database)
+from src.analytics_api import (
+    get_today_analytics, get_accuracy_analytics,
+    get_league_analytics, get_market_analytics,
+    get_roi_analytics as calculate_roi_analytics, get_db_stats,
+    get_section_analytics, get_time_period_analytics, get_acca_analytics
+)
+
 # Phase 31: SportyBet Specialized Markets
 from src.models.sportybet_predictor import (
     SportyBetPredictor, get_sportybet_predictor,
@@ -2094,6 +2102,121 @@ def settle_prediction():
 def analytics_page():
     """Success rate analytics dashboard"""
     return render_template('analytics.html')
+
+
+# ============================================================
+# Analytics Dashboard API (Real Database - Phase 31)
+# ============================================================
+
+@app.route('/api/analytics/dashboard/today')
+def get_dashboard_today():
+    """Get today's analytics from real prediction database."""
+    try:
+        data = get_today_analytics()
+        return jsonify({'success': True, **data})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/analytics/dashboard/history')
+def get_dashboard_history():
+    """Get accuracy history from real database."""
+    days = int(request.args.get('days', 30))
+    try:
+        data = get_accuracy_analytics(days)
+        return jsonify({'success': True, **data})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/analytics/dashboard/league')
+def get_dashboard_leagues():
+    """Get performance by league from real database."""
+    try:
+        data = get_league_analytics()
+        return jsonify({'success': True, 'leagues': data})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/analytics/dashboard/market')
+def get_dashboard_markets():
+    """Get performance by market from real database."""
+    try:
+        data = get_market_analytics()
+        return jsonify({'success': True, 'markets': data})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/analytics/dashboard/calculate-roi')
+def get_dashboard_roi():
+    """Calculate ROI from real database predictions."""
+    stake = float(request.args.get('stake', 10.0))
+    days = int(request.args.get('days', 30))
+    try:
+        data = calculate_roi_analytics(stake, days)
+        return jsonify({'success': True, **data})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/analytics/dashboard/db-stats')
+def get_dashboard_db_stats():
+    """Get database statistics for debugging."""
+    try:
+        data = get_db_stats()
+        return jsonify({'success': True, **data})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/analytics/dashboard/sections')
+def get_dashboard_sections():
+    """Get analytics by section (Daily Tips, Money Zone, ACCAs)."""
+    section = request.args.get('section', 'all')  # all, daily_tips, money_zone, accas
+    try:
+        data = get_section_analytics(section)
+        return jsonify({'success': True, **data})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/analytics/dashboard/sections/<section_name>')
+def get_dashboard_section_by_name(section_name):
+    """Get analytics for specific section: daily_tips, money_zone, or accas."""
+    valid_sections = ['daily_tips', 'money_zone', 'accas']
+    if section_name not in valid_sections:
+        return jsonify({
+            'success': False, 
+            'error': f'Invalid section. Valid options: {valid_sections}'
+        }), 400
+    
+    try:
+        data = get_section_analytics(section_name)
+        return jsonify({'success': True, **data})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/analytics/dashboard/time-periods')
+def get_dashboard_time_periods():
+    """Get analytics by time period (for Money Zone)."""
+    try:
+        data = get_time_period_analytics()
+        return jsonify({'success': True, **data})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
+@app.route('/api/analytics/dashboard/accas')
+def get_dashboard_accas():
+    """Get detailed accumulator analytics."""
+    try:
+        data = get_acca_analytics()
+        return jsonify({'success': True, **data})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 
 # ============================================================

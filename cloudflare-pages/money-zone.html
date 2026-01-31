@@ -25,7 +25,13 @@
                 <a href="accumulators.html" class="nav-link">🎰 ACCAs</a>
                 <a href="blog.html" class="nav-link">📝 Blog</a>
             </nav>
+            <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
         </div>
+        <div class="mobile-menu-overlay"></div>
     </header>
 
     <!-- Hero Banner -->
@@ -765,9 +771,58 @@
     <footer class="footer">
         <div class="container">
             <p>FootyPredict Pro © 2026 | Powered by Cloudflare Workers</p>
+            
+            <!-- Gambling Disclaimer -->
+            <div class="gambling-warning">
+                <h4>⚠️ Responsible Gambling</h4>
+                <p>Gambling involves risk. Please bet responsibly and only with money you can afford to lose.</p>
+                <div class="gambling-links">
+                    <a href="https://www.begambleaware.org" target="_blank" rel="noopener">BeGambleAware</a>
+                    <a href="https://www.gamcare.org.uk" target="_blank" rel="noopener">GamCare</a>
+                </div>
+            </div>
+            
+            <p class="footer-disclaimer">
+                <strong>Affiliate Disclosure:</strong> This site contains affiliate links. 18+ only. T&Cs apply. Please gamble responsibly.
+            </p>
         </div>
     </footer>
 
     <script src="money-zone.js"></script>
+    <script>
+    // Mobile Menu Toggle
+    (function() {
+        const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+        const nav = document.querySelector('.nav');
+        const overlay = document.querySelector('.mobile-menu-overlay');
+        
+        if (mobileMenuToggle && nav) {
+            mobileMenuToggle.addEventListener('click', function() {
+                mobileMenuToggle.classList.toggle('active');
+                nav.classList.toggle('active');
+                if (overlay) overlay.classList.toggle('active');
+                document.body.style.overflow = nav.classList.contains('active') ? 'hidden' : '';
+            });
+            
+            if (overlay) {
+                overlay.addEventListener('click', function() {
+                    mobileMenuToggle.classList.remove('active');
+                    nav.classList.remove('active');
+                    overlay.classList.remove('active');
+                    document.body.style.overflow = '';
+                });
+            }
+            
+            nav.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', function() {
+                    mobileMenuToggle.classList.remove('active');
+                    nav.classList.remove('active');
+                    if (overlay) overlay.classList.remove('active');
+                    document.body.style.overflow = '';
+                });
+            });
+        }
+    })();
+    </script>
 </body>
 </html>

@@ -1,5 +1,27 @@
 /* Money Zone - Additional Styles */
 
+/* Reorder sections: Combos first, then Time-Based */
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+.zone-section {
+    order: 2; /* Time-Based Predictions goes second */
+}
+
+.combos-section {
+    order: 1; /* Combos go first */
+}
+
+.stats-section {
+    order: 3;
+}
+
+.footer {
+    order: 4;
+}
+
 .nav-link.active {
     color: var(--accent-primary);
 }

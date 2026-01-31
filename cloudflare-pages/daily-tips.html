@@ -480,10 +480,84 @@
             font-size: 0.9rem;
         }
         
+        /* Mobile Menu Toggle */
+        .mobile-menu-toggle {
+            display: none;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 28px;
+            height: 20px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            z-index: 110;
+        }
+        
+        .mobile-menu-toggle span {
+            display: block;
+            width: 100%;
+            height: 3px;
+            background: var(--text);
+            border-radius: 2px;
+            transition: transform 0.3s, opacity 0.3s;
+        }
+        
+        .mobile-menu-toggle.active span:nth-child(1) {
+            transform: rotate(45deg) translate(6px, 6px);
+        }
+        
+        .mobile-menu-toggle.active span:nth-child(2) {
+            opacity: 0;
+        }
+        
+        .mobile-menu-toggle.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(6px, -6px);
+        }
+        
+        .mobile-menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+            z-index: 100;
+        }
+        
+        .mobile-menu-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
         /* Responsive */
         @media (max-width: 768px) {
-            .header { flex-direction: column; gap: 16px; padding: 16px; }
-            .nav-links { justify-content: center; }
+            .header { flex-direction: row; justify-content: space-between; gap: 16px; padding: 16px; }
+            .mobile-menu-toggle { display: flex; }
+            .nav-links { 
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: 280px;
+                height: 100vh;
+                background: var(--bg-secondary);
+                flex-direction: column;
+                padding: 80px 32px 32px;
+                gap: 0;
+                transition: right 0.3s ease;
+                z-index: 105;
+                box-shadow: -4px 0 24px rgba(0, 0, 0, 0.3);
+            }
+            .nav-links.active { right: 0; }
+            .nav-links .nav-link {
+                padding: 16px 0;
+                font-size: 1.1rem;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                display: block;
+            }
             .matches-grid { grid-template-columns: 1fr; }
             .page-title h1 { font-size: 1.8rem; }
             .stats-bar { gap: 16px; }
@@ -506,7 +580,13 @@
                 <a href="accumulators.html" class="nav-link">🎰 ACCAs</a>
                 <a href="blog.html" class="nav-link">📝 Blog</a>
             </nav>
+            <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
         </header>
+        <div class="mobile-menu-overlay"></div>
         
         <!-- Page Title -->
         <div class="page-title">
@@ -553,10 +633,58 @@
         <!-- Footer -->
         <footer class="footer">
             <p>FootyPredict Pro © 2026 | Powered by API-Football | 2,400+ fixtures daily</p>
+            
+            <!-- Gambling Disclaimer -->
+            <div class="gambling-warning" style="margin-top: 20px; text-align: left;">
+                <h4 style="display: flex; align-items: center; gap: 8px; color: #f59e0b;">⚠️ Responsible Gambling</h4>
+                <p style="font-size: 0.85rem; margin: 10px 0;">Gambling involves risk. Please bet responsibly and only with money you can afford to lose.</p>
+                <div style="display: flex; gap: 16px; flex-wrap: wrap; font-size: 0.8rem;">
+                    <a href="https://www.begambleaware.org" target="_blank" rel="noopener" style="color: #6366f1;">BeGambleAware</a>
+                    <a href="https://www.gamcare.org.uk" target="_blank" rel="noopener" style="color: #6366f1;">GamCare</a>
+                </div>
+            </div>
+            
+            <p style="font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-top: 16px;">
+                <strong>Affiliate Disclosure:</strong> This site contains affiliate links. 18+ only. T&Cs apply. Please gamble responsibly.
+            </p>
         </footer>
     </div>
     
     <script>
+        // Mobile Menu Toggle
+        (function() {
+            const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+            const nav = document.querySelector('.nav-links');
+            const overlay = document.querySelector('.mobile-menu-overlay');
+            
+            if (mobileMenuToggle && nav) {
+                mobileMenuToggle.addEventListener('click', function() {
+                    mobileMenuToggle.classList.toggle('active');
+                    nav.classList.toggle('active');
+                    if (overlay) overlay.classList.toggle('active');
+                    document.body.style.overflow = nav.classList.contains('active') ? 'hidden' : '';
+                });
+                
+                if (overlay) {
+                    overlay.addEventListener('click', function() {
+                        mobileMenuToggle.classList.remove('active');
+                        nav.classList.remove('active');
+                        overlay.classList.remove('active');
+                        document.body.style.overflow = '';
+                    });
+                }
+                
+                nav.querySelectorAll('.nav-link').forEach(link => {
+                    link.addEventListener('click', function() {
+                        mobileMenuToggle.classList.remove('active');
+                        nav.classList.remove('active');
+                        if (overlay) overlay.classList.remove('active');
+                        document.body.style.overflow = '';
+                    });
+                });
+            }
+        })();
+        
         const API_BASE = 'https://footypredict-api.tirene857.workers.dev';
         let allFixtures = [];
         

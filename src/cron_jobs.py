@@ -162,6 +162,21 @@ def weekly_retrain():
     logger.info(f"Retrain initiated: {result}")
 
 
+def generate_daily_blog():
+    """Generate daily blog posts from predictions - runs at 7 AM"""
+    from src.blog_generator import generate_daily_blog_posts
+    
+    logger.info("Generating daily blog posts...")
+    
+    try:
+        result = generate_daily_blog_posts()
+        logger.info(f"Blog posts generated: {result}")
+        return result
+    except Exception as e:
+        logger.error(f"Blog generation failed: {e}")
+        return {'error': str(e)}
+
+
 # Global manager
 _manager: Optional[CronJobManager] = None
 
@@ -176,6 +191,9 @@ def setup_default_cron_jobs():
     """Setup default scheduled jobs"""
     manager = get_cron_manager()
     
+    # Blog generation at 7 AM (after predictions are ready)
+    manager.add_job('daily_blog', generate_daily_blog, '0 7 * * *')
+    
     # Morning predictions at 9 AM
     manager.add_job('morning_predictions', send_morning_predictions, '0 9 * * *')
     
@@ -189,7 +207,7 @@ def setup_default_cron_jobs():
     manager.add_job('weekly_retrain', weekly_retrain, '0 2 * * 0')
     
     manager.start()
-    logger.info("Default cron jobs configured")
+    logger.info("Default cron jobs configured (including blog generation)")
     return manager.get_status()
 
 
