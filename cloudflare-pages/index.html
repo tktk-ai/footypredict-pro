@@ -835,16 +835,38 @@
             `;
             
             try {
-                const response = await fetch(`${API_BASE}/fixtures/${currentLeague}`);
+                // Fetch fixtures from the API
+                const response = await fetch(`${API_BASE}/fixtures?days=1`);
                 const data = await response.json();
                 
-                if (data.success && data.fixtures) {
-                    renderMatches(data.fixtures, grid, sureWinsGrid);
-                    document.getElementById('match-count').textContent = `${data.fixtures.length} Matches`;
+                if (data.fixtures && data.fixtures.length > 0) {
+                    // Filter fixtures by current league if needed
+                    let fixtures = data.fixtures;
+                    if (currentLeague !== 'all') {
+                        const leagueMap = {
+                            'bundesliga': ['Bundesliga', '1. Bundesliga'],
+                            'premier_league': ['Premier League', 'EPL'],
+                            'la_liga': ['La Liga', 'LaLiga'],
+                            'serie_a': ['Serie A'],
+                            'ligue_1': ['Ligue 1'],
+                            'champions_league': ['Champions League', 'UEFA Champions League'],
+                            'europa_league': ['Europa League', 'UEFA Europa League']
+                        };
+                        const targetLeagues = leagueMap[currentLeague] || [currentLeague];
+                        fixtures = data.fixtures.filter(f => 
+                            targetLeagues.some(l => f.league?.toLowerCase().includes(l.toLowerCase()) ||
+                                                    f.league_name?.toLowerCase().includes(l.toLowerCase()))
+                        );
+                    }
+                    renderMatches(fixtures, grid, sureWinsGrid);
+                    document.getElementById('match-count').textContent = `${fixtures.length} Matches`;
+                    document.getElementById('today-count').textContent = fixtures.length;
+                    document.getElementById('value-bets-count').textContent = fixtures.filter(f => f.confidence > 0.6).length;
                 } else {
                     grid.innerHTML = '<p style="color: rgba(255,255,255,0.5); padding: 40px; text-align: center;">No fixtures available</p>';
                 }
             } catch (err) {
+                console.error('Error loading fixtures:', err);
                 grid.innerHTML = '<p style="color: #ef4444; padding: 40px; text-align: center;">Error loading fixtures</p>';
             }
         }
