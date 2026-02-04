@@ -3,9 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Accumulators | FootyPredict Pro</title>
-    <meta name="description" content="Build winning accumulators with AI-powered predictions. Auto-generated ACCAs from high-confidence matches.">
+    <title>Smart Accumulators | FootyPredict Pro</title>
     
+    <meta name="theme-color" content="#6366f1">
+    <link rel="manifest" href="/static/manifest.json">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
@@ -18,8 +19,17 @@
             --accent-glow: rgba(99, 102, 241, 0.4);
             --gold: #fbbf24;
             --emerald: #10b981;
+            --rose: #f43f5e;
             --text: #ffffff;
             --text-muted: rgba(255, 255, 255, 0.5);
+        }
+        
+        [data-theme="light"] {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f1f5f9;
+            --text: #0f172a;
+            --text-muted: #64748b;
         }
         
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -47,24 +57,20 @@
             margin-bottom: 30px;
         }
         
-        .logo {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            text-decoration: none;
-            color: var(--text);
+        [data-theme="light"] .header {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(0, 0, 0, 0.08);
         }
         
+        .logo { display: flex; align-items: center; gap: 12px; }
+        
         .logo-icon {
-            width: 48px;
-            height: 48px;
-            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            width: 48px; height: 48px;
+            background: linear-gradient(135deg, #10b981, #059669);
             border-radius: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            display: flex; align-items: center; justify-content: center;
             font-size: 24px;
-            box-shadow: 0 8px 32px rgba(251, 191, 36, 0.3);
+            box-shadow: 0 8px 32px rgba(16, 185, 129, 0.3);
         }
         
         .logo-text { font-size: 1.5rem; font-weight: 800; }
@@ -86,409 +92,380 @@
             color: #a5b4fc;
         }
         
-        /* Page Title */
-        .page-title {
-            text-align: center;
+        .theme-toggle {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 12px;
+            padding: 10px 16px;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+        
+        /* Category Tabs */
+        .category-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            overflow-x: auto;
+            padding-bottom: 10px;
+        }
+        
+        .category-tab {
+            padding: 12px 20px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: var(--text-muted);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        
+        .category-tab:hover {
+            background: rgba(99, 102, 241, 0.1);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+        
+        .category-tab.active {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-color: transparent;
+            color: white;
+        }
+        
+        /* ===== JACKPOT SECTION ===== */
+        .jackpot-section {
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.05), rgba(16, 185, 129, 0.05));
+            border: 1px solid rgba(251, 191, 36, 0.2);
+            border-radius: 24px;
+            padding: 30px;
             margin-bottom: 30px;
         }
         
-        .page-title h1 {
-            font-size: 2.5rem;
-            font-weight: 800;
-            background: linear-gradient(135deg, #fbbf24, #f59e0b);
-            -webkit-background-clip: text;
-            background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        
-        /* Slip of the Day - Featured ACCA */
-        .slip-of-day {
-            margin-bottom: 40px;
-            padding: 30px;
-            background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(251, 191, 36, 0.15) 50%, rgba(16, 185, 129, 0.15) 100%);
-            border: 2px solid rgba(251, 191, 36, 0.4);
-            border-radius: 24px;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .slip-of-day::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 5px;
-            background: linear-gradient(90deg, #ef4444, #fbbf24, #10b981);
-        }
-        
-        .slip-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-            flex-wrap: wrap;
-            gap: 16px;
-        }
-        
-        .slip-title {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        .slip-badge {
-            font-size: 2rem;
-        }
-        
-        .slip-title h2 {
+        .jackpot-section-title {
             font-size: 1.8rem;
             font-weight: 800;
-            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            background: linear-gradient(135deg, #fbbf24, #10b981);
             -webkit-background-clip: text;
-            background-clip: text;
             -webkit-text-fill-color: transparent;
-        }
-        
-        .slip-title p {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-        }
-        
-        .slip-stats {
-            display: flex;
-            gap: 24px;
-        }
-        
-        .slip-stat {
-            text-align: center;
-            padding: 12px 20px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 12px;
-        }
-        
-        .slip-stat-value {
-            font-size: 1.8rem;
-            font-weight: 800;
-            color: var(--emerald);
-        }
-        
-        .slip-stat-label {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-        }
-        
-        .slip-matches {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 16px;
-            margin-bottom: 24px;
-        }
-        
-        .slip-match {
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 14px;
-            padding: 16px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        
-        .slip-match-info h4 {
-            font-size: 1rem;
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-        
-        .slip-match-meta {
-            font-size: 0.8rem;
-            color: var(--text-muted);
-        }
-        
-        .slip-match-pick {
-            text-align: right;
-        }
-        
-        .slip-match-pick .pick {
-            font-weight: 700;
-            color: #22c55e;
-            font-size: 1rem;
-        }
-        
-        .slip-match-pick .odds {
-            font-size: 0.85rem;
-            color: var(--gold);
-        }
-        
-        .slip-match-pick .confidence {
-            font-size: 0.75rem;
-            color: var(--text-muted);
-        }
-        
-        .slip-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-top: 20px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            flex-wrap: wrap;
-            gap: 16px;
-        }
-        
-        .slip-potential {
-            background: linear-gradient(135deg, #10b981, #22c55e);
-            padding: 16px 24px;
-            border-radius: 14px;
-            text-align: center;
-        }
-        
-        .slip-potential-label {
-            font-size: 0.85rem;
-            opacity: 0.9;
-        }
-        
-        .slip-potential-value {
-            font-size: 1.6rem;
-            font-weight: 800;
-        }
-        
-        /* Combo Predictions Section */
-        .combos-section {
-            margin-bottom: 40px;
-        }
-        
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .section-title {
-            font-size: 1.3rem;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .combo-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 20px;
-        }
-        
-        .combo-card {
-            background: linear-gradient(135deg, rgba(20, 20, 42, 0.8), rgba(30, 30, 60, 0.6));
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 20px;
-            padding: 24px;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .combo-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 4px;
-        }
-        
-        .combo-card.safe::before { background: linear-gradient(90deg, #10b981, #6ee7b6); }
-        .combo-card.value::before { background: linear-gradient(90deg, #6366f1, #a78bfa); }
-        .combo-card.risky::before { background: linear-gradient(90deg, #ef4444, #f97316); }
-        
-        .combo-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 16px;
-        }
-        
-        .combo-badge {
-            padding: 6px 14px;
-            border-radius: 20px;
-            font-size: 0.85rem;
-            font-weight: 700;
-        }
-        
-        .combo-badge.safe { background: rgba(16, 185, 129, 0.2); color: #10b981; }
-        .combo-badge.value { background: rgba(99, 102, 241, 0.2); color: #a5b4fc; }
-        .combo-badge.risky { background: rgba(239, 68, 68, 0.2); color: #ef4444; }
-        
-        .combo-odds {
-            font-size: 1.4rem;
-            font-weight: 800;
-            color: var(--emerald);
-        }
-        
-        .combo-card h3 {
-            font-size: 1.1rem;
             margin-bottom: 8px;
         }
         
-        .combo-desc {
-            font-size: 0.85rem;
+        .jackpot-section-desc {
             color: var(--text-muted);
-            margin-bottom: 16px;
+            margin-bottom: 24px;
         }
         
-        .combo-picks {
-            max-height: 180px;
+        .jackpot-types { display: flex; flex-direction: column; gap: 24px; }
+        
+        .jackpot-type-group h3 {
+            font-size: 1.1rem;
+            margin-bottom: 12px;
+            color: var(--text-muted);
+        }
+        
+        .jackpot-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 16px;
+        }
+        
+        .jackpot-card {
+            background: rgba(251, 191, 36, 0.08);
+            border: 1px solid rgba(251, 191, 36, 0.25);
+            border-radius: 16px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: all 0.3s;
+        }
+        
+        .jackpot-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(251, 191, 36, 0.15);
+        }
+        
+        .jackpot-card.over15 {
+            background: rgba(16, 185, 129, 0.08);
+            border-color: rgba(16, 185, 129, 0.25);
+        }
+        
+        .jackpot-card.over15:hover {
+            box-shadow: 0 8px 32px rgba(16, 185, 129, 0.15);
+        }
+        
+        .jackpot-icon { font-size: 2.5rem; }
+        
+        .jackpot-info { flex: 1; }
+        
+        .jackpot-name {
+            display: block;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #fbbf24;
+            margin-bottom: 4px;
+        }
+        
+        .jackpot-card.over15 .jackpot-name { color: #10b981; }
+        
+        .jackpot-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        
+        .jackpot-timeframes {
+            display: flex;
+            gap: 6px;
+        }
+        
+        .jackpot-btn {
+            padding: 8px 14px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 8px;
+            color: var(--text);
+            font-size: 0.8rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .jackpot-btn:hover {
+            background: rgba(251, 191, 36, 0.3);
+            border-color: rgba(251, 191, 36, 0.5);
+        }
+        
+        .jackpot-results {
+            margin-top: 24px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            padding: 20px;
+            max-height: 600px;
             overflow-y: auto;
         }
         
-        .combo-pick-item {
+        .jackpot-results-header {
             display: flex;
             justify-content: space-between;
-            padding: 10px 12px;
-            background: rgba(255, 255, 255, 0.03);
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .jackpot-results-header h3 {
+            font-size: 1.2rem;
+            color: #fbbf24;
+        }
+        
+        .close-jackpot {
+            width: 32px;
+            height: 32px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
             border-radius: 8px;
-            margin-bottom: 6px;
-            font-size: 0.85rem;
-        }
-        
-        .combo-pick-team { font-weight: 500; }
-        .combo-pick-bet { color: #a5b4fc; }
-        
-        .combo-footer {
-            padding-top: 16px;
-            border-top: 1px solid rgba(255, 255, 255, 0.06);
-        }
-        
-        .win-prob {
-            font-size: 0.9rem;
-            color: var(--text-muted);
-        }
-        
-        .win-prob strong {
-            color: var(--emerald);
-        }
-        
-        /* Auto ACCAs Section */
-        .auto-accas-section {
-            margin-bottom: 40px;
-        }
-        
-        .acca-filters {
-            display: flex;
-            gap: 12px;
-            flex-wrap: wrap;
-        }
-        
-        .filter-select {
-            padding: 10px 16px;
-            background: rgba(255, 255, 255, 0.06);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
             color: var(--text);
-            font-size: 0.9rem;
+            font-size: 1.5rem;
             cursor: pointer;
         }
         
-        /* ACCA Cards Grid */
-        .acca-grid {
+        .jackpot-picks-list {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-            gap: 20px;
+            gap: 8px;
         }
         
+        .jackpot-pick-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.05);
+            padding: 12px 16px;
+            border-radius: 10px;
+        }
+        
+        .jackpot-pick-match { font-weight: 600; }
+        .jackpot-pick-bet { color: #10b981; font-weight: 600; }
+        .jackpot-pick-odds { color: #fbbf24; }
+        
+        /* Accumulators Grid */
+        .accas-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 24px;
+        }
+        
+        @media (max-width: 768px) {
+            .accas-grid { grid-template-columns: 1fr; }
+        }
+        
+        /* Accumulator Card */
         .acca-card {
-            background: linear-gradient(135deg, rgba(20, 20, 42, 0.8), rgba(30, 30, 60, 0.6));
+            background: rgba(20, 20, 42, 0.6);
             backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.06);
             border-radius: 20px;
-            padding: 24px;
-            position: relative;
             overflow: hidden;
             transition: all 0.3s;
         }
         
         .acca-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 60px rgba(99, 102, 241, 0.2);
         }
         
-        .acca-card::before {
-            content: '';
-            position: absolute;
-            top: 0; left: 0; right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, #10b981, #6ee7b6);
+        [data-theme="light"] .acca-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(0, 0, 0, 0.08);
         }
-        
-        .acca-card.medium::before { background: linear-gradient(90deg, #f59e0b, #fbbf24); }
-        .acca-card.high::before { background: linear-gradient(90deg, #ef4444, #f97316); }
         
         .acca-header {
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.1));
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        
+        .acca-title-row {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 16px;
+            align-items: center;
+            margin-bottom: 8px;
         }
         
         .acca-title {
+            font-size: 1.2rem;
+            font-weight: 700;
             display: flex;
             align-items: center;
             gap: 10px;
         }
         
-        .acca-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.4rem;
-            background: rgba(16, 185, 129, 0.2);
+        .acca-badge {
+            padding: 4px 10px;
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            text-transform: uppercase;
         }
         
-        .acca-name { font-size: 1.1rem; font-weight: 700; }
-        .acca-type { font-size: 0.75rem; color: var(--text-muted); }
+        .badge-sure { background: rgba(16, 185, 129, 0.2); color: #10b981; }
+        .badge-goals { background: rgba(251, 191, 36, 0.2); color: #fbbf24; }
+        .badge-result { background: rgba(99, 102, 241, 0.2); color: #a5b4fc; }
+        .badge-htft { background: rgba(244, 63, 94, 0.2); color: #f43f5e; }
         
-        .acca-odds { text-align: right; }
-        .acca-odds-value { font-size: 1.4rem; font-weight: 800; color: var(--emerald); }
-        .acca-odds-label { font-size: 0.7rem; color: var(--text-muted); }
-        
-        .acca-selections { margin: 16px 0; max-height: 220px; overflow-y: auto; }
-        
-        .acca-selection {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 12px;
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 10px;
-            margin-bottom: 8px;
+        .acca-desc {
             font-size: 0.85rem;
+            color: var(--text-muted);
         }
         
-        .acca-match { display: flex; flex-direction: column; gap: 2px; }
-        .acca-teams { font-weight: 600; }
-        .acca-pick { font-size: 0.75rem; color: #a5b4fc; }
-        .acca-date { font-size: 0.7rem; color: var(--text-muted); }
-        .acca-selection-odds { font-weight: 700; color: var(--emerald); }
+        .acca-picks {
+            padding: 16px 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
         
-        .acca-footer {
+        .pick-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding-top: 16px;
-            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
         }
         
-        .acca-confidence {
+        .pick-item:last-child { border-bottom: none; }
+        
+        .pick-match {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        
+        .pick-teams {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+        
+        .pick-bet {
+            font-size: 0.75rem;
+            color: #a5b4fc;
             display: flex;
             align-items: center;
             gap: 6px;
-            font-size: 0.85rem;
         }
         
-        .acca-potential { text-align: right; }
-        .acca-potential-label { font-size: 0.7rem; color: var(--text-muted); }
-        .acca-potential-value { font-size: 1.1rem; font-weight: 700; color: var(--gold); }
+        .cascade-badge {
+            background: rgba(16, 185, 129, 0.2);
+            color: #10b981;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            font-weight: 700;
+        }
+        
+        .pick-odds {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 2px;
+        }
+        
+        .odds-value {
+            font-weight: 700;
+            color: var(--emerald);
+        }
+        
+        .prob-value {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+        
+        /* Acca Footer */
+        .acca-footer {
+            padding: 16px 20px;
+            background: rgba(255, 255, 255, 0.02);
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        
+        .acca-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        
+        .stat-item {
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+        
+        .stat-value.odds { color: var(--gold); }
+        .stat-value.prob { color: var(--emerald); }
+        .stat-value.return { color: var(--accent); }
+        
+        .stat-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+        
+        .copy-btn {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border: none;
+            border-radius: 12px;
+            color: white;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .copy-btn:hover {
+            transform: scale(1.02);
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+        }
         
         /* Loading */
         .loading {
@@ -507,209 +484,42 @@
             margin: 0 auto 16px;
         }
         
-        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
         
-        /* Footer */
-        .footer {
+        /* Empty State */
+        .empty-state {
             text-align: center;
-            padding: 40px 20px;
-            color: rgba(255, 255, 255, 0.4);
-            font-size: 0.9rem;
-        }
-        
-        /* Mobile Menu Toggle */
-        .mobile-menu-toggle {
-            display: none;
-            flex-direction: column;
-            justify-content: space-between;
-            width: 28px;
-            height: 20px;
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            padding: 0;
-            z-index: 110;
-        }
-        
-        .mobile-menu-toggle span {
-            display: block;
-            width: 100%;
-            height: 3px;
-            background: var(--text);
-            border-radius: 2px;
-            transition: transform 0.3s, opacity 0.3s;
-        }
-        
-        .mobile-menu-toggle.active span:nth-child(1) {
-            transform: rotate(45deg) translate(6px, 6px);
-        }
-        
-        .mobile-menu-toggle.active span:nth-child(2) {
-            opacity: 0;
-        }
-        
-        .mobile-menu-toggle.active span:nth-child(3) {
-            transform: rotate(-45deg) translate(6px, -6px);
-        }
-        
-        .mobile-menu-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            opacity: 0;
-            visibility: hidden;
-            transition: opacity 0.3s, visibility 0.3s;
-            z-index: 100;
-        }
-        
-        .mobile-menu-overlay.active {
-            opacity: 1;
-            visibility: visible;
-        }
-        
-        /* Responsive */
-        @media (max-width: 768px) {
-            .header { flex-direction: row; justify-content: space-between; gap: 16px; padding: 16px; }
-            .mobile-menu-toggle { display: flex; }
-            .nav-links { 
-                position: fixed;
-                top: 0;
-                right: -100%;
-                width: 280px;
-                height: 100vh;
-                background: var(--bg-secondary);
-                flex-direction: column;
-                padding: 80px 32px 32px;
-                gap: 0;
-                transition: right 0.3s ease;
-                z-index: 105;
-                box-shadow: -4px 0 24px rgba(0, 0, 0, 0.3);
-            }
-            .nav-links.active { right: 0; }
-            .nav-links .nav-link {
-                padding: 16px 0;
-                font-size: 1.1rem;
-                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-                display: block;
-            }
-            .acca-grid { grid-template-columns: 1fr; }
-            .combo-grid { grid-template-columns: 1fr; }
-            .section-header { flex-direction: column; gap: 16px; }
-            .slip-matches { grid-template-columns: 1fr; }
-            .slip-stats { flex-direction: column; gap: 12px; }
-            .market-tabs { justify-content: center; }
-            .special-grid { grid-template-columns: 1fr; }
-        }
-        
-        /* SportyBet Markets Section */
-        .sportybet-section {
-            margin-bottom: 40px;
-            padding: 30px;
-            background: linear-gradient(135deg, rgba(20, 20, 42, 0.8), rgba(30, 30, 60, 0.5));
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 24px;
-        }
-        
-        .market-tabs {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 24px;
-            flex-wrap: wrap;
-            padding: 8px;
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 14px;
-        }
-        
-        .market-tab {
-            padding: 10px 18px;
-            border: none;
-            background: transparent;
+            padding: 80px 20px;
             color: var(--text-muted);
-            font-size: 0.9rem;
+        }
+        
+        .empty-icon { font-size: 4rem; margin-bottom: 16px; }
+        
+        /* Risk indicators */
+        .risk-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-size: 0.7rem;
             font-weight: 600;
-            border-radius: 10px;
-            cursor: pointer;
-            transition: all 0.2s;
         }
         
-        .market-tab:hover {
-            background: rgba(255, 255, 255, 0.08);
-            color: var(--text);
+        .risk-low { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+        .risk-medium { background: rgba(251, 191, 36, 0.15); color: #fbbf24; }
+        .risk-high { background: rgba(244, 63, 94, 0.15); color: #f43f5e; }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
         
-        .market-tab.active {
-            background: linear-gradient(135deg, #6366f1, #8b5cf6);
-            color: white;
-        }
-        
-        .market-content {
-            display: none;
-        }
-        
-        .market-content.active {
-            display: block;
-        }
-        
-        .special-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 16px;
-        }
-        
-        .special-card {
-            background: rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 16px;
-            padding: 20px;
-            text-align: center;
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        
-        .special-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        }
-        
-        .special-icon {
-            font-size: 1.8rem;
-            display: block;
-            margin-bottom: 10px;
-        }
-        
-        .special-card h4 {
-            font-size: 1rem;
-            font-weight: 700;
-            margin-bottom: 12px;
-            color: var(--gold);
-        }
-        
-        .special-picks {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            margin-bottom: 12px;
-            min-height: 60px;
-        }
-        
-        .special-pick-item {
-            padding: 6px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
-        }
-        
-        .special-pick-item:last-child {
-            border-bottom: none;
-        }
-        
-        .special-odds {
-            display: inline-block;
-            padding: 6px 14px;
-            background: rgba(16, 185, 129, 0.2);
-            color: var(--emerald);
-            font-weight: 700;
-            border-radius: 20px;
-            font-size: 0.95rem;
+        .animate-in {
+            animation: fadeIn 0.4s ease forwards;
         }
     </style>
 </head>
@@ -717,867 +527,573 @@
     <div class="app">
         <!-- Header -->
         <header class="header">
-            <a href="index.html" class="logo">
-                <div class="logo-icon">🎰</div>
-                <span class="logo-text">Accumulators</span>
-            </a>
+            <div class="logo">
+                <div class="logo-icon">🎯</div>
+                <span class="logo-text">Smart Accumulators</span>
+            </div>
             
             <nav class="nav-links">
-                <a href="index.html" class="nav-link">🏠 Home</a>
-                <a href="daily-tips.html" class="nav-link">📊 Daily Tips</a>
-                <a href="sure-bets.html" class="nav-link">🎯 Sure Bets</a>
-                <a href="money-zone.html" class="nav-link">💰 Money Zone</a>
-                <a href="accumulators.html" class="nav-link active">🎰 ACCAs</a>
-                <a href="blog.html" class="nav-link">📝 Blog</a>
+                <a href="/" class="nav-link">🏠 Home</a>
+                <a href="/smart-accas" class="nav-link active">🎰 Smart ACCAs</a>
+                <a href="/live" class="nav-link">📺 Live</a>
+                <a href="/vip" class="nav-link">👑 VIP</a>
+                <a href="/blog" class="nav-link">📰 Blog</a>
+                <a href="/tracker" class="nav-link">📊 Tracker</a>
             </nav>
-            <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">
-                <span></span>
-                <span></span>
-                <span></span>
-            </button>
+            
+            <button class="theme-toggle" onclick="toggleTheme()">🌓</button>
         </header>
-        <div class="mobile-menu-overlay"></div>
         
-        <!-- Page Title -->
-        <div class="page-title">
-            <h1>🎯 AI-Generated Accumulators</h1>
-            <p style="color: var(--text-muted); margin-top: 10px;">Auto-built from 65%+ confidence predictions</p>
+        <!-- Info Banner -->
+        <div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(99, 102, 241, 0.1)); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 16px; padding: 20px; margin-bottom: 24px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 20px;">
+                <div style="flex: 1; min-width: 280px;">
+                    <h3 style="margin-bottom: 8px; display: flex; align-items: center; gap: 10px;">
+                        🧠 Cascade Logic Intelligence
+                    </h3>
+                    <p style="color: var(--text-muted); font-size: 0.9rem;">
+                        Our smart system uses <strong>cascade logic</strong>: if we predict a match will have xG ≥ 3.5, then Over 0.5, Over 1.5, and Over 2.5 are all <span style="color: var(--emerald);">automatically considered "sure bets"</span>. 
+                        We focus on <strong>easy-to-predict matches</strong> to maximize accuracy.
+                    </p>
+                </div>
+                <div id="daily-stats" style="background: rgba(0,0,0,0.2); border-radius: 12px; padding: 16px 20px; display: flex; gap: 20px; flex-wrap: wrap;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 1.4rem; font-weight: 700; color: var(--emerald);" id="stat-picks">--</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">Picks Today</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 1.4rem; font-weight: 700; color: var(--gold);" id="stat-matches">--</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">Matches</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 1.4rem; font-weight: 700; color: var(--accent);" id="stat-conf">--%</div>
+                        <div style="font-size: 0.75rem; color: var(--text-muted);">Avg Conf</div>
+                    </div>
+                </div>
+            </div>
         </div>
         
-        <!-- Slip of the Day - Featured ACCA -->
-        <section class="slip-of-day" id="slip-of-day">
-            <div class="slip-header">
-                <div class="slip-title">
-                    <span class="slip-badge">🔥</span>
-                    <div>
-                        <h2>Slip of the Day</h2>
-                        <p>Our highest confidence Sure Wins combined</p>
-                    </div>
-                </div>
-                <div class="slip-stats">
-                    <div class="slip-stat">
-                        <div class="slip-stat-value" id="slip-odds">--</div>
-                        <div class="slip-stat-label">Combined Odds</div>
-                    </div>
-                    <div class="slip-stat">
-                        <div class="slip-stat-value" id="slip-confidence">--%</div>
-                        <div class="slip-stat-label">Avg Confidence</div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="slip-matches" id="slip-matches">
-                <div class="loading">
-                    <div class="loading-spinner"></div>
-                    <p>Loading Sure Wins...</p>
-                </div>
-            </div>
-            
-            <div class="slip-footer">
-                <div>
-                    <span style="color: var(--text-muted);">📅 Updated: <span id="slip-date">--</span></span>
-                </div>
-                <div class="slip-potential">
-                    <div class="slip-potential-label">€10 Stake Returns</div>
-                    <div class="slip-potential-value" id="slip-return">€--</div>
-                </div>
-            </div>
-
-        </section>
+        <!-- Date Filter Tabs -->
+        <div class="date-tabs" id="date-tabs" style="display: flex; gap: 12px; margin-bottom: 20px;">
+            <button class="date-tab active" data-days="1" style="
+                flex: 1;
+                padding: 16px 24px;
+                background: linear-gradient(135deg, #6366f1, #8b5cf6);
+                border: none;
+                border-radius: 14px;
+                color: white;
+                font-weight: 700;
+                font-size: 1rem;
+                cursor: pointer;
+                transition: all 0.3s;
+                box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
+            ">
+                📅 Today
+            </button>
+            <button class="date-tab" data-days="3" style="
+                flex: 1;
+                padding: 16px 24px;
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 14px;
+                color: var(--text-muted);
+                font-weight: 600;
+                font-size: 1rem;
+                cursor: pointer;
+                transition: all 0.3s;
+            ">
+                📆 Next 3 Days
+            </button>
+            <button class="date-tab" data-days="7" style="
+                flex: 1;
+                padding: 16px 24px;
+                background: rgba(255, 255, 255, 0.05);
+                border: 1px solid rgba(255, 255, 255, 0.1);
+                border-radius: 14px;
+                color: var(--text-muted);
+                font-weight: 600;
+                font-size: 1rem;
+                cursor: pointer;
+                transition: all 0.3s;
+            ">
+                🗓️ Next 7 Days
+            </button>
+        </div>
         
-        <!-- Combo Predictions Section -->
-        <section class="combos-section">
-            <div class="section-header">
-                <h2 class="section-title">🎯 Quick Combos</h2>
+        <!-- Category Tabs -->
+        <div class="category-tabs" id="category-tabs">
+            <button class="category-tab active" data-category="all">📋 All</button>
+            <button class="category-tab" data-category="sure_wins">🔥 Sure Wins (91%+)</button>
+            <button class="category-tab" data-category="over_0_5">⚽ Over 0.5</button>
+            <button class="category-tab" data-category="over_1_5">🎯 Over 1.5</button>
+            <button class="category-tab" data-category="over_2_5">🔥 Over 2.5</button>
+            <button class="category-tab" data-category="btts">⚔️ BTTS</button>
+            <button class="category-tab" data-category="result">🏆 1X2</button>
+            <button class="category-tab" data-category="double_chance">🛡️ DC</button>
+            <button class="category-tab" data-category="htft">⏱️ HT/FT</button>
+            <!-- COMBO TABS (Over25Tips inspired) -->
+            <button class="category-tab" data-category="win_over_2_5">🎰 Win + O2.5</button>
+            <button class="category-tab" data-category="btts_win">💎 BTTS + Win</button>
+            <button class="category-tab" data-category="btts_over_2_5">🌟 BTTS + O2.5</button>
+            <button class="category-tab" data-category="win_to_nil">🧤 Win to Nil</button>
+        </div>
+        
+        <!-- Accumulators Grid (MOVED ABOVE JACKPOT) -->
+        <div class="accas-grid" id="accas-grid">
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <div>Loading smart accumulators...</div>
             </div>
+        </div>
+        
+        <!-- ===== DEDICATED JACKPOT SECTION (MOVED BELOW GRID) ===== -->
+        <div class="jackpot-section">
+            <h2 class="jackpot-section-title">🎰 Jackpot Bundles</h2>
+            <p class="jackpot-section-desc">High-volume prediction bundles with the most winnable matches</p>
             
-            <div class="combo-grid" id="combos-container">
-                <!-- Safe Combo -->
-                <div class="combo-card safe">
-                    <div class="combo-header">
-                        <span class="combo-badge safe">🛡️ Safe</span>
-                        <span class="combo-odds" id="safe-combo-odds">@--</span>
-                    </div>
-                    <h3>Conservative Accumulator</h3>
-                    <p class="combo-desc">3 low-risk selections with 75%+ confidence</p>
-                    <div class="combo-picks" id="safe-combo-picks">
-                        <div class="loading" style="padding: 20px;">Loading...</div>
-                    </div>
-                    <div class="combo-footer">
-                        <span class="win-prob">Win Probability: <strong id="safe-combo-prob">--%</strong></span>
+            <!-- Jackpot Types -->
+            <div class="jackpot-types">
+                <!-- Regular Jackpots (Any Bet Type) -->
+                <div class="jackpot-type-group">
+                    <h3>🎲 Mixed Jackpots</h3>
+                    <div class="jackpot-cards">
+                        <div class="jackpot-card" data-jackpot="jackpot">
+                            <div class="jackpot-icon">🎰</div>
+                            <div class="jackpot-info">
+                                <span class="jackpot-name">Jackpot 30</span>
+                                <span class="jackpot-desc">Top 30 picks (any market)</span>
+                            </div>
+                            <div class="jackpot-timeframes">
+                                <button class="jackpot-btn" onclick="loadJackpot('jackpot', 1)">Today</button>
+                                <button class="jackpot-btn" onclick="loadJackpot('jackpot', 3)">3 Days</button>
+                                <button class="jackpot-btn" onclick="loadJackpot('jackpot', 7)">7 Days</button>
+                            </div>
+                        </div>
+                        <div class="jackpot-card" data-jackpot="super_jackpot">
+                            <div class="jackpot-icon">💰</div>
+                            <div class="jackpot-info">
+                                <span class="jackpot-name">Super Jackpot 40</span>
+                                <span class="jackpot-desc">Top 40 picks (any market)</span>
+                            </div>
+                            <div class="jackpot-timeframes">
+                                <button class="jackpot-btn" onclick="loadJackpot('super_jackpot', 1)">Today</button>
+                                <button class="jackpot-btn" onclick="loadJackpot('super_jackpot', 3)">3 Days</button>
+                                <button class="jackpot-btn" onclick="loadJackpot('super_jackpot', 7)">7 Days</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 
-                <!-- Value Combo -->
-                <div class="combo-card value">
-                    <div class="combo-header">
-                        <span class="combo-badge value">💎 Value</span>
-                        <span class="combo-odds" id="value-combo-odds">@--</span>
-                    </div>
-                    <h3>Value Accumulator</h3>
-                    <p class="combo-desc">4 selections balancing risk and reward</p>
-                    <div class="combo-picks" id="value-combo-picks">
-                        <div class="loading" style="padding: 20px;">Loading...</div>
-                    </div>
-                    <div class="combo-footer">
-                        <span class="win-prob">Win Probability: <strong id="value-combo-prob">--%</strong></span>
-                    </div>
-                </div>
-                
-                <!-- Risky Combo -->
-                <div class="combo-card risky">
-                    <div class="combo-header">
-                        <span class="combo-badge risky">🔥 Risky</span>
-                        <span class="combo-odds" id="risky-combo-odds">@--</span>
-                    </div>
-                    <h3>High-Risk Accumulator</h3>
-                    <p class="combo-desc">5 bold picks for maximum payout</p>
-                    <div class="combo-picks" id="risky-combo-picks">
-                        <div class="loading" style="padding: 20px;">Loading...</div>
-                    </div>
-                    <div class="combo-footer">
-                        <span class="win-prob">Win Probability: <strong id="risky-combo-prob">--%</strong></span>
-                    </div>
-                </div>
-            </div>
-        </section>
-        
-        <!-- SportyBet Market Combos Section -->
-        <section class="sportybet-section">
-            <div class="section-header">
-                <h2 class="section-title">🎲 SportyBet Market Combos</h2>
-                <p style="color: var(--text-muted);">Predictions for all SportyBet betting markets</p>
-            </div>
-            
-            <!-- Market Category Tabs -->
-            <div class="market-tabs">
-                <button class="market-tab active" data-market="main">Main</button>
-                <button class="market-tab" data-market="goals">Goals</button>
-                <button class="market-tab" data-market="half">Half</button>
-                <button class="market-tab" data-market="bookings">Bookings</button>
-                <button class="market-tab" data-market="corners">Corners</button>
-                <button class="market-tab" data-market="combo">Combo</button>
-            </div>
-            
-            <!-- Main Markets -->
-            <div class="market-content active" id="main-markets">
-                <div class="special-grid">
-                    <div class="special-card">
-                        <span class="special-icon">1️⃣❌2️⃣</span>
-                        <h4>1X2</h4>
-                        <div class="special-picks" id="sb-1x2-combo"></div>
-                        <span class="special-odds" id="sb-1x2-odds">@--</span>
-                    </div>
-                    <div class="special-card">
-                        <span class="special-icon">1️⃣❌</span>
-                        <h4>Double Chance</h4>
-                        <div class="special-picks" id="sb-dc-combo"></div>
-                        <span class="special-odds" id="sb-dc-odds">@--</span>
-                    </div>
-                    <div class="special-card">
-                        <span class="special-icon">🥅🥅</span>
-                        <h4>GG/NG</h4>
-                        <div class="special-picks" id="sb-ggng-combo"></div>
-                        <span class="special-odds" id="sb-ggng-odds">@--</span>
-                    </div>
-                </div>
-                <div class="special-grid" style="margin-top: 16px;">
-                    <div class="special-card">
-                        <span class="special-icon">🏠</span>
-                        <h4>Draw No Bet</h4>
-                        <div class="special-picks" id="sb-dnb-combo"></div>
-                        <span class="special-odds" id="sb-dnb-odds">@--</span>
-                    </div>
-                    <div class="special-card">
-                        <span class="special-icon">📊</span>
-                        <h4>Handicap</h4>
-                        <div class="special-picks" id="sb-hc-combo"></div>
-                        <span class="special-odds" id="sb-hc-odds">@--</span>
-                    </div>
-                    <div class="special-card">
-                        <span class="special-icon">🎯</span>
-                        <h4>Winning Margin</h4>
-                        <div class="special-picks" id="sb-margin-combo"></div>
-                        <span class="special-odds" id="sb-margin-odds">@--</span>
+                <!-- Over 1.5 Jackpots -->
+                <div class="jackpot-type-group">
+                    <h3>⚽ Over 1.5 Goals Jackpots</h3>
+                    <div class="jackpot-cards">
+                        <div class="jackpot-card over15" data-jackpot="jackpot_over15">
+                            <div class="jackpot-icon">⚽</div>
+                            <div class="jackpot-info">
+                                <span class="jackpot-name">Over 1.5 Jackpot 30</span>
+                                <span class="jackpot-desc">30 best Over 1.5 goals picks</span>
+                            </div>
+                            <div class="jackpot-timeframes">
+                                <button class="jackpot-btn" onclick="loadJackpot('jackpot_over15', 1)">Today</button>
+                                <button class="jackpot-btn" onclick="loadJackpot('jackpot_over15', 3)">3 Days</button>
+                                <button class="jackpot-btn" onclick="loadJackpot('jackpot_over15', 7)">7 Days</button>
+                            </div>
+                        </div>
+                        <div class="jackpot-card over15" data-jackpot="super_jackpot_over15">
+                            <div class="jackpot-icon">🔥</div>
+                            <div class="jackpot-info">
+                                <span class="jackpot-name">Over 1.5 Super Jackpot 40</span>
+                                <span class="jackpot-desc">40 best Over 1.5 goals picks</span>
+                            </div>
+                            <div class="jackpot-timeframes">
+                                <button class="jackpot-btn" onclick="loadJackpot('super_jackpot_over15', 1)">Today</button>
+                                <button class="jackpot-btn" onclick="loadJackpot('super_jackpot_over15', 3)">3 Days</button>
+                                <button class="jackpot-btn" onclick="loadJackpot('super_jackpot_over15', 7)">7 Days</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
             
-            <!-- Goals Markets -->
-            <div class="market-content" id="goals-markets">
-                <div class="special-grid">
-                    <div class="special-card">
-                        <span class="special-icon">⚽1️⃣.5️⃣</span>
-                        <h4>Over 1.5</h4>
-                        <div class="special-picks" id="sb-o15-combo"></div>
-                        <span class="special-odds" id="sb-o15-odds">@--</span>
-                    </div>
-                    <div class="special-card">
-                        <span class="special-icon">⚽2️⃣.5️⃣</span>
-                        <h4>Over 2.5</h4>
-                        <div class="special-picks" id="sb-o25-combo"></div>
-                        <span class="special-odds" id="sb-o25-odds">@--</span>
-                    </div>
-                    <div class="special-card">
-                        <span class="special-icon">⚽3️⃣.5️⃣</span>
-                        <h4>Over 3.5</h4>
-                        <div class="special-picks" id="sb-o35-combo"></div>
-                        <span class="special-odds" id="sb-o35-odds">@--</span>
-                    </div>
+            <!-- Jackpot Results Display -->
+            <div id="jackpot-results" class="jackpot-results" style="display:none;">
+                <div class="jackpot-results-header">
+                    <h3 id="jackpot-results-title"></h3>
+                    <button class="close-jackpot" onclick="closeJackpotResults()">&times;</button>
                 </div>
-                <div class="special-grid" style="margin-top: 16px;">
-                    <div class="special-card">
-                        <span class="special-icon">🔢</span>
-                        <h4>Correct Score</h4>
-                        <div class="special-picks" id="sb-cs-combo"></div>
-                        <span class="special-odds" id="sb-cs-odds">@--</span>
-                    </div>
-                    <div class="special-card">
-                        <span class="special-icon">⚽🏠</span>
-                        <h4>Home Goals</h4>
-                        <div class="special-picks" id="sb-htg-combo"></div>
-                        <span class="special-odds" id="sb-htg-odds">@--</span>
-                    </div>
-                    <div class="special-card">
-                        <span class="special-icon">⚽✈️</span>
-                        <h4>Away Goals</h4>
-                        <div class="special-picks" id="sb-atg-combo"></div>
-                        <span class="special-odds" id="sb-atg-odds">@--</span>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Half Markets -->
-            <div class="market-content" id="half-markets">
-                <div class="special-grid">
-                    <div class="special-card">
-                        <span class="special-icon">1️⃣H</span>
-                        <h4>1st Half Result</h4>
-                        <div class="special-picks" id="sb-ht1x2-combo"></div>
-                        <span class="special-odds" id="sb-ht1x2-odds">@--</span>
-                    </div>
-                    <div class="special-card">
-                        <span class="special-icon">2️⃣H</span>
-                        <h4>2nd Half Result</h4>
-                        <div class="special-picks" id="sb-ft1x2-combo"></div>
-                        <span class="special-odds" id="sb-ft1x2-odds">@--</span>
-                    </div>
-                    <div class="special-card">
-                        <span class="special-icon">📊</span>
-                        <h4>HT/FT</h4>
-                        <div class="special-picks" id="sb-htft-combo"></div>
-                        <span class="special-odds" id="sb-htft-odds">@--</span>
-                    </div>
-                </div>
-                <div class="special-grid" style="margin-top: 16px;">
-                    <div class="special-card">
-                        <span class="special-icon">⚽1️⃣H</span>
-                        <h4>1st Half O/U</h4>
-                        <div class="special-picks" id="sb-htou-combo"></div>
-                        <span class="special-odds" id="sb-htou-odds">@--</span>
-                    </div>
-                    <div class="special-card">
-                        <span class="special-icon">🥅1️⃣H</span>
-                        <h4>1st Half GG/NG</h4>
-                        <div class="special-picks" id="sb-htgg-combo"></div>
-                        <span class="special-odds" id="sb-htgg-odds">@--</span>
-                    </div>
-                    <div class="special-card">
-                        <span class="special-icon">🏆</span>
-                        <h4>Highest Scoring Half</h4>
-                        <div class="special-picks" id="sb-hsh-combo"></div>
-                        <span class="special-odds" id="sb-hsh-odds">@--</span>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Bookings Markets -->
-            <div class="market-content" id="bookings-markets">
-                <div class="special-grid">
-                    <div class="special-card">
-                        <span class="special-icon">🟨</span>
-                        <h4>Total Bookings</h4>
-                        <div class="special-picks" id="sb-bookings-combo"></div>
-                        <span class="special-odds" id="sb-bookings-odds">@--</span>
-                    </div>
-                    <div class="special-card">
-                        <span class="special-icon">🟥</span>
-                        <h4>Red Card</h4>
-                        <div class="special-picks" id="sb-red-combo"></div>
-                        <span class="special-odds" id="sb-red-odds">@--</span>
-                    </div>
-                    <div class="special-card">
-                        <span class="special-icon">🟨🟨</span>
-                        <h4>Both Teams Carded</h4>
-                        <div class="special-picks" id="sb-btc-combo"></div>
-                        <span class="special-odds" id="sb-btc-odds">@--</span>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Corners Markets -->
-            <div class="market-content" id="corners-markets">
-                <div class="special-grid">
-                    <div class="special-card">
-                        <span class="special-icon">🚩</span>
-                        <h4>Total Corners</h4>
-                        <div class="special-picks" id="sb-corners-combo"></div>
-                        <span class="special-odds" id="sb-corners-odds">@--</span>
-                    </div>
-                    <div class="special-card">
-                        <span class="special-icon">🚩1️⃣</span>
-                        <h4>First Corner</h4>
-                        <div class="special-picks" id="sb-fc-combo"></div>
-                        <span class="special-odds" id="sb-fc-odds">@--</span>
-                    </div>
-                    <div class="special-card">
-                        <span class="special-icon">🚩🏆</span>
-                        <h4>Corner Race</h4>
-                        <div class="special-picks" id="sb-cr-combo"></div>
-                        <span class="special-odds" id="sb-cr-odds">@--</span>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Combo Markets -->
-            <div class="market-content" id="combo-markets">
-                <div class="special-grid">
-                    <div class="special-card">
-                        <span class="special-icon">🎰</span>
-                        <h4>1X2 & Over 2.5</h4>
-                        <div class="special-picks" id="sb-1x2ou-combo"></div>
-                        <span class="special-odds" id="sb-1x2ou-odds">@--</span>
-                    </div>
-                    <div class="special-card">
-                        <span class="special-icon">🎲</span>
-                        <h4>1X2 & GG</h4>
-                        <div class="special-picks" id="sb-1x2gg-combo"></div>
-                        <span class="special-odds" id="sb-1x2gg-odds">@--</span>
-                    </div>
-                    <div class="special-card">
-                        <span class="special-icon">⚽🥅</span>
-                        <h4>O/U & GG/NG</h4>
-                        <div class="special-picks" id="sb-ougg-combo"></div>
-                        <span class="special-odds" id="sb-ougg-odds">@--</span>
-                    </div>
-                </div>
-                <div class="special-grid" style="margin-top: 16px;">
-                    <div class="special-card">
-                        <span class="special-icon">🏠🚫</span>
-                        <h4>Home Win to Nil</h4>
-                        <div class="special-picks" id="sb-hwtn-combo"></div>
-                        <span class="special-odds" id="sb-hwtn-odds">@--</span>
-                    </div>
-                    <div class="special-card">
-                        <span class="special-icon">✈️🚫</span>
-                        <h4>Away Win to Nil</h4>
-                        <div class="special-picks" id="sb-awtn-combo"></div>
-                        <span class="special-odds" id="sb-awtn-odds">@--</span>
-                    </div>
-                    <div class="special-card">
-                        <span class="special-icon">🏠➕⬆️</span>
-                        <h4>Home OR Over 2.5</h4>
-                        <div class="special-picks" id="sb-horo25-combo"></div>
-                        <span class="special-odds" id="sb-horo25-odds">@--</span>
-                    </div>
-                </div>
-            </div>
-        </section>
-        
-        <!-- Auto ACCAs Section -->
-        <div class="auto-accas-section">
-            <div class="section-header">
-                <h2 class="section-title">⚡ Today's Best ACCAs</h2>
-                <div class="acca-filters">
-                    <select class="filter-select" id="folds-filter">
-                        <option value="2">2-Fold</option>
-                        <option value="3" selected>3-Fold</option>
-                        <option value="4">4-Fold</option>
-                        <option value="5">5-Fold</option>
-                    </select>
-                    <select class="filter-select" id="market-filter">
-                        <option value="result">1X2 Result</option>
-                        <option value="over25">Over/Under 2.5</option>
-                        <option value="btts">BTTS</option>
-                    </select>
-                </div>
-            </div>
-            
-            <div class="acca-grid" id="accas-container">
-                <div class="loading">
-                    <div class="loading-spinner"></div>
-                    <p>Generating accumulators...</p>
-                </div>
+                <div id="jackpot-results-content"></div>
             </div>
         </div>
-        
-        <!-- Betting Partners Section -->
-        <div style="background: linear-gradient(135deg, rgba(20, 20, 42, 0.8), rgba(30, 30, 60, 0.6)); border: 1px solid rgba(255, 255, 255, 0.08); border-radius: 20px; padding: 24px; margin: 30px 0;">
-            <h3 style="font-size: 1.1rem; margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">🎰 Place Your ACCA Bet <span style="display: inline-flex; align-items: center; justify-content: center; width: 28px; height: 28px; background: #ef4444; color: white; font-size: 0.7rem; font-weight: 800; border-radius: 50%;">18+</span></h3>
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px;">
-                <a href="https://www.sportybet.com/?ref=footypredict" target="_blank" rel="noopener sponsored" class="partner-btn">
-                    <span class="partner-logo">🏆</span>
-                    <span class="partner-name">SportyBet</span>
-                    <span class="partner-bonus">100% ACCA Boost</span>
-                </a>
-                <a href="https://www.bet365.com/?ref=footypredict" target="_blank" rel="noopener sponsored" class="partner-btn">
-                    <span class="partner-logo">⚽</span>
-                    <span class="partner-name">Bet365</span>
-                    <span class="partner-bonus">ACCA Bonus</span>
-                </a>
-                <a href="https://www.1xbet.com/?ref=footypredict" target="_blank" rel="noopener sponsored" class="partner-btn">
-                    <span class="partner-logo">🎲</span>
-                    <span class="partner-name">1xBet</span>
-                    <span class="partner-bonus">Accumulator of the Day</span>
-                </a>
-            </div>
-        </div>
-        
-        <!-- Footer -->
-        <footer class="footer">
-            <p>FootyPredict Pro © 2026 | AI-Powered Accumulators | Bet Responsibly</p>
-            
-            <div class="gambling-warning" style="margin-top: 16px; text-align: left;">
-                <h4 style="color: #f59e0b; display: flex; align-items: center; gap: 8px;">⚠️ Responsible Gambling</h4>
-                <p style="font-size: 0.85rem; margin: 10px 0;">Gambling involves risk. Please bet responsibly and only with money you can afford to lose.</p>
-                <div style="display: flex; gap: 16px; flex-wrap: wrap; font-size: 0.8rem;">
-                    <a href="https://www.begambleaware.org" target="_blank" rel="noopener" style="color: #6366f1;">BeGambleAware</a>
-                    <a href="https://www.gamcare.org.uk" target="_blank" rel="noopener" style="color: #6366f1;">GamCare</a>
-                </div>
-            </div>
-            
-            <p style="font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-top: 16px;">
-                <strong>Affiliate Disclosure:</strong> This site contains affiliate links. 18+ only. T&Cs apply. Please gamble responsibly.
-            </p>
-        </footer>
     </div>
     
     <script>
-        // Mobile Menu Toggle
+        // Theme toggle
+        function toggleTheme() {
+            const html = document.documentElement;
+            const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+        }
+        
+        // Load saved theme
         (function() {
-            const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
-            const nav = document.querySelector('.nav-links');
-            const overlay = document.querySelector('.mobile-menu-overlay');
-            
-            if (mobileMenuToggle && nav) {
-                mobileMenuToggle.addEventListener('click', function() {
-                    mobileMenuToggle.classList.toggle('active');
-                    nav.classList.toggle('active');
-                    if (overlay) overlay.classList.toggle('active');
-                    document.body.style.overflow = nav.classList.contains('active') ? 'hidden' : '';
-                });
-                
-                if (overlay) {
-                    overlay.addEventListener('click', function() {
-                        mobileMenuToggle.classList.remove('active');
-                        nav.classList.remove('active');
-                        overlay.classList.remove('active');
-                        document.body.style.overflow = '';
-                    });
-                }
-                
-                nav.querySelectorAll('.nav-link').forEach(link => {
-                    link.addEventListener('click', function() {
-                        mobileMenuToggle.classList.remove('active');
-                        nav.classList.remove('active');
-                        if (overlay) overlay.classList.remove('active');
-                        document.body.style.overflow = '';
-                    });
-                });
-            }
+            const saved = localStorage.getItem('theme');
+            if (saved) document.documentElement.setAttribute('data-theme', saved);
         })();
         
-        const API_BASE = 'https://footypredict-api.tirene857.workers.dev';
-        
-        document.addEventListener('DOMContentLoaded', () => {
-            loadSlipOfTheDay();
-            loadCombos();
-            loadAccas();
-            loadSportyBetMarkets();
-            setupMarketTabs();
+        // ===== JACKPOT FUNCTIONS =====
+        async function loadJackpot(jackpotType, days) {
+            const resultsDiv = document.getElementById('jackpot-results');
+            const titleEl = document.getElementById('jackpot-results-title');
+            const contentEl = document.getElementById('jackpot-results-content');
             
-            document.getElementById('folds-filter').addEventListener('change', loadAccas);
-            document.getElementById('market-filter').addEventListener('change', loadAccas);
-        });
-        
-        // Setup market tabs
-        function setupMarketTabs() {
-            document.querySelectorAll('.market-tab').forEach(tab => {
-                tab.addEventListener('click', () => {
-                    // Remove active from all tabs
-                    document.querySelectorAll('.market-tab').forEach(t => t.classList.remove('active'));
-                    // Add active to clicked tab
-                    tab.classList.add('active');
-                    
-                    // Hide all content
-                    document.querySelectorAll('.market-content').forEach(c => c.classList.remove('active'));
-                    // Show corresponding content
-                    const market = tab.dataset.market;
-                    document.getElementById(`${market}-markets`).classList.add('active');
-                });
-            });
-        }
-        
-        // Load SportyBet Market Combos
-        async function loadSportyBetMarkets() {
-            try {
-                const response = await fetch(`${API_BASE}/fixtures?days=3&includePredictions=true`);
-                if (!response.ok) return;
-                
-                const data = await response.json();
-                const fixtures = (data.fixtures || []).filter(f => f.confidence && f.odds);
-                const sorted = fixtures.sort((a, b) => (b.confidence || 0) - (a.confidence || 0));
-                
-                // Generate combos for each market type
-                generateMarketCombo('sb-1x2', sorted.slice(0, 3), '1x2');
-                generateMarketCombo('sb-dc', sorted.slice(1, 4), 'dc');
-                generateMarketCombo('sb-ggng', sorted.slice(0, 3), 'ggng');
-                generateMarketCombo('sb-dnb', sorted.slice(2, 5), 'dnb');
-                generateMarketCombo('sb-hc', sorted.slice(0, 3), 'handicap');
-                generateMarketCombo('sb-margin', sorted.slice(1, 4), 'margin');
-                
-                // Goals markets
-                generateMarketCombo('sb-o15', sorted.slice(0, 3), 'o15');
-                generateMarketCombo('sb-o25', sorted.slice(0, 3), 'o25');
-                generateMarketCombo('sb-o35', sorted.slice(0, 3), 'o35');
-                generateMarketCombo('sb-cs', sorted.slice(0, 2), 'cs');
-                generateMarketCombo('sb-htg', sorted.slice(1, 4), 'homegoals');
-                generateMarketCombo('sb-atg', sorted.slice(2, 5), 'awaygoals');
-                
-                // Half markets
-                generateMarketCombo('sb-ht1x2', sorted.slice(0, 3), 'ht1x2');
-                generateMarketCombo('sb-ft1x2', sorted.slice(1, 4), 'ft1x2');
-                generateMarketCombo('sb-htft', sorted.slice(0, 2), 'htft');
-                generateMarketCombo('sb-htou', sorted.slice(0, 3), 'htou');
-                generateMarketCombo('sb-htgg', sorted.slice(1, 4), 'htgg');
-                generateMarketCombo('sb-hsh', sorted.slice(2, 5), 'hsh');
-                
-                // Bookings markets
-                generateMarketCombo('sb-bookings', sorted.slice(0, 3), 'bookings');
-                generateMarketCombo('sb-red', sorted.slice(1, 4), 'red');
-                generateMarketCombo('sb-btc', sorted.slice(0, 3), 'btc');
-                
-                // Corners markets
-                generateMarketCombo('sb-corners', sorted.slice(0, 3), 'corners');
-                generateMarketCombo('sb-fc', sorted.slice(1, 4), 'firstcorner');
-                generateMarketCombo('sb-cr', sorted.slice(2, 5), 'cornerrace');
-                
-                // Combo markets
-                generateMarketCombo('sb-1x2ou', sorted.slice(0, 2), '1x2ou');
-                generateMarketCombo('sb-1x2gg', sorted.slice(0, 2), '1x2gg');
-                generateMarketCombo('sb-ougg', sorted.slice(0, 3), 'ougg');
-                generateMarketCombo('sb-hwtn', sorted.slice(1, 4), 'hwtn');
-                generateMarketCombo('sb-awtn', sorted.slice(2, 5), 'awtn');
-                generateMarketCombo('sb-horo25', sorted.slice(0, 3), 'horo25');
-                
-            } catch (error) {
-                console.error('SportyBet Markets error:', error);
-            }
-        }
-        
-        function generateMarketCombo(elementId, matches, marketType) {
-            const picksEl = document.getElementById(`${elementId}-combo`);
-            const oddsEl = document.getElementById(`${elementId}-odds`);
+            const typeNames = {
+                'jackpot': 'Jackpot 30',
+                'super_jackpot': 'Super Jackpot 40',
+                'jackpot_over15': 'Over 1.5 Jackpot 30',
+                'super_jackpot_over15': 'Over 1.5 Super Jackpot 40'
+            };
             
-            if (!picksEl || !oddsEl || matches.length === 0) return;
+            const dayLabel = days === 1 ? 'Today' : `${days} Days`;
+            titleEl.textContent = `${typeNames[jackpotType]} - ${dayLabel}`;
             
-            let combinedOdds = 1;
-            const picks = matches.map(match => {
-                const odds = match.odds || {};
-                const prediction = match.prediction?.result || {};
-                
-                // Determine pick and odds based on market type
-                let pick, pickOdds;
-                
-                switch(marketType) {
-                    case '1x2':
-                        if (prediction.home > prediction.away && prediction.home > prediction.draw) {
-                            pick = match.home_team; pickOdds = odds.home || 1.8;
-                        } else if (prediction.away > prediction.home) {
-                            pick = match.away_team; pickOdds = odds.away || 2.5;
-                        } else {
-                            pick = 'Draw'; pickOdds = odds.draw || 3.2;
-                        }
-                        break;
-                    case 'dc':
-                        pick = 'Home/Draw'; pickOdds = 1.35;
-                        break;
-                    case 'ggng':
-                        pick = 'GG'; pickOdds = 1.72;
-                        break;
-                    case 'o15':
-                        pick = 'Over 1.5'; pickOdds = 1.30;
-                        break;
-                    case 'o25':
-                        pick = 'Over 2.5'; pickOdds = odds.over_2_5 || 1.85;
-                        break;
-                    case 'o35':
-                        pick = 'Over 3.5'; pickOdds = 2.40;
-                        break;
-                    default:
-                        pick = match.home_team; pickOdds = odds.home || 1.8;
-                }
-                
-                combinedOdds *= pickOdds;
-                return `<div class="special-pick-item">${match.home_team?.slice(0,10)}.. → ${pick}</div>`;
-            });
-            
-            picksEl.innerHTML = picks.join('');
-            oddsEl.textContent = `@${combinedOdds.toFixed(2)}`;
-        }
-        
-        // Load Slip of the Day from Sure Wins
-        async function loadSlipOfTheDay() {
-            const matchesContainer = document.getElementById('slip-matches');
+            resultsDiv.style.display = 'block';
+            contentEl.innerHTML = '<div class="loading"><div class="loading-spinner"></div>Loading jackpot...</div>';
             
             try {
-                const response = await fetch(`${API_BASE}/fixtures?days=3&includePredictions=true`);
-                if (!response.ok) throw new Error('Failed to fetch');
-                
+                const response = await fetch(`/api/smart-accumulators/${jackpotType}?days=${days}`);
                 const data = await response.json();
-                const fixtures = data.fixtures || [];
                 
-                // Get top 4-5 high confidence matches for the slip
-                const sureWins = fixtures
-                    .filter(f => (f.confidence || 0) >= 0.68)
-                    .sort((a, b) => (b.confidence || 0) - (a.confidence || 0))
-                    .slice(0, 5);
-                
-                if (sureWins.length < 2) {
-                    matchesContainer.innerHTML = `<p style="text-align: center; color: var(--text-muted);">Not enough high-confidence matches today. Check back later!</p>`;
-                    return;
-                }
-                
-                // Calculate combined odds and confidence
-                let combinedOdds = 1;
-                let totalConfidence = 0;
-                
-                sureWins.forEach(match => {
-                    const prediction = match.prediction?.result || {};
-                    const odds = match.odds || {};
+                if (data.success && data.accumulator) {
+                    const acca = data.accumulator;
+                    const picks = acca.picks || [];
                     
-                    // Get best pick
-                    let pickOdds = 1.5; // default
-                    if (prediction.home > prediction.away && prediction.home > prediction.draw) {
-                        pickOdds = odds.home || 1.5;
-                    } else if (prediction.away > prediction.home && prediction.away > prediction.draw) {
-                        pickOdds = odds.away || 2.5;
-                    } else {
-                        pickOdds = odds.draw || 3.0;
-                    }
-                    
-                    combinedOdds *= pickOdds;
-                    totalConfidence += (match.confidence || 0.7) * 100;
-                });
-                
-                const avgConfidence = totalConfidence / sureWins.length;
-                
-                // Update stats
-                document.getElementById('slip-odds').textContent = combinedOdds.toFixed(2);
-                document.getElementById('slip-confidence').textContent = `${Math.round(avgConfidence)}%`;
-                document.getElementById('slip-return').textContent = `€${(10 * combinedOdds).toFixed(2)}`;
-                document.getElementById('slip-date').textContent = new Date().toLocaleDateString();
-                
-                // Render matches
-                matchesContainer.innerHTML = sureWins.map(match => {
-                    const confidence = Math.round((match.confidence || 0) * 100);
-                    const prediction = match.prediction?.result || {};
-                    const odds = match.odds || {};
-                    
-                    let pick = 'Draw';
-                    let pickOdds = odds.draw || 3.0;
-                    if (prediction.home > prediction.away && prediction.home > prediction.draw) {
-                        pick = match.home_team || 'Home';
-                        pickOdds = odds.home || 1.5;
-                    } else if (prediction.away > prediction.home && prediction.away > prediction.draw) {
-                        pick = match.away_team || 'Away';
-                        pickOdds = odds.away || 2.5;
-                    }
-                    
-                    return `
-                        <div class="slip-match">
-                            <div class="slip-match-info">
-                                <h4>${match.home_team} vs ${match.away_team}</h4>
-                                <div class="slip-match-meta">
-                                    📅 ${match.date} • ⏰ ${match.time || 'TBA'} • 🏆 ${match.league_name || 'League'}
+                    contentEl.innerHTML = `
+                        <div class="jackpot-summary" style="margin-bottom:16px; padding:16px; background:rgba(251,191,36,0.1); border-radius:12px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px;">
+                                <div>
+                                    <span style="font-size:0.9rem; color:var(--text-muted);">Total Picks:</span>
+                                    <span style="font-size:1.5rem; font-weight:700; color:#fbbf24; margin-left:8px;">${picks.length}</span>
+                                </div>
+                                <div>
+                                    <span style="font-size:0.9rem; color:var(--text-muted);">Combined Odds:</span>
+                                    <span style="font-size:1.5rem; font-weight:700; color:#10b981; margin-left:8px;">${acca.combined_odds?.toFixed(2) || 'N/A'}</span>
                                 </div>
                             </div>
-                            <div class="slip-match-pick">
-                                <div class="pick">🎯 ${pick}</div>
-                                <div class="odds">@${pickOdds.toFixed(2)}</div>
-                                <div class="confidence">${confidence}% sure</div>
-                            </div>
+                        </div>
+                        <div class="jackpot-picks-list">
+                            ${picks.map((p, i) => `
+                                <div class="jackpot-pick-card" style="
+                                    background: rgba(255,255,255,0.03);
+                                    border: 1px solid rgba(255,255,255,0.08);
+                                    border-radius: 12px;
+                                    padding: 12px 16px;
+                                    margin-bottom: 8px;
+                                ">
+                                    <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
+                                        <!-- Pick Number -->
+                                        <span style="
+                                            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+                                            color: #000;
+                                            width: 28px;
+                                            height: 28px;
+                                            border-radius: 8px;
+                                            display: flex;
+                                            align-items: center;
+                                            justify-content: center;
+                                            font-weight: 700;
+                                            font-size: 0.85rem;
+                                        ">#${i+1}</span>
+                                        
+                                        <!-- Teams with Logos -->
+                                        <div style="flex:1; min-width:200px;">
+                                            <div style="display:flex; align-items:center; gap:8px;">
+                                                <img src="https://img.sofascore.com/api/v1/team/${p.match_id?.replace(/\\D/g,'').slice(0,5) || '123'}/image" 
+                                                     onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22><circle cx=%2220%22 cy=%2220%22 r=%2218%22 fill=%22%23333%22/><text x=%2220%22 y=%2225%22 text-anchor=%22middle%22 fill=%22white%22 font-size=%2214%22>⚽</text></svg>'"
+                                                     style="width:24px; height:24px; border-radius:50%; object-fit:cover;">
+                                                <span style="font-weight:600;">${p.home_team}</span>
+                                                <span style="color:var(--text-muted); font-size:0.85rem;">vs</span>
+                                                <span style="font-weight:600;">${p.away_team}</span>
+                                                <img src="https://img.sofascore.com/api/v1/team/${p.match_id?.replace(/\\D/g,'').slice(5,10) || '456'}/image"
+                                                     onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 40 40%22><circle cx=%2220%22 cy=%2220%22 r=%2218%22 fill=%22%23333%22/><text x=%2220%22 y=%2225%22 text-anchor=%22middle%22 fill=%22white%22 font-size=%2214%22>⚽</text></svg>'"
+                                                     style="width:24px; height:24px; border-radius:50%; object-fit:cover;">
+                                            </div>
+                                            <div style="display:flex; gap:12px; margin-top:4px; font-size:0.8rem; color:var(--text-muted); flex-wrap:wrap;">
+                                                <span>📅 ${p.date || 'TBD'}</span>
+                                                <span>⏰ ${p.kickoff || '15:00'}</span>
+                                                <span>🏆 ${p.league || 'League'}</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- Bet Type -->
+                                        <div style="
+                                            background: rgba(16, 185, 129, 0.15);
+                                            border: 1px solid rgba(16, 185, 129, 0.3);
+                                            border-radius: 8px;
+                                            padding: 6px 12px;
+                                            color: #10b981;
+                                            font-weight: 600;
+                                            font-size: 0.85rem;
+                                        ">${p.bet_label}</div>
+                                        
+                                        <!-- Odds -->
+                                        <div style="
+                                            background: rgba(251, 191, 36, 0.15);
+                                            border-radius: 8px;
+                                            padding: 6px 12px;
+                                            color: #fbbf24;
+                                            font-weight: 700;
+                                            font-size: 0.9rem;
+                                        ">${p.odds?.toFixed(2) || '1.00'}</div>
+                                    </div>
+                                </div>
+                            `).join('')}
                         </div>
                     `;
-                }).join('');
-                
-            } catch (error) {
-                console.error('Slip of the Day error:', error);
-                matchesContainer.innerHTML = `<p style="text-align: center; color: var(--text-muted);">Could not load Sure Wins. Please refresh.</p>`;
-            }
-        }
-        
-        // Load Combos
-        async function loadCombos() {
-            try {
-                const response = await fetch(`${API_BASE}/fixtures?days=3&includePredictions=true`);
-                if (!response.ok) return;
-                
-                const data = await response.json();
-                const fixtures = data.fixtures || [];
-                
-                // Sort by confidence
-                const sorted = fixtures
-                    .filter(f => f.confidence && f.odds)
-                    .sort((a, b) => (b.confidence || 0) - (a.confidence || 0));
-                
-                // Safe combo: top 3 highest confidence
-                const safeMatches = sorted.slice(0, 3);
-                renderCombo('safe', safeMatches);
-                
-                // Value combo: 4 mid-range confidence
-                const valueMatches = sorted.slice(2, 6);
-                renderCombo('value', valueMatches);
-                
-                // Risky combo: 5 varied selections
-                const riskyMatches = sorted.slice(0, 5);
-                renderCombo('risky', riskyMatches);
-                
-            } catch (error) {
-                console.error('Combos error:', error);
-            }
-        }
-        
-        function renderCombo(type, matches) {
-            const picksEl = document.getElementById(`${type}-combo-picks`);
-            const oddsEl = document.getElementById(`${type}-combo-odds`);
-            const probEl = document.getElementById(`${type}-combo-prob`);
-            
-            if (matches.length === 0) {
-                picksEl.innerHTML = '<p style="color: var(--text-muted);">No matches available</p>';
-                return;
-            }
-            
-            let combinedOdds = 1;
-            let totalConfidence = 0;
-            
-            const html = matches.map(match => {
-                const prediction = match.prediction?.result || {};
-                const odds = match.odds || {};
-                
-                let pick = 'Draw';
-                let pickOdds = odds.draw || 3.0;
-                if (prediction.home > prediction.away && prediction.home > prediction.draw) {
-                    pick = match.home_team || 'Home Win';
-                    pickOdds = odds.home || 1.5;
-                } else if (prediction.away > prediction.home && prediction.away > prediction.draw) {
-                    pick = match.away_team || 'Away Win';
-                    pickOdds = odds.away || 2.5;
+                } else {
+                    contentEl.innerHTML = '<div style="text-align:center; padding:20px; color:#f43f5e;">No picks available for this timeframe</div>';
                 }
-                
-                combinedOdds *= pickOdds;
-                totalConfidence += (match.confidence || 0.6) * 100;
-                
-                return `
-                    <div class="combo-pick-item">
-                        <span class="combo-pick-team">${match.home_team} v ${match.away_team}</span>
-                        <span class="combo-pick-bet">${pick} @${pickOdds.toFixed(2)}</span>
-                    </div>
-                `;
-            }).join('');
-            
-            picksEl.innerHTML = html;
-            oddsEl.textContent = `@${combinedOdds.toFixed(2)}`;
-            probEl.textContent = `${Math.round(totalConfidence / matches.length)}%`;
+            } catch (error) {
+                contentEl.innerHTML = `<div style="text-align:center; padding:20px; color:#f43f5e;">Error loading: ${error.message}</div>`;
+            }
         }
         
-        // Load Auto ACCAs
-        async function loadAccas() {
-            const container = document.getElementById('accas-container');
-            const folds = document.getElementById('folds-filter').value;
-            const market = document.getElementById('market-filter').value;
+        function closeJackpotResults() {
+            document.getElementById('jackpot-results').style.display = 'none';
+        }
+        
+        // State
+        let allAccumulators = {};
+        let currentCategory = 'all';
+        let currentDays = 1;
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadSmartAccumulators();
+            loadDailyStats();
             
-            container.innerHTML = `
+            // Date tab clicks
+            document.querySelectorAll('.date-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    // Update styling
+                    document.querySelectorAll('.date-tab').forEach(t => {
+                        t.style.background = 'rgba(255, 255, 255, 0.05)';
+                        t.style.border = '1px solid rgba(255, 255, 255, 0.1)';
+                        t.style.color = 'var(--text-muted)';
+                        t.style.boxShadow = 'none';
+                        t.classList.remove('active');
+                    });
+                    tab.style.background = 'linear-gradient(135deg, #6366f1, #8b5cf6)';
+                    tab.style.border = 'none';
+                    tab.style.color = 'white';
+                    tab.style.boxShadow = '0 4px 15px rgba(99, 102, 241, 0.3)';
+                    tab.classList.add('active');
+                    
+                    currentDays = parseInt(tab.dataset.days);
+                    loadSmartAccumulators();
+                });
+            });
+            
+            // Category tab clicks
+            document.querySelectorAll('.category-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.category-tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    currentCategory = tab.dataset.category;
+                    renderAccumulators();
+                });
+            });
+        });
+        
+        async function loadDailyStats() {
+            try {
+                const response = await fetch('/api/daily-predictions?target=50');
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('stat-picks').textContent = data.total_picks || 0;
+                    document.getElementById('stat-matches').textContent = data.total_matches_analyzed || 0;
+                    
+                    if (data.summary && data.summary.avg_confidence) {
+                        const avgConf = (data.summary.avg_confidence * 100).toFixed(0);
+                        document.getElementById('stat-conf').textContent = avgConf + '%';
+                    }
+                }
+            } catch (err) {
+                console.log('Daily stats not available:', err.message);
+            }
+        }
+        
+        async function loadSmartAccumulators() {
+            const grid = document.getElementById('accas-grid');
+            
+            // Show loading
+            grid.innerHTML = `
                 <div class="loading">
                     <div class="loading-spinner"></div>
-                    <p>Generating ${folds}-fold accumulators...</p>
+                    <div>Loading predictions for ${currentDays === 1 ? 'today' : 'next ' + currentDays + ' days'}...</div>
                 </div>
             `;
             
             try {
-                const response = await fetch(`${API_BASE}/accas?folds=${folds}&market=${market}&limit=6`);
+                const response = await fetch(`/api/smart-accumulators?days=${currentDays}`);
                 const data = await response.json();
                 
-                if (!data.accas || data.accas.length === 0) {
-                    container.innerHTML = `
-                        <div class="loading">
-                            <p>No accumulators available. Try different settings.</p>
-                            <p style="font-size: 0.85rem; margin-top: 10px;">Scanned ${data.total_matches_scanned || 0} matches, ${data.high_conf_matches || 0} high confidence</p>
+                if (data.success && data.accumulators) {
+                    allAccumulators = data.accumulators;
+                    renderAccumulators();
+                } else {
+                    grid.innerHTML = `
+                        <div class="empty-state" style="grid-column: 1/-1;">
+                            <div class="empty-icon">📭</div>
+                            <div>No smart accumulators available</div>
+                            <p style="color: var(--text-muted); margin-top: 8px;">Check back when more fixtures are available</p>
                         </div>
                     `;
-                    return;
                 }
-                
-                renderAccas(data.accas);
-                
-            } catch (error) {
-                console.error('Error loading accas:', error);
-                container.innerHTML = `
-                    <div class="loading">
-                        <p style="color: #ef4444;">Error generating accumulators. Please try again.</p>
+            } catch (err) {
+                console.error('Error loading accumulators:', err);
+                grid.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1/-1;">
+                        <div class="empty-icon">⚠️</div>
+                        <div>Error loading accumulators</div>
+                        <p style="color: var(--text-muted); margin-top: 8px;">${err.message}</p>
                     </div>
                 `;
             }
         }
         
-        function renderAccas(accas) {
-            const container = document.getElementById('accas-container');
+        function renderAccumulators() {
+            const grid = document.getElementById('accas-grid');
             
-            container.innerHTML = accas.map((acca, idx) => {
-                const riskClass = acca.risk_level === 'Low' ? '' : acca.risk_level === 'Medium' ? 'medium' : 'high';
-                const riskEmoji = acca.risk_level === 'Low' ? '🟢' : acca.risk_level === 'Medium' ? '🟡' : '🔴';
+            // Jackpot categories to exclude from main grid (they have dedicated section below)
+            const jackpotCategories = ['jackpot', 'super_jackpot', 'jackpot_over15', 'super_jackpot_over15'];
+            
+            // Filter accumulators - exclude jackpots from main grid
+            let accasToShow = currentCategory === 'all' 
+                ? Object.entries(allAccumulators).filter(([key]) => !jackpotCategories.includes(key))
+                : Object.entries(allAccumulators).filter(([key]) => key === currentCategory && !jackpotCategories.includes(key));
+            
+            if (accasToShow.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state" style="grid-column: 1/-1;">
+                        <div class="empty-icon">📭</div>
+                        <div>No ${currentCategory.replace('_', ' ')} accumulators found</div>
+                        <p style="color: var(--text-muted); margin-top: 8px;">Check the Jackpot Bundles section below or try a different date range</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            grid.innerHTML = accasToShow.map(([key, acca], idx) => {
+                const badgeClass = getBadgeClass(key);
+                const riskClass = `risk-${acca.risk_level || 'medium'}`;
                 
                 return `
-                    <div class="acca-card ${riskClass}">
+                    <div class="acca-card animate-in" style="animation-delay: ${idx * 0.1}s;">
                         <div class="acca-header">
-                            <div class="acca-title">
-                                <div class="acca-icon">🎯</div>
-                                <div>
-                                    <div class="acca-name">ACCA #${idx + 1}</div>
-                                    <div class="acca-type">${acca.type} • ${acca.market.toUpperCase()}</div>
-                                </div>
+                            <div class="acca-title-row">
+                                <h3 class="acca-title">
+                                    ${acca.emoji || '🎯'} ${acca.name}
+                                </h3>
+                                <span class="acca-badge ${badgeClass}">${acca.num_picks} picks</span>
                             </div>
-                            <div class="acca-odds">
-                                <div class="acca-odds-value">${acca.combined_odds.toFixed(2)}</div>
-                                <div class="acca-odds-label">Combined Odds</div>
-                            </div>
+                            <p class="acca-desc">${acca.description}</p>
                         </div>
                         
-                        <div class="acca-selections">
-                            ${acca.selections.map(s => `
-                                <div class="acca-selection">
-                                    <div class="acca-match">
-                                        <div class="acca-teams">${s.home_team} vs ${s.away_team}</div>
-                                        <div class="acca-pick">📌 ${s.pick}</div>
-                                        <div class="acca-date">${s.date} ${s.time} • ${s.league}</div>
+                        <div class="acca-picks">
+                            ${acca.picks.map(pick => `
+                                <div class="pick-item">
+                                    <div class="pick-match">
+                                        <span class="pick-teams">${pick.home_team} vs ${pick.away_team}</span>
+                                        <div class="pick-meta" style="display: flex; gap: 12px; font-size: 0.75rem; color: var(--text-muted); margin-top: 4px;">
+                                            <span>📅 ${pick.date || 'TBD'}</span>
+                                            <span>⏰ ${pick.time || 'TBD'}</span>
+                                            <span>🏟️ ${pick.venue || pick.league || 'TBD'}</span>
+                                        </div>
+                                        <span class="pick-bet">
+                                            ${pick.bet_label}
+                                            ${pick.is_cascade ? '<span class="cascade-badge">CASCADE</span>' : ''}
+                                        </span>
                                     </div>
-                                    <div class="acca-selection-odds">${s.odds.toFixed(2)}</div>
+                                    <div class="pick-odds">
+                                        <span class="odds-value">${pick.odds.toFixed(2)}</span>
+                                        <span class="prob-value">${(pick.probability * 100).toFixed(0)}%</span>
+                                    </div>
                                 </div>
                             `).join('')}
                         </div>
                         
                         <div class="acca-footer">
-                            <div class="acca-confidence">
-                                ${riskEmoji} ${acca.confidence}% conf
+                            <div class="acca-stats">
+                                <div class="stat-item">
+                                    <div class="stat-value odds">${acca.combined_odds.toFixed(2)}</div>
+                                    <div class="stat-label">Combined Odds</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value prob">${acca.win_chance_pct}%</div>
+                                    <div class="stat-label">Win Chance</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-value return">€${acca.potential_return}</div>
+                                    <div class="stat-label">€${acca.suggested_stake} Stake</div>
+                                </div>
                             </div>
-                            <div class="acca-potential">
-                                <div class="acca-potential-label">€10 returns</div>
-                                <div class="acca-potential-value">€${acca.potential_return_10.toFixed(2)}</div>
+                            <div style="display: flex; gap: 8px; margin-bottom: 12px; justify-content: center;">
+                                <span class="risk-indicator ${riskClass}">
+                                    ${acca.risk_level === 'low' ? '🟢' : acca.risk_level === 'medium' ? '🟡' : '🔴'}
+                                    ${(acca.risk_level || 'medium').toUpperCase()} RISK
+                                </span>
+                                <span class="risk-indicator" style="background: rgba(99, 102, 241, 0.15); color: #a5b4fc;">
+                                    ⭐ ${(acca.confidence_rating || 'medium').toUpperCase()}
+                                </span>
                             </div>
+                            <button class="copy-btn" onclick="copyAcca('${key}')">
+                                📋 Copy Accumulator
+                            </button>
                         </div>
                     </div>
                 `;
             }).join('');
+        }
+        
+        function getBadgeClass(key) {
+            if (key === 'sure_wins' || key === 'double_chance' || key === 'win_to_nil') return 'badge-sure';
+            if (key.startsWith('over_') || key === 'btts' || key.includes('btts_')) return 'badge-goals';
+            if (key === 'result' || key === 'win_over_2_5') return 'badge-result';
+            if (key === 'htft') return 'badge-htft';
+            if (key === 'jackpot' || key === 'super_jackpot') return 'badge-goals';
+            return 'badge-result';
+        }
+        
+        function copyAcca(key) {
+            const acca = allAccumulators[key];
+            if (!acca) return;
+            
+            let text = `🎯 ${acca.name}\n`;
+            text += `━━━━━━━━━━━━━━━\n`;
+            acca.picks.forEach((p, i) => {
+                text += `${i+1}. ${p.home_team} vs ${p.away_team}\n`;
+                text += `   📌 ${p.bet_label} @ ${p.odds.toFixed(2)}\n`;
+            });
+            text += `━━━━━━━━━━━━━━━\n`;
+            text += `💰 Combined Odds: ${acca.combined_odds.toFixed(2)}\n`;
+            text += `📊 Win Chance: ${acca.win_chance_pct}%\n`;
+            text += `💵 Suggested: €${acca.suggested_stake} → €${acca.potential_return}\n`;
+            
+            navigator.clipboard.writeText(text).then(() => {
+                alert('Accumulator copied to clipboard! 📋');
+            }).catch(() => {
+                // Fallback
+                const textarea = document.createElement('textarea');
+                textarea.value = text;
+                document.body.appendChild(textarea);
+                textarea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textarea);
+                alert('Accumulator copied! 📋');
+            });
         }
     </script>
 </body>
