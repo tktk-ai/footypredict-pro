@@ -1039,10 +1039,29 @@
                 }
             });
             
-            // Sort each category by confidence
-            Object.values(accas).forEach(cat => {
+            // Sort each category by confidence and add summary stats
+            Object.entries(accas).forEach(([key, cat]) => {
                 cat.picks.sort((a, b) => b.confidence - a.confidence);
                 cat.picks = cat.picks.slice(0, 15); // Limit to top 15 picks per category
+                
+                // Add probability to each pick
+                cat.picks = cat.picks.map(p => ({
+                    ...p,
+                    probability: p.confidence || 0.5
+                }));
+                
+                // Calculate combined stats
+                if (cat.picks.length > 0) {
+                    cat.combined_odds = cat.picks.reduce((acc, p) => acc * (p.odds || 1), 1);
+                    cat.win_chance_pct = Math.max(5, Math.round(100 / cat.combined_odds));
+                    cat.suggested_stake = 10;
+                    cat.potential_return = Math.round(cat.combined_odds * 10);
+                } else {
+                    cat.combined_odds = 1;
+                    cat.win_chance_pct = 100;
+                    cat.suggested_stake = 10;
+                    cat.potential_return = 10;
+                }
             });
             
             return accas;
