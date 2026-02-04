@@ -1,0 +1,30 @@
+# Ignore virtual environment
+venv/
+.venv/
+
+# Git
+.git/
+
+# Cache
+__pycache__/
+*.pyc
+.pytest_cache/
+.cache/
+
+# Large directories
+w5-football-prediction/
+notebooks/
+
+# Model backups (keep current models)
+models/backup/
+
+# Data files (too large)
+data/training_data.csv
+data/cache/
+
+# IDE
+.vscode/
+.idea/
+
+# Vercel
+.vercel/

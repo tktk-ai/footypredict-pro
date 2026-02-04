@@ -1,0 +1,855 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Daily Tips | FootyPredict Pro</title>
+    <meta name="description" content="Expert football predictions - Today's picks with highest win probability. Real-time data from 200+ leagues.">
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-primary: #050510;
+            --bg-secondary: #0d0d1a;
+            --bg-tertiary: #14142a;
+            --accent-primary: #6366f1;
+            --accent-glow: rgba(99, 102, 241, 0.4);
+            --gold: #fbbf24;
+            --emerald: #10b981;
+            --text: #ffffff;
+            --text-muted: rgba(255, 255, 255, 0.5);
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            background-image: 
+                radial-gradient(ellipse at top, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at bottom right, rgba(139, 92, 246, 0.1) 0%, transparent 40%);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        
+        .app { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            background: rgba(13, 13, 26, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.5rem;
+            font-weight: 800;
+            text-decoration: none;
+            color: var(--text);
+        }
+        
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 8px 32px rgba(99, 102, 241, 0.3);
+        }
+        
+        .nav-links { display: flex; gap: 8px; flex-wrap: wrap; }
+        
+        .nav-link {
+            padding: 10px 18px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            border-radius: 10px;
+            transition: all 0.2s;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            background: rgba(99, 102, 241, 0.15);
+            color: #a5b4fc;
+        }
+        
+        /* Page Title */
+        .page-title {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .page-title h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin: 0 0 10px 0;
+            background: linear-gradient(135deg, #fff, #a5b4fc);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .page-title p {
+            color: var(--text-muted);
+            font-size: 1.1rem;
+        }
+        
+        /* Stats Bar */
+        .stats-bar {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 16px 24px;
+            background: rgba(20, 20, 42, 0.6);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.06);
+        }
+        
+        .stat-value {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--emerald);
+        }
+        
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+        
+        /* Time Section Tabs */
+        .time-tabs {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 30px;
+            padding: 10px;
+            background: rgba(20, 20, 42, 0.5);
+            border-radius: 16px;
+        }
+        
+        .time-tab {
+            padding: 12px 24px;
+            background: transparent;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: var(--text-muted);
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .time-tab:hover {
+            background: rgba(99, 102, 241, 0.1);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+        
+        .time-tab.active {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-color: transparent;
+            color: #fff;
+        }
+        
+        /* Match Cards Grid */
+        .matches-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .match-card {
+            background: rgba(20, 20, 42, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 20px;
+            padding: 24px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .match-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+        
+        .match-card.high-conf::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #10b981, #6ee7b6);
+        }
+        
+        .match-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .match-league {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .match-league img {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+        }
+        
+        .match-time {
+            font-size: 0.85rem;
+            padding: 6px 12px;
+            background: rgba(99, 102, 241, 0.15);
+            border-radius: 8px;
+            color: #a5b4fc;
+        }
+        
+        .match-teams {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .team {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .team-logo {
+            width: 48px;
+            height: 48px;
+            margin: 0 auto 8px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            object-fit: contain;
+        }
+        
+        .team-name {
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 4px;
+        }
+        
+        .team-prob {
+            font-size: 0.9rem;
+            color: var(--emerald);
+            font-weight: 600;
+        }
+        
+        .vs {
+            padding: 0 20px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+        
+        .match-prediction {
+            text-align: center;
+            padding: 12px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.15));
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .prediction-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+        
+        .prediction-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--gold);
+        }
+        
+        .match-markets {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .market-tag {
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+        
+        .market-tag.high {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+        }
+        
+        /* Loading State */
+        .loading {
+            text-align: center;
+            padding: 60px;
+            color: var(--text-muted);
+        }
+        
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid rgba(99, 102, 241, 0.2);
+            border-top-color: #6366f1;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 16px;
+        }
+        
+        @keyframes spin { to { transform: rotate(360deg); } }
+        
+        /* Confidence Badge */
+        .confidence-badge {
+            position: absolute;
+            top: 16px;
+            right: 16px;
+            padding: 6px 12px;
+            background: linear-gradient(135deg, #10b981, #059669);
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: #fff;
+        }
+        
+        /* Live Match Styles */
+        .match-card.live {
+            border-color: rgba(239, 68, 68, 0.4);
+        }
+        
+        .match-card.live::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #ef4444, #f97316);
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+        
+        @keyframes pulse-glow {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .live-badge {
+            position: absolute;
+            top: 16px;
+            left: 16px;
+            padding: 6px 12px;
+            background: linear-gradient(135deg, #ef4444, #dc2626);
+            border-radius: 20px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            animation: pulse-glow 2s ease-in-out infinite;
+        }
+        
+        .live-badge::before {
+            content: '';
+            width: 8px;
+            height: 8px;
+            background: #fff;
+            border-radius: 50%;
+        }
+        
+        .live-score {
+            text-align: center;
+            padding: 16px;
+            background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(249, 115, 22, 0.2));
+            border-radius: 12px;
+            margin-bottom: 12px;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        
+        .live-score-display {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .live-score-home, .live-score-away {
+            min-width: 50px;
+        }
+        
+        .live-score-separator {
+            color: var(--text-muted);
+            font-size: 1.5rem;
+        }
+        
+        .live-minute {
+            font-size: 0.85rem;
+            color: #f97316;
+            margin-top: 8px;
+            font-weight: 600;
+        }
+        
+        /* Sportradar Advanced Stats */
+        .sportradar-stats {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            margin-top: 12px;
+            padding: 10px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+            border-radius: 10px;
+            border: 1px solid rgba(99, 102, 241, 0.2);
+        }
+        
+        .team-stats {
+            flex: 1;
+            text-align: center;
+        }
+        
+        .manager-name {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-bottom: 4px;
+        }
+        
+        .manager-name span {
+            color: #a5b4fc;
+            font-weight: 500;
+        }
+        
+        .position-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            padding: 3px 8px;
+            background: rgba(16, 185, 129, 0.2);
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--emerald);
+        }
+        
+        .position-badge.top-4 {
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.2), rgba(245, 158, 11, 0.2));
+            color: var(--gold);
+        }
+        
+        .position-badge.relegation {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.9rem;
+        }
+        
+        /* Mobile Menu Toggle */
+        .mobile-menu-toggle {
+            display: none;
+            flex-direction: column;
+            justify-content: space-between;
+            width: 28px;
+            height: 20px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            z-index: 110;
+        }
+        
+        .mobile-menu-toggle span {
+            display: block;
+            width: 100%;
+            height: 3px;
+            background: var(--text);
+            border-radius: 2px;
+            transition: transform 0.3s, opacity 0.3s;
+        }
+        
+        .mobile-menu-toggle.active span:nth-child(1) {
+            transform: rotate(45deg) translate(6px, 6px);
+        }
+        
+        .mobile-menu-toggle.active span:nth-child(2) {
+            opacity: 0;
+        }
+        
+        .mobile-menu-toggle.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(6px, -6px);
+        }
+        
+        .mobile-menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s, visibility 0.3s;
+            z-index: 100;
+        }
+        
+        .mobile-menu-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header { flex-direction: row; justify-content: space-between; gap: 16px; padding: 16px; }
+            .mobile-menu-toggle { display: flex; }
+            .nav-links { 
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: 280px;
+                height: 100vh;
+                background: var(--bg-secondary);
+                flex-direction: column;
+                padding: 80px 32px 32px;
+                gap: 0;
+                transition: right 0.3s ease;
+                z-index: 105;
+                box-shadow: -4px 0 24px rgba(0, 0, 0, 0.3);
+            }
+            .nav-links.active { right: 0; }
+            .nav-links .nav-link {
+                padding: 16px 0;
+                font-size: 1.1rem;
+                border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+                display: block;
+            }
+            .matches-grid { grid-template-columns: 1fr; }
+            .page-title h1 { font-size: 1.8rem; }
+            .stats-bar { gap: 16px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <a href="index.html" class="logo">
+                <div class="logo-icon">⚽</div>
+                <span>FootyPredict Pro</span>
+            </a>
+            
+            <nav class="nav-links">
+                <a href="index.html" class="nav-link">🏠 Home</a>
+                <a href="daily-tips.html" class="nav-link active">📊 Daily Tips</a>
+                <a href="sure-bets.html" class="nav-link">🎯 Sure Bets</a>
+                <a href="money-zone.html" class="nav-link">💰 Money Zone</a>
+                <a href="accumulators.html" class="nav-link">🎰 ACCAs</a>
+                <a href="blog.html" class="nav-link">📝 Blog</a>
+            </nav>
+            <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </header>
+        <div class="mobile-menu-overlay"></div>
+        
+        <!-- Page Title -->
+        <div class="page-title">
+            <h1>🔥 Daily Tips</h1>
+            <p>Today's highest probability predictions from 200+ leagues</p>
+        </div>
+        
+        <!-- Stats Bar -->
+        <div class="stats-bar">
+            <div class="stat-item">
+                <div class="stat-value" id="total-tips">-</div>
+                <div class="stat-label">Total Tips</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="high-conf">-</div>
+                <div class="stat-label">High Confidence</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="live-now">-</div>
+                <div class="stat-label">Live Now</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-value" id="leagues-count">-</div>
+                <div class="stat-label">Leagues</div>
+            </div>
+        </div>
+        
+        <!-- Time Tabs -->
+        <div class="time-tabs">
+            <button class="time-tab active" data-time="all">🌐 All Times</button>
+            <button class="time-tab" data-time="morning">🌅 Morning (6-12)</button>
+            <button class="time-tab" data-time="afternoon">☀️ Afternoon (12-18)</button>
+            <button class="time-tab" data-time="evening">🌙 Evening (18-24)</button>
+        </div>
+        
+        <!-- Matches Grid -->
+        <div class="matches-grid" id="matches-container">
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <p>Loading predictions...</p>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <footer class="footer">
+            <p>FootyPredict Pro © 2026 | Powered by API-Football | 2,400+ fixtures daily</p>
+            
+            <!-- Gambling Disclaimer -->
+            <div class="gambling-warning" style="margin-top: 20px; text-align: left;">
+                <h4 style="display: flex; align-items: center; gap: 8px; color: #f59e0b;">⚠️ Responsible Gambling</h4>
+                <p style="font-size: 0.85rem; margin: 10px 0;">Gambling involves risk. Please bet responsibly and only with money you can afford to lose.</p>
+                <div style="display: flex; gap: 16px; flex-wrap: wrap; font-size: 0.8rem;">
+                    <a href="https://www.begambleaware.org" target="_blank" rel="noopener" style="color: #6366f1;">BeGambleAware</a>
+                    <a href="https://www.gamcare.org.uk" target="_blank" rel="noopener" style="color: #6366f1;">GamCare</a>
+                </div>
+            </div>
+            
+            <p style="font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-top: 16px;">
+                <strong>Affiliate Disclosure:</strong> This site contains affiliate links. 18+ only. T&Cs apply. Please gamble responsibly.
+            </p>
+        </footer>
+    </div>
+    
+    <script>
+        // Mobile Menu Toggle
+        (function() {
+            const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+            const nav = document.querySelector('.nav-links');
+            const overlay = document.querySelector('.mobile-menu-overlay');
+            
+            if (mobileMenuToggle && nav) {
+                mobileMenuToggle.addEventListener('click', function() {
+                    mobileMenuToggle.classList.toggle('active');
+                    nav.classList.toggle('active');
+                    if (overlay) overlay.classList.toggle('active');
+                    document.body.style.overflow = nav.classList.contains('active') ? 'hidden' : '';
+                });
+                
+                if (overlay) {
+                    overlay.addEventListener('click', function() {
+                        mobileMenuToggle.classList.remove('active');
+                        nav.classList.remove('active');
+                        overlay.classList.remove('active');
+                        document.body.style.overflow = '';
+                    });
+                }
+                
+                nav.querySelectorAll('.nav-link').forEach(link => {
+                    link.addEventListener('click', function() {
+                        mobileMenuToggle.classList.remove('active');
+                        nav.classList.remove('active');
+                        if (overlay) overlay.classList.remove('active');
+                        document.body.style.overflow = '';
+                    });
+                });
+            }
+        })();
+        
+        const API_BASE = 'https://footypredict-api.tirene857.workers.dev';
+        let allFixtures = [];
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            loadFixtures();
+            
+            // Time tab handlers
+            document.querySelectorAll('.time-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    document.querySelectorAll('.time-tab').forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    filterByTime(tab.dataset.time);
+                });
+            });
+        });
+        
+        async function loadFixtures() {
+            const container = document.getElementById('matches-container');
+            
+            try {
+                const response = await fetch(`${API_BASE}/fixtures?days=2&highConfidence=true`);
+                const data = await response.json();
+                
+                allFixtures = data.fixtures || [];
+                
+                // Update stats
+                document.getElementById('total-tips').textContent = data.count || 0;
+                document.getElementById('high-conf').textContent = data.high_confidence || 0;
+                document.getElementById('live-now').textContent = data.live || 0;
+                document.getElementById('leagues-count').textContent = new Set(allFixtures.map(f => f.league_name)).size;
+                
+                renderFixtures(allFixtures);
+                
+            } catch (error) {
+                console.error('Error loading fixtures:', error);
+                container.innerHTML = `
+                    <div class="loading">
+                        <p style="color: #ef4444;">Error loading predictions. Please try again.</p>
+                    </div>
+                `;
+            }
+        }
+        
+        function filterByTime(timeFilter) {
+            if (timeFilter === 'all') {
+                renderFixtures(allFixtures);
+                return;
+            }
+            
+            const filtered = allFixtures.filter(f => {
+                const hour = parseInt(f.time?.split(':')[0] || '12');
+                if (timeFilter === 'morning') return hour >= 6 && hour < 12;
+                if (timeFilter === 'afternoon') return hour >= 12 && hour < 18;
+                if (timeFilter === 'evening') return hour >= 18 || hour < 6;
+                return true;
+            });
+            
+            renderFixtures(filtered);
+        }
+        
+        function renderFixtures(fixtures) {
+            const container = document.getElementById('matches-container');
+            
+            if (!fixtures.length) {
+                container.innerHTML = `
+                    <div class="loading">
+                        <p>No predictions available for this time slot.</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = fixtures.slice(0, 50).map(f => {
+                const pred = f.prediction || {};
+                const result = pred.result || {};
+                const over25 = pred.over_25 || {};
+                const btts = pred.btts || {};
+                const conf = f.confidence || 0.65;
+                const isHighConf = conf >= 0.7;
+                const isLive = f.status === 'live';
+                const hasScore = f.home_score !== null && f.home_score !== undefined;
+                
+                // Live score section HTML
+                const liveScoreHTML = isLive && hasScore ? `
+                    <div class="live-score">
+                        <div class="live-score-display">
+                            <span class="live-score-home">${f.home_score}</span>
+                            <span class="live-score-separator">-</span>
+                            <span class="live-score-away">${f.away_score}</span>
+                        </div>
+                        <div class="live-minute">⚡ LIVE${f.elapsed ? ` ${f.elapsed}'` : ''}</div>
+                    </div>
+                ` : '';
+                
+                // Live badge HTML
+                const liveBadgeHTML = isLive ? `<span class="live-badge">LIVE</span>` : '';
+                
+                return `
+                    <div class="match-card ${isHighConf ? 'high-conf' : ''} ${isLive ? 'live' : ''}">
+                        ${liveBadgeHTML}
+                        <span class="confidence-badge">${(conf * 100).toFixed(0)}%</span>
+                        
+                        <div class="match-header">
+                            <div class="match-league">
+                                ${f.league_logo ? `<img src="${f.league_logo}" alt="">` : ''}
+                                ${f.league_name || 'Unknown League'}
+                            </div>
+                            <div class="match-time">${isLive ? '🔴 LIVE' : `${f.date?.substring(5) || ''} ${f.time || ''}`}</div>
+                        </div>
+                        
+                        ${liveScoreHTML}
+                        
+                        <div class="match-teams">
+                            <div class="team">
+                                ${f.home_logo ? `<img src="${f.home_logo}" class="team-logo" alt="">` : '<div class="team-logo">⚽</div>'}
+                                <div class="team-name">${f.home_team}</div>
+                                <div class="team-prob">${((result.home || 0.33) * 100).toFixed(0)}%</div>
+                            </div>
+                            <div class="vs">${isLive && hasScore ? '' : 'VS'}</div>
+                            <div class="team">
+                                ${f.away_logo ? `<img src="${f.away_logo}" class="team-logo" alt="">` : '<div class="team-logo">⚽</div>'}
+                                <div class="team-name">${f.away_team}</div>
+                                <div class="team-prob">${((result.away || 0.33) * 100).toFixed(0)}%</div>
+                            </div>
+                        </div>
+                        
+                        <div class="match-prediction">
+                            <div class="prediction-label">${isLive ? 'Pre-Match Prediction' : 'Recommended Pick'}</div>
+                            <div class="prediction-value">${result.recommendation || 'Home Win'}</div>
+                        </div>
+                        
+                        <div class="match-markets">
+                            <span class="market-tag ${(over25.yes || 0) > 0.5 ? 'high' : ''}">
+                                O2.5: ${((over25.yes || 0.5) * 100).toFixed(0)}%
+                            </span>
+                            <span class="market-tag ${(btts.yes || 0) > 0.5 ? 'high' : ''}">
+                                BTTS: ${((btts.yes || 0.5) * 100).toFixed(0)}%
+                            </span>
+                        </div>
+                        
+                        ${f.sportradar && Object.keys(f.sportradar).length > 0 ? `
+                        <div class="sportradar-stats">
+                            <div class="team-stats">
+                                ${f.sportradar.home_manager ? `<div class="manager-name">🎯 <span>${f.sportradar.home_manager}</span></div>` : ''}
+                                ${f.sportradar.home_position ? `
+                                    <span class="position-badge ${f.sportradar.home_position <= 4 ? 'top-4' : f.sportradar.home_position >= 17 ? 'relegation' : ''}">
+                                        #${f.sportradar.home_position} ${f.sportradar.home_points ? `(${f.sportradar.home_points}pts)` : ''}
+                                    </span>
+                                ` : ''}
+                            </div>
+                            <div class="team-stats">
+                                ${f.sportradar.away_manager ? `<div class="manager-name">🎯 <span>${f.sportradar.away_manager}</span></div>` : ''}
+                                ${f.sportradar.away_position ? `
+                                    <span class="position-badge ${f.sportradar.away_position <= 4 ? 'top-4' : f.sportradar.away_position >= 17 ? 'relegation' : ''}">
+                                        #${f.sportradar.away_position} ${f.sportradar.away_points ? `(${f.sportradar.away_points}pts)` : ''}
+                                    </span>
+                                ` : ''}
+                            </div>
+                        </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+        }
+    </script>
+</body>
+</html>

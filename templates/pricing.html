@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pricing | FootyPredict Pro</title>
+    
+    <meta name="theme-color" content="#6366f1">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-primary: #050510;
+            --bg-secondary: #0d0d1a;
+            --bg-tertiary: #14142a;
+            --accent: #6366f1;
+            --gold: #fbbf24;
+            --emerald: #10b981;
+            --text: #ffffff;
+            --text-muted: rgba(255, 255, 255, 0.5);
+        }
+        
+        [data-theme="light"] {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f1f5f9;
+            --text: #0f172a;
+            --text-muted: #64748b;
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            background-image: radial-gradient(ellipse at top, rgba(99, 102, 241, 0.15) 0%, transparent 50%);
+            color: var(--text);
+            min-height: 100vh;
+        }
+        
+        [data-theme="light"] body {
+            background-image: radial-gradient(ellipse at top, rgba(99, 102, 241, 0.08) 0%, transparent 50%);
+        }
+        
+        .app { max-width: 1200px; margin: 0 auto; padding: 20px; }
+        
+        /* Header */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            background: rgba(13, 13, 26, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 20px;
+            margin-bottom: 40px;
+        }
+        
+        [data-theme="light"] .header {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(0, 0, 0, 0.08);
+        }
+        
+        .logo { display: flex; align-items: center; gap: 12px; }
+        
+        .logo-icon {
+            width: 48px; height: 48px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 14px;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px;
+        }
+        
+        .logo-text { font-size: 1.5rem; font-weight: 800; }
+        
+        .nav-links { display: flex; gap: 8px; }
+        
+        .nav-link {
+            padding: 10px 18px;
+            color: var(--text-muted);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            border-radius: 10px;
+            transition: all 0.2s;
+        }
+        
+        .nav-link:hover { background: rgba(99, 102, 241, 0.15); color: #a5b4fc; }
+        
+        /* Page Title */
+        .page-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        
+        .page-title {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, #fff, #a5b4fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .page-subtitle {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        
+        /* Pricing Toggle */
+        .pricing-toggle {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+        
+        .toggle-label {
+            font-weight: 500;
+            color: var(--text-muted);
+        }
+        
+        .toggle-label.active { color: var(--text); }
+        
+        .toggle-switch {
+            width: 60px;
+            height: 32px;
+            background: rgba(99, 102, 241, 0.3);
+            border-radius: 16px;
+            position: relative;
+            cursor: pointer;
+        }
+        
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            width: 26px;
+            height: 26px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 50%;
+            top: 3px;
+            left: 3px;
+            transition: all 0.3s;
+        }
+        
+        .toggle-switch.yearly::after { left: 31px; }
+        
+        .save-badge {
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.1));
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: var(--emerald);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        /* Pricing Cards */
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+        
+        @media (max-width: 900px) {
+            .pricing-grid { grid-template-columns: 1fr; }
+        }
+        
+        .pricing-card {
+            background: rgba(20, 20, 42, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 24px;
+            padding: 32px;
+            position: relative;
+            transition: all 0.3s;
+        }
+        
+        [data-theme="light"] .pricing-card {
+            background: rgba(255, 255, 255, 0.9);
+            border-color: rgba(0, 0, 0, 0.08);
+        }
+        
+        .pricing-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        .pricing-card.popular {
+            border-color: rgba(99, 102, 241, 0.5);
+            box-shadow: 0 0 60px rgba(99, 102, 241, 0.2);
+        }
+        
+        .popular-badge {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            padding: 6px 20px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 700;
+        }
+        
+        .plan-name {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .plan-desc {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 24px;
+        }
+        
+        .plan-price {
+            margin-bottom: 24px;
+        }
+        
+        .price-amount {
+            font-size: 3rem;
+            font-weight: 800;
+        }
+        
+        .price-period {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+        
+        .plan-features {
+            list-style: none;
+            margin-bottom: 32px;
+        }
+        
+        .plan-features li {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        }
+        
+        .plan-features li:last-child { border-bottom: none; }
+        
+        .feature-icon { font-size: 1.2rem; }
+        
+        .feature-icon.check { color: var(--emerald); }
+        .feature-icon.lock { color: var(--text-muted); }
+        
+        .plan-btn {
+            width: 100%;
+            padding: 16px;
+            border: none;
+            border-radius: 14px;
+            font-size: 1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .plan-btn.primary {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: white;
+            box-shadow: 0 8px 32px rgba(99, 102, 241, 0.4);
+        }
+        
+        .plan-btn.primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 40px rgba(99, 102, 241, 0.5);
+        }
+        
+        .plan-btn.secondary {
+            background: rgba(255, 255, 255, 0.08);
+            color: var(--text);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .plan-btn.secondary:hover {
+            background: rgba(255, 255, 255, 0.12);
+        }
+        
+        /* Features Section */
+        .features-section {
+            margin-top: 80px;
+            text-align: center;
+        }
+        
+        .features-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 40px;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 24px;
+        }
+        
+        @media (max-width: 900px) {
+            .features-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        
+        .feature-card {
+            background: rgba(20, 20, 42, 0.4);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 24px;
+        }
+        
+        [data-theme="light"] .feature-card {
+            background: rgba(255, 255, 255, 0.8);
+            border-color: rgba(0, 0, 0, 0.08);
+        }
+        
+        .feature-card-icon {
+            font-size: 2rem;
+            margin-bottom: 16px;
+        }
+        
+        .feature-card-title {
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+        
+        .feature-card-desc {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+    </style>
+</head>
+<body>
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">⚽</div>
+                <span class="logo-text">FootyPredict Pro</span>
+            </div>
+            
+            <nav class="nav-links">
+                <a href="/" class="nav-link">🏠 Home</a>
+                <a href="/smart-accas" class="nav-link">🎰 Smart ACCAs</a>
+                <a href="/live" class="nav-link">📺 Live</a>
+                <a href="/vip" class="nav-link active">👑 VIP</a>
+                <a href="/blog" class="nav-link">📰 Blog</a>
+                <a href="/tracker" class="nav-link">📊 Tracker</a>
+            </nav>
+        </header>
+        
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1 class="page-title">Choose Your Plan</h1>
+            <p class="page-subtitle">Get access to AI-powered predictions with up to 82% accuracy. Start winning more today.</p>
+        </div>
+        
+        <!-- Pricing Toggle -->
+        <div class="pricing-toggle">
+            <span class="toggle-label active">Monthly</span>
+            <div class="toggle-switch" onclick="this.classList.toggle('yearly')"></div>
+            <span class="toggle-label">Yearly</span>
+            <span class="save-badge">Save 20%</span>
+        </div>
+        
+        <!-- Pricing Cards -->
+        <div class="pricing-grid">
+            <!-- Free -->
+            <div class="pricing-card">
+                <div class="plan-name">Free</div>
+                <div class="plan-desc">Get started with basic predictions</div>
+                
+                <div class="plan-price">
+                    <span class="price-amount">€0</span>
+                    <span class="price-period">/month</span>
+                </div>
+                
+                <ul class="plan-features">
+                    <li><span class="feature-icon check">✓</span> German leagues only</li>
+                    <li><span class="feature-icon check">✓</span> 5 predictions/day</li>
+                    <li><span class="feature-icon check">✓</span> Basic ML model</li>
+                    <li><span class="feature-icon lock">🔒</span> No odds data</li>
+                    <li><span class="feature-icon lock">🔒</span> No Telegram alerts</li>
+                </ul>
+                
+                <button class="plan-btn secondary">Current Plan</button>
+            </div>
+            
+            <!-- Pro -->
+            <div class="pricing-card popular">
+                <span class="popular-badge">⭐ Most Popular</span>
+                <div class="plan-name">Pro</div>
+                <div class="plan-desc">For serious bettors</div>
+                
+                <div class="plan-price">
+                    <span class="price-amount">€19</span>
+                    <span class="price-period">/month</span>
+                </div>
+                
+                <ul class="plan-features">
+                    <li><span class="feature-icon check">✓</span> All European leagues</li>
+                    <li><span class="feature-icon check">✓</span> Unlimited predictions</li>
+                    <li><span class="feature-icon check">✓</span> 5-model ML ensemble</li>
+                    <li><span class="feature-icon check">✓</span> Live odds integration</li>
+                    <li><span class="feature-icon check">✓</span> Telegram alerts</li>
+                </ul>
+                
+                <button class="plan-btn primary">Start Pro Trial</button>
+            </div>
+            
+            <!-- Premium -->
+            <div class="pricing-card">
+                <div class="plan-name">Premium</div>
+                <div class="plan-desc">Maximum winning potential</div>
+                
+                <div class="plan-price">
+                    <span class="price-amount">€49</span>
+                    <span class="price-period">/month</span>
+                </div>
+                
+                <ul class="plan-features">
+                    <li><span class="feature-icon check">✓</span> All 60+ leagues worldwide</li>
+                    <li><span class="feature-icon check">✓</span> Sure Win alerts (91%+)</li>
+                    <li><span class="feature-icon check">✓</span> API access</li>
+                    <li><span class="feature-icon check">✓</span> Kelly stake optimizer</li>
+                    <li><span class="feature-icon check">✓</span> Priority support</li>
+                </ul>
+                
+                <button class="plan-btn secondary">Get Premium</button>
+            </div>
+        </div>
+        
+        <!-- Features Section -->
+        <div class="features-section">
+            <h2 class="features-title">Why Choose FootyPredict Pro?</h2>
+            
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-card-icon">🤖</div>
+                    <div class="feature-card-title">5-Model ML Ensemble</div>
+                    <div class="feature-card-desc">Advanced AI combining multiple algorithms for higher accuracy</div>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-card-icon">📊</div>
+                    <div class="feature-card-title">72-82% Accuracy</div>
+                    <div class="feature-card-desc">Proven track record with live monitoring</div>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-card-icon">⚡</div>
+                    <div class="feature-card-title">Real-Time Alerts</div>
+                    <div class="feature-card-desc">Instant Telegram & WhatsApp notifications</div>
+                </div>
+                
+                <div class="feature-card">
+                    <div class="feature-card-icon">🌍</div>
+                    <div class="feature-card-title">60+ Leagues</div>
+                    <div class="feature-card-desc">Coverage across all major leagues worldwide</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        (function() {
+            const saved = localStorage.getItem('theme');
+            if (saved) document.documentElement.setAttribute('data-theme', saved);
+        })();
+    </script>
+</body>
+</html>

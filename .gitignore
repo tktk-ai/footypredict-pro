@@ -1,0 +1,45 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Virtual environment
+venv/
+.venv/
+ENV/
+
+# Environment variables
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Cache
+.cache/
+*.cache
+
+# Logs
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Large model files (stored on HuggingFace Hub: nananie143/footypredict-models)
+models/
+!models/.gitkeep
+
+# Large training data files
+data/comprehensive_training_data.csv
+data/raw/kaggle/football_data_all_leagues.csv
+catboost_info/
+
+# W5 research submodule (separate project)
+w5-football-prediction/
+.vercel

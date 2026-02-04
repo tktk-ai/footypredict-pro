@@ -1,0 +1,11 @@
+# ads.txt - Authorized Digital Sellers
+# Replace YOUR_PUBLISHER_ID with your actual AdSense Publisher ID
+# Format: google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0
+
+google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0
+
+# Instructions:
+# 1. Sign up for Google AdSense at https://www.google.com/adsense
+# 2. Get your Publisher ID (starts with "pub-")
+# 3. Replace "pub-XXXXXXXXXXXXXXXX" above with your actual ID
+# 4. Redeploy the site

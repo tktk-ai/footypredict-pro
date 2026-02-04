@@ -1,0 +1,13 @@
+{
+  "id": "tweneboahopoku/ananse-v8-enhanced-football-predictor",
+  "title": "ANANSE v8 Enhanced Football Predictor",
+  "code_file": "quantum_football_v8_honest.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_internet": true,
+  "dataset_sources": ["tweneboahopoku/footypredict-training-data"],
+  "competition_sources": [],
+  "kernel_sources": []
+}

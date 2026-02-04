@@ -1,0 +1,25 @@
+name: football-predictions
+type: web
+instance_types:
+  - type: free
+regions:
+  - fra
+ports:
+  - port: 5000
+    protocol: http
+routes:
+  - path: /
+env:
+  - key: FLASK_ENV
+    value: production
+  - key: PORT
+    value: "5000"
+build:
+  type: buildpack
+run: gunicorn app:app --bind 0.0.0.0:5000 --workers 2
+health_checks:
+  - type: http
+    path: /api/health
+    port: 5000
+    interval_seconds: 60
+    timeout_seconds: 20

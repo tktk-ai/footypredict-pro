@@ -1,0 +1,93 @@
+{
+  "name": "Football Predictions Pro",
+  "short_name": "FootyPredict",
+  "description": "AI-powered football predictions with 5-model ML ensemble, live odds, and real-time scores",
+  "version": "2.0.0",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0a0f1c",
+  "theme_color": "#00d4ff",
+  "orientation": "portrait-primary",
+  "scope": "/",
+  "lang": "en-US",
+  "icons": [
+    {
+      "src": "/static/icons/icon-72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/icons/icon-96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/icons/icon-128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/static/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["sports", "entertainment", "utilities"],
+  "screenshots": [
+    {
+      "src": "/static/screenshots/home.png",
+      "sizes": "1280x720",
+      "type": "image/png",
+      "form_factor": "wide"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Today's Predictions",
+      "short_name": "Predictions",
+      "url": "/",
+      "description": "See today's match predictions",
+      "icons": [{"src": "/static/icons/predict.png", "sizes": "96x96"}]
+    },
+    {
+      "name": "Sure Wins",
+      "short_name": "Sure Wins",
+      "url": "/#sure-wins",
+      "description": "View 91%+ confidence picks"
+    },
+    {
+      "name": "Live Scores",
+      "short_name": "Live",
+      "url": "/dashboard",
+      "description": "Live match scores"
+    },
+    {
+      "name": "Accumulators",
+      "short_name": "Accas",
+      "url": "/accumulators",
+      "description": "Build accumulators"
+    }
+  ],
+  "share_target": {
+    "action": "/share",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  },
+  "related_applications": [],
+  "prefer_related_applications": false,
+  "handle_links": "preferred"
+}

@@ -1,0 +1,15 @@
+{
+  "name": "footypredict-api",
+  "version": "1.0.0",
+  "description": "FootyPredict Pro - Cloudflare Worker Prediction API",
+  "main": "worker.js",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "tail": "wrangler tail"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  }
+}

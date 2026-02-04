@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analytics Dashboard - FootyPredict Pro</title>
+    <meta name="description" content="Track prediction accuracy, performance by league and market, ROI calculations and more">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="analytics.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="container">
+            <a href="index.html" class="logo">
+                <span class="logo-icon">⚽</span>
+                <span class="logo-text">FootyPredict <span class="pro">Pro</span></span>
+            </a>
+            <nav class="nav">
+                <a href="index.html" class="nav-link">🏠 Home</a>
+                <a href="daily-tips.html" class="nav-link">📊 Daily Tips</a>
+                <a href="money-zone.html" class="nav-link">💰 Money Zone</a>
+                <a href="accumulators.html" class="nav-link">🎰 ACCAs</a>
+                <a href="analytics.html" class="nav-link active">📈 Analytics</a>
+                <a href="blog.html" class="nav-link">📝 Blog</a>
+            </nav>
+            <button class="mobile-menu-toggle" aria-label="Toggle navigation menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+        <div class="mobile-menu-overlay"></div>
+    </header>
+
+    <!-- Hero -->
+    <section class="analytics-hero">
+        <div class="container">
+            <h1 class="hero-title">📈 <span class="gradient-text">Analytics Dashboard</span></h1>
+            <p class="hero-subtitle">Track prediction performance, accuracy trends, and ROI in real-time</p>
+        </div>
+    </section>
+
+    <!-- Date Filter -->
+    <section class="filter-section">
+        <div class="container">
+            <div class="filter-bar">
+                <div class="date-filter">
+                    <button class="filter-btn active" data-period="today">Today</button>
+                    <button class="filter-btn" data-period="week">This Week</button>
+                    <button class="filter-btn" data-period="month">This Month</button>
+                    <button class="filter-btn" data-period="all">All Time</button>
+                </div>
+                <button class="export-btn" onclick="exportData()">📥 Export Data</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Today's Summary -->
+    <section class="summary-section">
+        <div class="container">
+            <h2 class="section-title">📊 Today's Summary</h2>
+            <div class="summary-grid">
+                <div class="summary-card">
+                    <span class="summary-icon">🎯</span>
+                    <div class="summary-content">
+                        <span class="summary-value" id="total-predictions">24</span>
+                        <span class="summary-label">Total Predictions</span>
+                    </div>
+                </div>
+                <div class="summary-card highlight">
+                    <span class="summary-icon">📈</span>
+                    <div class="summary-content">
+                        <span class="summary-value" id="accuracy-rate">72.4%</span>
+                        <span class="summary-label">Accuracy Rate</span>
+                    </div>
+                </div>
+                <div class="summary-card success">
+                    <span class="summary-icon">✅</span>
+                    <div class="summary-content">
+                        <span class="summary-value" id="won-count">18</span>
+                        <span class="summary-label">Won</span>
+                    </div>
+                </div>
+                <div class="summary-card error">
+                    <span class="summary-icon">❌</span>
+                    <div class="summary-content">
+                        <span class="summary-value" id="lost-count">6</span>
+                        <span class="summary-label">Lost</span>
+                    </div>
+                </div>
+                <div class="summary-card pending">
+                    <span class="summary-icon">⏳</span>
+                    <div class="summary-content">
+                        <span class="summary-value" id="pending-count">0</span>
+                        <span class="summary-label">Pending</span>
+                    </div>
+                </div>
+                <div class="summary-card roi">
+                    <span class="summary-icon">💰</span>
+                    <div class="summary-content">
+                        <span class="summary-value" id="roi-value">+8.5%</span>
+                        <span class="summary-label">ROI</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Section Performance (Daily Tips, Money Zone, ACCAs) -->
+    <section class="section-analytics-section">
+        <div class="container">
+            <h2 class="section-title">📋 Performance by Section</h2>
+            <div id="section-analytics" class="section-analytics-grid">
+                <!-- Dynamic section cards will be loaded here -->
+                <div class="loading-message">Loading section analytics...</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Charts Section -->
+    <section class="charts-section">
+        <div class="container">
+            <div class="charts-grid">
+                <!-- Accuracy Over Time -->
+                <div class="chart-card large">
+                    <div class="chart-header">
+                        <h3>📈 Accuracy Trend (30 Days)</h3>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="accuracy-chart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Confidence Distribution -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>🎯 Confidence Distribution</h3>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="confidence-chart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Win/Loss Breakdown -->
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>✅ Win/Loss Breakdown</h3>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="winloss-chart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Performance Tables -->
+    <section class="tables-section">
+        <div class="container">
+            <div class="tables-grid">
+                <!-- By League -->
+                <div class="table-card">
+                    <div class="table-header">
+                        <h3>🏆 Performance by League</h3>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>League</th>
+                                    <th>Predictions</th>
+                                    <th>Won</th>
+                                    <th>Accuracy</th>
+                                    <th>ROI</th>
+                                </tr>
+                            </thead>
+                            <tbody id="league-table">
+                                <!-- Dynamic content -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- By Market -->
+                <div class="table-card">
+                    <div class="table-header">
+                        <h3>🎲 Performance by Market</h3>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Market</th>
+                                    <th>Predictions</th>
+                                    <th>Won</th>
+                                    <th>Accuracy</th>
+                                    <th>Avg Odds</th>
+                                </tr>
+                            </thead>
+                            <tbody id="market-table">
+                                <!-- Dynamic content -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ROI Calculator -->
+    <section class="roi-section">
+        <div class="container">
+            <div class="roi-card">
+                <div class="roi-header">
+                    <h3>💰 ROI Calculator</h3>
+                    <p>Calculate potential returns based on historical performance</p>
+                </div>
+                <div class="roi-calculator">
+                    <div class="roi-input">
+                        <label>Stake per bet ($)</label>
+                        <input type="number" id="stake-input" value="10" min="1" max="1000">
+                    </div>
+                    <div class="roi-input">
+                        <label>Period (days)</label>
+                        <select id="period-input">
+                            <option value="7">7 days</option>
+                            <option value="30" selected>30 days</option>
+                            <option value="90">90 days</option>
+                        </select>
+                    </div>
+                    <button class="calculate-btn" onclick="calculateROI()">Calculate</button>
+                </div>
+                <div class="roi-results" id="roi-results">
+                    <div class="roi-result">
+                        <span class="roi-label">Total Staked</span>
+                        <span class="roi-value" id="total-staked">$1,800</span>
+                    </div>
+                    <div class="roi-result">
+                        <span class="roi-label">Total Returns</span>
+                        <span class="roi-value" id="total-returns">$2,167</span>
+                    </div>
+                    <div class="roi-result highlight">
+                        <span class="roi-label">Net Profit</span>
+                        <span class="roi-value positive" id="net-profit">+$367</span>
+                    </div>
+                    <div class="roi-result highlight">
+                        <span class="roi-label">ROI</span>
+                        <span class="roi-value positive" id="roi-percent">+20.4%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Top Picks Today -->
+    <section class="picks-section">
+        <div class="container">
+            <h2 class="section-title">🔥 Today's Top Picks</h2>
+            <div class="picks-grid" id="top-picks">
+                <!-- Dynamic content -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <p>⚽ FootyPredict Pro - AI-Powered Football Predictions</p>
+                <p class="disclaimer">18+ | Gamble Responsibly | Past performance does not guarantee future results</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="analytics.js"></script>
+</body>
+</html>

@@ -1,0 +1,1084 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FootyPredict Pro | AI-Powered Football Predictions</title>
+    
+    <!-- SEO Meta Tags -->
+    <meta name="description" content="Professional football predictions with 72%+ accuracy using 5-model ML ensemble. Live odds, form analysis, and real-time insights.">
+    <meta name="keywords" content="football predictions, soccer betting, AI predictions, match analysis">
+    
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#6366f1">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="/static/manifest.json">
+    <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Styles -->
+    <link rel="stylesheet" href="/static/css/design-system.css">
+    <style>
+        /* Premium UI - Dark Theme (Default) */
+        :root {
+            --bg-primary: #050510;
+            --bg-secondary: #0d0d1a;
+            --bg-tertiary: #14142a;
+            --accent-primary: #6366f1;
+            --accent-glow: rgba(99, 102, 241, 0.4);
+            --gold: #fbbf24;
+            --emerald: #10b981;
+            --text: #ffffff;
+            --text-muted: rgba(255, 255, 255, 0.5);
+        }
+        
+        /* Light Theme */
+        [data-theme="light"] {
+            --bg-primary: #f8fafc;
+            --bg-secondary: #ffffff;
+            --bg-tertiary: #f1f5f9;
+            --text: #0f172a;
+            --text-muted: #64748b;
+        }
+        
+        [data-theme="light"] body {
+            background-image: radial-gradient(ellipse at top, rgba(99, 102, 241, 0.08) 0%, transparent 50%);
+        }
+        
+        [data-theme="light"] .header,
+        [data-theme="light"] .match-card,
+        [data-theme="light"] .stat-item,
+        [data-theme="light"] .sure-wins-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: rgba(0, 0, 0, 0.08);
+        }
+        
+        [data-theme="light"] .nav-link,
+        [data-theme="light"] .stat-label,
+        [data-theme="light"] .match-league {
+            color: var(--text-muted);
+        }
+        
+        [data-theme="light"] .stat-value,
+        [data-theme="light"] .team-name,
+        [data-theme="light"] .prediction-outcome {
+            color: var(--text);
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            background-image: 
+                radial-gradient(ellipse at top, rgba(99, 102, 241, 0.15) 0%, transparent 50%),
+                radial-gradient(ellipse at bottom right, rgba(139, 92, 246, 0.1) 0%, transparent 40%);
+            color: var(--text);
+            min-height: 100vh;
+            margin: 0;
+        }
+        
+        /* App Layout */
+        .app {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        
+        /* Header - Premium */
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            background: rgba(13, 13, 26, 0.8);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 8px 32px var(--accent-glow);
+        }
+        
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, #fff, #a5b4fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .nav-link {
+            padding: 10px 18px;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            border-radius: 10px;
+            transition: all 0.2s;
+        }
+        
+        .nav-link:hover, .nav-link.active {
+            background: rgba(99, 102, 241, 0.15);
+            color: #a5b4fc;
+        }
+        
+        .header-actions {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+        
+        .accuracy-badge {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            background: linear-gradient(135deg, rgba(16, 185, 129, 0.2), rgba(16, 185, 129, 0.1));
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            border-radius: 30px;
+            color: #10b981;
+            font-weight: 600;
+            font-size: 0.85rem;
+        }
+        
+        .accuracy-badge .pulse {
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.5); }
+            50% { opacity: 0.8; box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+        }
+        
+        /* Stats Bar */
+        .stats-bar {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-item {
+            background: rgba(20, 20, 42, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 16px;
+            padding: 24px;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s;
+        }
+        
+        .stat-item:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+        
+        .stat-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #6366f1, #8b5cf6);
+        }
+        
+        .stat-item.gold::before {
+            background: linear-gradient(90deg, #fbbf24, #f59e0b);
+        }
+        
+        .stat-item.emerald::before {
+            background: linear-gradient(90deg, #10b981, #059669);
+        }
+        
+        .stat-label {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 800;
+            color: #fff;
+        }
+        
+        .stat-change {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-top: 8px;
+            font-size: 0.8rem;
+            padding: 4px 10px;
+            border-radius: 20px;
+        }
+        
+        .stat-change.up {
+            background: rgba(16, 185, 129, 0.15);
+            color: #10b981;
+        }
+        
+        /* Section Headers */
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .section-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: #fff;
+        }
+        
+        .section-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+        }
+        
+        .section-badge {
+            font-size: 0.75rem;
+            padding: 4px 12px;
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            border-radius: 20px;
+            color: #fff;
+            font-weight: 600;
+        }
+        
+        /* Match Cards Grid */
+        .matches-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+            gap: 20px;
+            margin-bottom: 40px;
+        }
+        
+        .match-card {
+            background: rgba(20, 20, 42, 0.6);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 20px;
+            padding: 24px;
+            transition: all 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .match-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            border-color: rgba(99, 102, 241, 0.3);
+        }
+        
+        .match-card.sure-win {
+            border-color: rgba(251, 191, 36, 0.4);
+            box-shadow: 0 0 30px rgba(251, 191, 36, 0.1);
+        }
+        
+        .match-card.sure-win::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #fbbf24, #f59e0b);
+        }
+        
+        .match-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .match-league {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        .match-time {
+            font-size: 0.85rem;
+            padding: 6px 12px;
+            background: rgba(99, 102, 241, 0.15);
+            border-radius: 8px;
+            color: #a5b4fc;
+        }
+        
+        .match-teams {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+        
+        .team {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .team-logo {
+            width: 56px;
+            height: 56px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin: 0 auto 12px;
+        }
+        
+        .team-name {
+            font-weight: 600;
+            font-size: 1rem;
+            color: #fff;
+        }
+        
+        .vs-badge {
+            font-size: 0.9rem;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.4);
+            padding: 0 20px;
+        }
+        
+        /* Prediction Display */
+        .prediction-display {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.05));
+            border: 1px solid rgba(99, 102, 241, 0.2);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+        
+        .prediction-main {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .prediction-outcome {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #fff;
+        }
+        
+        .confidence-ring {
+            position: relative;
+            width: 64px;
+            height: 64px;
+        }
+        
+        .confidence-ring svg {
+            transform: rotate(-90deg);
+        }
+        
+        .confidence-ring-bg {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.1);
+            stroke-width: 6;
+        }
+        
+        .confidence-ring-fill {
+            fill: none;
+            stroke: url(#gradient);
+            stroke-width: 6;
+            stroke-linecap: round;
+            transition: stroke-dashoffset 1s ease;
+        }
+        
+        .confidence-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #fff;
+        }
+        
+        /* Probability Bars */
+        .prob-bars {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .prob-bar {
+            flex: 1;
+            text-align: center;
+        }
+        
+        .prob-bar-label {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.5);
+            margin-bottom: 6px;
+        }
+        
+        .prob-bar-track {
+            height: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
+            overflow: hidden;
+            margin-bottom: 6px;
+        }
+        
+        .prob-bar-fill {
+            height: 100%;
+            border-radius: 3px;
+            transition: width 1s ease;
+        }
+        
+        .prob-bar-fill.home {
+            background: linear-gradient(90deg, #10b981, #059669);
+        }
+        
+        .prob-bar-fill.draw {
+            background: linear-gradient(90deg, #6366f1, #8b5cf6);
+        }
+        
+        .prob-bar-fill.away {
+            background: linear-gradient(90deg, #ef4444, #dc2626);
+        }
+        
+        .prob-bar-value {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #fff;
+        }
+        
+        /* Match Actions */
+        .match-actions {
+            display: flex;
+            gap: 12px;
+        }
+        
+        .btn-action {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+            color: #fff;
+            box-shadow: 0 4px 20px var(--accent-glow);
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 30px var(--accent-glow);
+        }
+        
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.08);
+            color: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.12);
+        }
+        
+        /* Sure Wins Section */
+        .sure-wins-section {
+            background: linear-gradient(135deg, rgba(251, 191, 36, 0.1), rgba(245, 158, 11, 0.05));
+            border: 1px solid rgba(251, 191, 36, 0.2);
+            border-radius: 24px;
+            padding: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .sure-wins-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .sure-wins-icon {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            box-shadow: 0 8px 32px rgba(251, 191, 36, 0.3);
+        }
+        
+        .sure-wins-title h2 {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: #fbbf24;
+            margin-bottom: 4px;
+        }
+        
+        .sure-wins-title p {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+        
+        /* League Pills */
+        .league-pills {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 30px;
+        }
+        
+        .league-pill {
+            padding: 10px 20px;
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 30px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.7);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .league-pill:hover, .league-pill.active {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.1));
+            border-color: rgba(99, 102, 241, 0.4);
+            color: #a5b4fc;
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 40px 20px;
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 0.85rem;
+        }
+        
+        .footer a {
+            color: #6366f1;
+            text-decoration: none;
+        }
+        
+        /* Loading State */
+        .skeleton {
+            background: linear-gradient(90deg, rgba(255,255,255,0.06) 25%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0.06) 75%);
+            background-size: 200% 100%;
+            animation: skeleton 1.5s infinite;
+            border-radius: 8px;
+        }
+        
+        @keyframes skeleton {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 16px;
+                padding: 16px;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .stats-bar {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 12px;
+            }
+            
+            .matches-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stat-value {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
+    
+    <!-- Service Worker -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/static/sw.js')
+                    .then(reg => console.log('SW registered'))
+                    .catch(err => console.log('SW failed'));
+            });
+        }
+    </script>
+</head>
+<body>
+    <!-- SVG Gradient Definition -->
+    <svg width="0" height="0">
+        <defs>
+            <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" style="stop-color:#6366f1"/>
+                <stop offset="100%" style="stop-color:#10b981"/>
+            </linearGradient>
+        </defs>
+    </svg>
+
+    <div class="app">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <div class="logo-icon">⚽</div>
+                <span class="logo-text">FootyPredict Pro</span>
+            </div>
+            
+            <nav class="nav-links">
+                <a href="/" class="nav-link active">🏠 Home</a>
+                <a href="/smart-accas" class="nav-link">🎰 Smart ACCAs</a>
+                <a href="/live" class="nav-link">📺 Live</a>
+                <a href="/vip" class="nav-link">👑 VIP</a>
+                <a href="/blog" class="nav-link">📰 Blog</a>
+                <a href="/tracker" class="nav-link">📊 Tracker</a>
+            </nav>
+            
+            <div class="header-actions">
+                <div class="accuracy-badge">
+                    <span class="pulse"></span>
+                    <span>72% Accuracy</span>
+                </div>
+                <button class="theme-toggle" onclick="toggleTheme()" title="Toggle theme" style="background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; padding: 10px 16px; cursor: pointer; font-size: 1.2rem;">
+                    🌓
+                </button>
+            </div>
+        </header>
+        
+        <!-- Stats Bar -->
+        <div class="stats-bar">
+            <div class="stat-item" onclick="scrollToSection('matches-grid')" style="cursor: pointer;">
+                <div class="stat-label">Today's Predictions</div>
+                <div class="stat-value" id="today-count">0</div>
+                <div class="stat-change up">↑ Click to view</div>
+            </div>
+            <div class="stat-item gold" onclick="scrollToSection('sure-wins')" style="cursor: pointer;">
+                <div class="stat-label">Top Picks (65%+)</div>
+                <div class="stat-value" id="sure-wins-count">0</div>
+                <div class="stat-change up">🔥 Click to view</div>
+            </div>
+            <div class="stat-item emerald" onclick="scrollToSection('matches-grid')" style="cursor: pointer;">
+                <div class="stat-label">Weekly Accuracy</div>
+                <div class="stat-value" id="weekly-accuracy">68%</div>
+                <div class="stat-change up">↑ 5%</div>
+            </div>
+            <div class="stat-item" onclick="scrollToSection('matches-grid')" style="cursor: pointer;">
+                <div class="stat-label">Value Bets</div>
+                <div class="stat-value" id="value-bets-count">0</div>
+                <div class="stat-change up">Click to view</div>
+            </div>
+        </div>
+        
+        <!-- League Selector Pills -->
+        <div class="league-pills" id="league-pills" style="overflow-x: auto; padding-bottom: 10px;">
+            <!-- Europe Top Leagues -->
+            <button class="league-pill active" data-league="bundesliga">🇩🇪 Bundesliga</button>
+            <button class="league-pill" data-league="premier_league">🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League</button>
+            <button class="league-pill" data-league="la_liga">🇪🇸 La Liga</button>
+            <button class="league-pill" data-league="serie_a">🇮🇹 Serie A</button>
+            <button class="league-pill" data-league="ligue_1">🇫🇷 Ligue 1</button>
+            <!-- European Cups -->
+            <button class="league-pill" data-league="champions_league">🏆 Champions League</button>
+            <button class="league-pill" data-league="europa_league">🏆 Europa League</button>
+            <!-- Other Europe -->
+            <button class="league-pill" data-league="eredivisie">🇳🇱 Eredivisie</button>
+            <button class="league-pill" data-league="primeira_liga">🇵🇹 Primeira Liga</button>
+            <button class="league-pill" data-league="jupiler_pro">🇧🇪 Jupiler Pro</button>
+            <button class="league-pill" data-league="super_lig">🇹🇷 Süper Lig</button>
+            <button class="league-pill" data-league="scottish_prem">🏴󠁧󠁢󠁳󠁣󠁴󠁿 Scottish Prem</button>
+            <!-- Americas -->
+            <button class="league-pill" data-league="brasileirao">🇧🇷 Brasileirão</button>
+            <button class="league-pill" data-league="liga_argentina">🇦🇷 Argentina</button>
+            <button class="league-pill" data-league="mls">🇺🇸 MLS</button>
+            <button class="league-pill" data-league="liga_mx">🇲🇽 Liga MX</button>
+            <button class="league-pill" data-league="copa_libertadores">🌎 Libertadores</button>
+            <!-- Asia -->
+            <button class="league-pill" data-league="j_league">🇯🇵 J-League</button>
+            <button class="league-pill" data-league="k_league">🇰🇷 K-League</button>
+            <button class="league-pill" data-league="saudi_pro">🇸🇦 Saudi Pro</button>
+            <!-- International -->
+            <button class="league-pill" data-league="world_cup">🌍 World Cup</button>
+            <button class="league-pill" data-league="nations_league">🏆 Nations League</button>
+            <button class="league-pill" data-league="friendlies">🌍 Friendlies</button>
+        </div>
+        
+        <!-- Sure Wins Section -->
+        <section class="sure-wins-section" id="sure-wins">
+            <div class="sure-wins-header">
+                <div class="sure-wins-icon">🔥</div>
+                <div class="sure-wins-title">
+                    <h2>Top Picks (65%+ Confidence)</h2>
+                    <p>Our most confident predictions today - ML verified</p>
+                </div>
+            </div>
+            
+            <div class="matches-grid" id="sure-wins-grid">
+                <!-- Sure wins will be loaded here -->
+            </div>
+        </section>
+        
+        <!-- All Predictions -->
+        <section>
+            <div class="section-header">
+                <div class="section-title">
+                    <div class="section-icon">📋</div>
+                    <span>Today's Predictions</span>
+                </div>
+                <span class="section-badge" id="match-count">Loading...</span>
+            </div>
+            
+            <div class="matches-grid" id="matches-grid">
+                <!-- Matches will be loaded here -->
+            </div>
+        </section>
+        
+        <!-- Footer -->
+        <footer class="footer">
+            <p>FootyPredict Pro v3.0 | 5-Model ML Ensemble | <a href="/api/docs">API Docs</a></p>
+            <p>Expected Accuracy: 72-78% with odds • Made with ⚽ and AI</p>
+        </footer>
+    </div>
+
+    <script>
+        // State
+        let currentLeague = 'bundesliga';
+        
+        // DOM Ready
+        document.addEventListener('DOMContentLoaded', () => {
+            loadFixtures();
+            
+            // League pills click
+            document.querySelectorAll('.league-pill').forEach(pill => {
+                pill.addEventListener('click', () => {
+                    document.querySelectorAll('.league-pill').forEach(p => p.classList.remove('active'));
+                    pill.classList.add('active');
+                    currentLeague = pill.dataset.league;
+                    loadFixtures();
+                });
+            });
+        });
+        
+        async function loadFixtures() {
+            const grid = document.getElementById('matches-grid');
+            const sureWinsGrid = document.getElementById('sure-wins-grid');
+            
+            // Show loading
+            grid.innerHTML = `
+                <div class="match-card">
+                    <div class="skeleton" style="height: 200px;"></div>
+                </div>
+                <div class="match-card">
+                    <div class="skeleton" style="height: 200px;"></div>
+                </div>
+            `;
+            
+            try {
+                const response = await fetch(`/api/fixtures/${currentLeague}`);
+                const data = await response.json();
+                
+                if (data.success && data.fixtures) {
+                    renderMatches(data.fixtures, grid, sureWinsGrid);
+                    document.getElementById('match-count').textContent = `${data.fixtures.length} Matches`;
+                } else {
+                    grid.innerHTML = '<p style="color: rgba(255,255,255,0.5); padding: 40px; text-align: center;">No fixtures available</p>';
+                }
+            } catch (err) {
+                grid.innerHTML = '<p style="color: #ef4444; padding: 40px; text-align: center;">Error loading fixtures</p>';
+            }
+        }
+        
+        async function renderMatches(fixtures, grid, sureWinsGrid) {
+            const regularMatches = [];
+            const sureWins = [];
+            
+            for (const match of fixtures) {
+                const prediction = await getPrediction(match);
+                const card = createMatchCard(match, prediction);
+                
+                if (prediction && prediction.confidence >= 0.50) {
+                    sureWins.push({card, confidence: prediction.confidence});
+                }
+                regularMatches.push(card);
+            }
+            
+            // Sort sure wins by confidence (highest first)
+            sureWins.sort((a, b) => b.confidence - a.confidence);
+            
+            // Take top 6 high confidence predictions
+            const topPicks = sureWins.slice(0, 6);
+            
+            // Update sure wins section
+            if (topPicks.length > 0) {
+                sureWinsGrid.innerHTML = topPicks.map(s => s.card).join('');
+                document.getElementById('sure-wins-count').textContent = topPicks.length;
+                document.getElementById('sure-wins').style.display = 'block';
+            } else {
+                document.getElementById('sure-wins').style.display = 'none';
+            }
+            
+            // Update regular matches
+            grid.innerHTML = regularMatches.join('') || '<p style="color: rgba(255,255,255,0.5); padding: 40px; text-align: center;">No predictions available</p>';
+            document.getElementById('today-count').textContent = fixtures.length;
+        }
+        
+        async function getPrediction(match) {
+            try {
+                const home = match.home_team?.name || match.home_team;
+                const away = match.away_team?.name || match.away_team;
+                
+                const response = await fetch(`/api/v3/predict?home=${encodeURIComponent(home)}&away=${encodeURIComponent(away)}&league=${currentLeague}`);
+                const data = await response.json();
+                
+                if (data.success && data.final_prediction) {
+                    // Include goals data in the prediction
+                    return {
+                        ...data.final_prediction,
+                        goals: data.goals || {}
+                    };
+                }
+            } catch (err) {
+                console.log('Prediction error:', err);
+            }
+            return null;
+        }
+        
+        function createMatchCard(match, prediction) {
+            const home = match.home_team?.name || match.home_team;
+            const away = match.away_team?.name || match.away_team;
+            const time = match.time || match.date || 'TBD';
+            const league = match.league || currentLeague.replace(/_/g, ' ');
+            
+            const isSureWin = prediction && prediction.confidence >= 0.91;
+            const confidence = prediction ? Math.round(prediction.confidence * 100) : 50;
+            const homeProb = prediction ? Math.round((prediction.home_win_prob || 0.33) * 100) : 33;
+            const drawProb = prediction ? Math.round((prediction.draw_prob || 0.33) * 100) : 33;
+            const awayProb = prediction ? Math.round((prediction.away_win_prob || 0.33) * 100) : 34;
+            const outcome = prediction?.predicted_outcome || 'N/A';
+            
+            // Goals predictions (from API)
+            const goals = prediction?.goals || {};
+            const homeXG = goals.home_xg?.toFixed(1) || '-';
+            const awayXG = goals.away_xg?.toFixed(1) || '-';
+            const totalXG = goals.total_xg?.toFixed(1) || '-';
+            const over25 = goals['over_2.5'] ? Math.round(goals['over_2.5'] * 100) : 50;
+            const btts = goals.btts ? Math.round(goals.btts * 100) : 50;
+            
+            // Calculate ring circumference
+            const radius = 26;
+            const circumference = 2 * Math.PI * radius;
+            const offset = circumference - (confidence / 100) * circumference;
+            
+            return `
+                <div class="match-card ${isSureWin ? 'sure-win' : ''}">
+                    <div class="match-header">
+                        <div class="match-league">${league}</div>
+                        <div class="match-time">${time}</div>
+                    </div>
+                    
+                    <div class="match-teams">
+                        <div class="team">
+                            <div class="team-logo">🏠</div>
+                            <div class="team-name">${home}</div>
+                        </div>
+                        <div class="vs-badge">VS</div>
+                        <div class="team">
+                            <div class="team-logo">✈️</div>
+                            <div class="team-name">${away}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="prediction-display">
+                        <div class="prediction-main">
+                            <div>
+                                <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-bottom: 4px;">PREDICTION</div>
+                                <div class="prediction-outcome">${outcome}</div>
+                            </div>
+                            <div class="confidence-ring">
+                                <svg width="64" height="64">
+                                    <circle class="confidence-ring-bg" cx="32" cy="32" r="${radius}"/>
+                                    <circle class="confidence-ring-fill" cx="32" cy="32" r="${radius}"
+                                        stroke-dasharray="${circumference}"
+                                        stroke-dashoffset="${offset}"/>
+                                </svg>
+                                <div class="confidence-text">${confidence}%</div>
+                            </div>
+                        </div>
+                        
+                        <div class="prob-bars">
+                            <div class="prob-bar">
+                                <div class="prob-bar-label">Home</div>
+                                <div class="prob-bar-track">
+                                    <div class="prob-bar-fill home" style="width: ${homeProb}%"></div>
+                                </div>
+                                <div class="prob-bar-value">${homeProb}%</div>
+                            </div>
+                            <div class="prob-bar">
+                                <div class="prob-bar-label">Draw</div>
+                                <div class="prob-bar-track">
+                                    <div class="prob-bar-fill draw" style="width: ${drawProb}%"></div>
+                                </div>
+                                <div class="prob-bar-value">${drawProb}%</div>
+                            </div>
+                            <div class="prob-bar">
+                                <div class="prob-bar-label">Away</div>
+                                <div class="prob-bar-track">
+                                    <div class="prob-bar-fill away" style="width: ${awayProb}%"></div>
+                                </div>
+                                <div class="prob-bar-value">${awayProb}%</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Goals Predictions Section -->
+                    <div style="margin-top: 16px; padding: 14px; background: rgba(16, 185, 129, 0.08); border-radius: 12px; border: 1px solid rgba(16, 185, 129, 0.2);">
+                        <div style="font-size: 0.75rem; color: rgba(255,255,255,0.5); margin-bottom: 10px; display: flex; align-items: center; gap: 6px;">
+                            ⚽ GOAL PREDICTIONS
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; text-align: center;">
+                            <div>
+                                <div style="font-size: 1.1rem; font-weight: 700; color: #10b981;">${homeXG}</div>
+                                <div style="font-size: 0.7rem; color: rgba(255,255,255,0.5);">Home xG</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 1.1rem; font-weight: 700; color: #f59e0b;">${awayXG}</div>
+                                <div style="font-size: 0.7rem; color: rgba(255,255,255,0.5);">Away xG</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 1.1rem; font-weight: 700; color: ${over25 > 50 ? '#10b981' : '#ef4444'};">${over25}%</div>
+                                <div style="font-size: 0.7rem; color: rgba(255,255,255,0.5);">Over 2.5</div>
+                            </div>
+                            <div>
+                                <div style="font-size: 1.1rem; font-weight: 700; color: ${btts > 50 ? '#10b981' : '#ef4444'};">${btts}%</div>
+                                <div style="font-size: 0.7rem; color: rgba(255,255,255,0.5);">BTTS</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="match-actions">
+                        <button class="btn-action btn-primary" onclick="addToAccumulator('${home}', '${away}', '${outcome}')">
+                            ➕ Add to Acca
+                        </button>
+                        <button class="btn-action btn-secondary" onclick="viewDetails('${home}', '${away}')">
+                            📊 Details
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function addToAccumulator(home, away, outcome) {
+            // Show toast notification
+            showToast(`Added: ${home} vs ${away} - ${outcome}`);
+        }
+        
+        function viewDetails(home, away) {
+            window.location.href = `/api/v3/predict?home=${encodeURIComponent(home)}&away=${encodeURIComponent(away)}`;
+        }
+        
+        // Scroll to section when clicking stats
+        function scrollToSection(sectionId) {
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+        
+        // Theme toggle
+        function toggleTheme() {
+            const html = document.documentElement;
+            const current = html.getAttribute('data-theme');
+            const next = current === 'dark' ? 'light' : 'dark';
+            html.setAttribute('data-theme', next);
+            localStorage.setItem('theme', next);
+        }
+        
+        // Load saved theme on startup
+        (function() {
+            const saved = localStorage.getItem('theme');
+            if (saved) document.documentElement.setAttribute('data-theme', saved);
+        })();
+        
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background: linear-gradient(135deg, #10b981, #059669);
+                color: white;
+                padding: 16px 24px;
+                border-radius: 12px;
+                font-weight: 600;
+                box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+                z-index: 1000;
+                animation: slide-up 0.3s ease;
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

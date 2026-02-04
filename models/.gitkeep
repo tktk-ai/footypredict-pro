@@ -1,0 +1,9 @@
+# Models are stored on HuggingFace Hub
+# Repository: https://huggingface.co/nananie143/footypredict-models
+# 
+# To download models locally:
+#   python scripts/upload_models_to_hf.py --download
+#
+# Or use the loader in your code:
+#   from src.models.hf_loader import load_model_from_hf
+#   model = load_model_from_hf("sportybet_ensemble/btts_ensemble.pkl")

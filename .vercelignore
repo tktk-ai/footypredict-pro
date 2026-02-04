@@ -1,0 +1,31 @@
+# Ignore large directories for Vercel deployment
+venv/
+.git/
+__pycache__/
+*.pyc
+.pytest_cache/
+.cache/
+
+# Large model files
+models/backup/
+models/trained/*.pt
+models/pretrained/*.pt
+
+# Data files
+data/training_data.csv
+data/cache/
+data/*.db
+
+# Notebooks
+notebooks/
+
+# Documentation
+docs/
+
+# Development files
+*.log
+*.tmp
+.env.local
+
+# W5 folder
+w5-football-prediction/
